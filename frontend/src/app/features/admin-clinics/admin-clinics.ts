@@ -35,6 +35,8 @@ export class AdminClinics implements OnInit {
   areas: Area[] = [];
   loading = false;
   showDialog = false;
+  showEditDialog = false;
+  editingClinic: Clinic | null = null;
   name = '';
   code = '';
   areaId = '';
@@ -67,6 +69,15 @@ export class AdminClinics implements OnInit {
     this.error = '';
   }
 
+  openEdit(c: Clinic): void {
+    this.editingClinic = c;
+    this.name = c.name;
+    this.code = c.code ?? '';
+    this.areaId = typeof c.areaId === 'object' && c.areaId?._id ? c.areaId._id : (c.areaId as string);
+    this.error = '';
+    this.showEditDialog = true;
+  }
+
   getAreaName(clinic: Clinic): string {
     const a = clinic.areaId;
     return typeof a === 'object' && a?.name ? a.name : '—';
@@ -93,6 +104,33 @@ export class AdminClinics implements OnInit {
       error: (err) => {
         this.error = err.error?.message || 'Failed to create clinic';
         this.messageService.add({ severity: 'error', summary: 'Create clinic failed', detail: this.error });
+      },
+    });
+  }
+
+  updateClinic(): void {
+    if (!this.editingClinic) return;
+    this.error = '';
+    if (!this.name.trim()) {
+      this.error = 'Name is required';
+      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: this.error });
+      return;
+    }
+    if (!this.areaId) {
+      this.error = 'Area is required';
+      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: this.error });
+      return;
+    }
+    this.api.patch<Clinic>(`/clinics/${this.editingClinic._id}`, { name: this.name.trim(), areaId: this.areaId, code: this.code.trim() || undefined }).subscribe({
+      next: () => {
+        this.showEditDialog = false;
+        this.editingClinic = null;
+        this.load();
+        this.messageService.add({ severity: 'success', summary: 'Clinic updated', detail: this.name.trim() });
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to update clinic';
+        this.messageService.add({ severity: 'error', summary: 'Update clinic failed', detail: this.error });
       },
     });
   }

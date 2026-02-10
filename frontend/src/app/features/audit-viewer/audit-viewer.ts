@@ -4,6 +4,8 @@ import { MessageService } from 'primeng/api';
 import { DatePipe, JsonPipe } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 
 interface AuditLog {
   _id: string;
@@ -17,7 +19,7 @@ interface AuditLog {
 
 @Component({
   selector: 'app-audit-viewer',
-  imports: [DatePipe, JsonPipe, CardModule, TableModule],
+  imports: [DatePipe, JsonPipe, CardModule, TableModule, ButtonModule, DialogModule],
   templateUrl: './audit-viewer.html',
   styleUrl: './audit-viewer.scss',
 })
@@ -27,6 +29,12 @@ export class AuditViewer implements OnInit {
   page = 1;
   limit = 20;
   loading = false;
+  selectedLog: AuditLog | null = null;
+  showDetailsDialog = false;
+
+  hasDetails(log: AuditLog): boolean {
+    return !!log.details && Object.keys(log.details).length > 0;
+  }
 
   constructor(
     private api: Api,
@@ -53,5 +61,10 @@ export class AuditViewer implements OnInit {
       },
       complete: () => (this.loading = false),
     });
+  }
+
+  viewDetails(log: AuditLog): void {
+    this.selectedLog = log;
+    this.showDetailsDialog = true;
   }
 }

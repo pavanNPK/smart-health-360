@@ -47,6 +47,7 @@
           currentPageReportTemplate="Showing {{ first }} to {{ last }} of {{ totalRecords }} patients"
           styleClass="p-datatable-sm p-datatable-striped"
           [tableStyle]="{ 'min-width': '50rem' }"
+          showGridlines
         >
           <ng-template pTemplate="header">
             <tr>
@@ -72,7 +73,7 @@
                 }
               </td>
               <td>
-                <div class="flex gap-1 flex-wrap">
+                <div class="flex gap-1 flex-wrap align-items-center">
                   <a [routerLink]="['/reception/patients', row._id]" class="no-underline"><p-button label="View" icon="pi pi-eye" styleClass="p-button-text p-button-sm"></p-button></a>
                   <a [routerLink]="['/reception/patients', row._id, 'import']" class="no-underline"><p-button label="Import" icon="pi pi-upload" styleClass="p-button-text p-button-sm"></p-button></a>
                 </div>

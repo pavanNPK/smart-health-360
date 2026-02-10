@@ -14,7 +14,7 @@
         <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
       </div>
     } @else {
-      <p-table [value]="users" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }">
+      <p-table [value]="users" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }" showGridlines>
         <ng-template pTemplate="header">
           <tr>
             <th>Name</th>
@@ -37,9 +37,11 @@
             </td>
             <td>{{ u.specialization || '—' }}</td>
             <td>
-              @if (u.status === 'PENDING_VERIFICATION') {
-                <p-button label="Resend OTP" icon="pi pi-envelope" styleClass="p-button-text p-button-sm" (onClick)="resendOtp(u.email)"></p-button>
-              }
+              <div class="flex gap-1 flex-wrap align-items-center">
+                @if (u.status === 'PENDING_VERIFICATION') {
+                  <p-button label="Resend OTP" icon="pi pi-envelope" styleClass="p-button-text p-button-sm" (onClick)="resendOtp(u.email)"></p-button>
+                }
+              </div>
             </td>
           </tr>
         </ng-template>

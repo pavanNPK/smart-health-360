@@ -26,6 +26,8 @@ export class AdminAreas implements OnInit {
   areas: Area[] = [];
   loading = false;
   showDialog = false;
+  showEditDialog = false;
+  editingArea: Area | null = null;
   name = '';
   code = '';
   error = '';
@@ -71,6 +73,36 @@ export class AdminAreas implements OnInit {
       error: (err) => {
         this.error = err.error?.message || 'Failed to create area';
         this.messageService.add({ severity: 'error', summary: 'Create area failed', detail: this.error });
+      },
+    });
+  }
+
+  openEdit(a: Area): void {
+    this.editingArea = a;
+    this.name = a.name;
+    this.code = a.code ?? '';
+    this.error = '';
+    this.showEditDialog = true;
+  }
+
+  updateArea(): void {
+    if (!this.editingArea) return;
+    this.error = '';
+    if (!this.name.trim()) {
+      this.error = 'Name is required';
+      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: this.error });
+      return;
+    }
+    this.api.patch<Area>(`/areas/${this.editingArea._id}`, { name: this.name.trim(), code: this.code.trim() || undefined }).subscribe({
+      next: () => {
+        this.showEditDialog = false;
+        this.editingArea = null;
+        this.load();
+        this.messageService.add({ severity: 'success', summary: 'Area updated', detail: this.name.trim() });
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to update area';
+        this.messageService.add({ severity: 'error', summary: 'Update area failed', detail: this.error });
       },
     });
   }

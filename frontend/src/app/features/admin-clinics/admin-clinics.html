@@ -11,12 +11,13 @@
         <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
       </div>
     } @else {
-      <p-table [value]="clinics" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '30rem' }">
+      <p-table [value]="clinics" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '30rem' }" showGridlines>
         <ng-template pTemplate="header">
           <tr>
             <th>Name</th>
             <th>Area</th>
             <th>Code</th>
+            <th style="width: 8rem;">Actions</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-c>
@@ -24,11 +25,16 @@
             <td>{{ c.name }}</td>
             <td>{{ getAreaName(c) }}</td>
             <td>{{ c.code || '—' }}</td>
+            <td>
+              <div class="flex gap-1 flex-wrap align-items-center">
+                <p-button icon="pi pi-pencil" label="Edit" styleClass="p-button-text p-button-sm" (onClick)="openEdit(c)"></p-button>
+              </div>
+            </td>
           </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="3" class="text-center py-4 text-600">No clinics. Add areas first, then add clinics.</td>
+            <td colspan="4" class="text-center py-4 text-600">No clinics. Add areas first, then add clinics.</td>
           </tr>
         </ng-template>
       </p-table>
@@ -57,5 +63,29 @@
   <ng-template pTemplate="footer">
     <p-button label="Cancel" severity="secondary" (onClick)="showDialog = false" styleClass="p-button-outlined"></p-button>
     <p-button label="Create" icon="pi pi-check" (onClick)="create()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="showEditDialog" header="Edit Clinic" [modal]="true" [style]="{ width: '24rem' }" [draggable]="false" [resizable]="false" (onHide)="showEditDialog = false; editingClinic = null">
+  <div class="flex flex-column gap-3">
+    <div class="flex flex-column gap-2">
+      <label for="edit-clinic-name" class="font-medium text-900">Name *</label>
+      <input id="edit-clinic-name" pInputText [(ngModel)]="name" class="w-full" placeholder="Clinic name" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="edit-clinic-area" class="font-medium text-900">Area *</label>
+      <p-select id="edit-clinic-area" [(ngModel)]="areaId" [options]="areas" optionLabel="name" optionValue="_id" placeholder="Select area" styleClass="w-full" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="edit-clinic-code" class="font-medium text-900">Code</label>
+      <input id="edit-clinic-code" pInputText [(ngModel)]="code" class="w-full" placeholder="Optional code" />
+    </div>
+    @if (error) {
+      <p-message severity="error" [text]="error" styleClass="w-full"></p-message>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showEditDialog = false; editingClinic = null" styleClass="p-button-outlined"></p-button>
+    <p-button label="Update" icon="pi pi-check" (onClick)="updateClinic()"></p-button>
   </ng-template>
 </p-dialog>

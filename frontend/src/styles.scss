@@ -56,6 +56,14 @@ a.text-primary:hover {
   color: var(--brand-primary) !important;
 }
 
+/* Card header plain: no dark background on title (e.g. Register Patient form) */
+.p-card.card-header-plain .p-card-title,
+.p-card.card-header-plain .p-card-header {
+  background: transparent !important;
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--surface-border);
+}
+
 /* Back-to-list link: plain text link, no button-like background */
 a.back-link {
   background: none !important;

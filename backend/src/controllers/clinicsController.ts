@@ -20,6 +20,21 @@ export async function createClinic(req: Request, res: Response): Promise<void> {
   res.status(201).json(clinic);
 }
 
+export async function updateClinic(req: Request, res: Response): Promise<void> {
+  const id = req.params.id;
+  const parsed = createClinicSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ message: 'Invalid input', errors: parsed.error.flatten() });
+    return;
+  }
+  const clinic = await Clinic.findByIdAndUpdate(id, parsed.data, { new: true }).populate('areaId', 'name code').lean();
+  if (!clinic) {
+    res.status(404).json({ message: 'Clinic not found' });
+    return;
+  }
+  res.json(clinic);
+}
+
 export async function listClinics(req: Request, res: Response): Promise<void> {
   const user = req.user! as AuthUser;
   const areaId = req.query.areaId as string | undefined;

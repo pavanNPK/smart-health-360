@@ -32,12 +32,13 @@
   }
   @if (clinicId && (receptionists.length > 0 || attendance.length > 0)) {
     <p-card header="Clinic receptionists &amp; attendance" styleClass="shadow-2 border-round-lg">
-      <p-table [value]="receptionists" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '24rem' }">
+      <p-table [value]="receptionists" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '24rem' }" showGridlines>
         <ng-template pTemplate="header">
           <tr>
             <th>Name</th>
             <th>Email</th>
             <th>Today</th>
+            <th style="width: 6rem;">Actions</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-r>
@@ -55,11 +56,14 @@
                 <span class="text-500">—</span>
               }
             </td>
+            <td>
+              <span class="text-500 text-sm">—</span>
+            </td>
           </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="3" class="text-center py-4 text-600">No receptionists in your clinic.</td>
+            <td colspan="4" class="text-center py-4 text-600">No receptionists in your clinic.</td>
           </tr>
         </ng-template>
       </p-table>

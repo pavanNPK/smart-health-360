@@ -10,4 +10,5 @@ router.get('/:id/doctors', clinicsController.getClinicDoctors);
 router.get('/:id/receptionists', clinicsController.getClinicReceptionists);
 // create: SA only
 router.post('/', roleGuard('SUPER_ADMIN'), clinicsController.createClinic);
+router.patch('/:id', roleGuard('SUPER_ADMIN'), clinicsController.updateClinic);
 export default router;

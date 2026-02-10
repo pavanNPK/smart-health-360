@@ -6,22 +6,16 @@
       <a routerLink="/" class="no-underline font-semibold text-xl text-900">Smart Health 360</a>
     </div>
     <nav class="sidebar-nav flex flex-column flex-grow-1 py-2">
-      @if (canAccess('RECEPTIONIST')) {
-        <div class="sidebar-group">
-          <a routerLink="/reception/patients" routerLinkActive="sidebar-link-active" [routerLinkActiveOptions]="{ exact: false }" class="sidebar-link sidebar-link-parent flex align-items-center gap-2 px-3 py-2 no-underline text-700">
-            <i class="pi pi-users"></i>
-            <span>Patients</span>
-          </a>
-          <a routerLink="/reception/patients/new" routerLinkActive="sidebar-link-active" class="sidebar-link sidebar-link-child flex align-items-center gap-2 no-underline text-700">
-            <i class="pi pi-user-plus"></i>
-            <span>Register Patient</span>
-          </a>
-        </div>
-      }
       @if (canAccess('DOCTOR')) {
         <a routerLink="/doctor/dashboard" routerLinkActive="sidebar-link-active" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
           <i class="pi pi-th-large"></i>
           <span>Dashboard</span>
+        </a>
+      }
+      @if (canAccess('RECEPTIONIST')) {
+        <a routerLink="/reception/patients" routerLinkActive="sidebar-link-active" [routerLinkActiveOptions]="{ exact: false }" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
+          <i class="pi pi-users"></i>
+          <span>Patients</span>
         </a>
       }
       @if (canAccess('SUPER_ADMIN')) {
