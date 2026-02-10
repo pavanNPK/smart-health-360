@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Api } from '../../core/api';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { MessageModule } from 'primeng/message';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface Area {
   _id: string;
@@ -18,7 +19,7 @@ interface Area {
 @Component({
   selector: 'app-admin-areas',
   standalone: true,
-  imports: [CardModule, TableModule, ButtonModule, InputTextModule, FormsModule, DialogModule, MessageModule],
+  imports: [CardModule, TableModule, ButtonModule, InputTextModule, FormsModule, DialogModule, MessageModule, TooltipModule],
   templateUrl: './admin-areas.html',
   styleUrl: './admin-areas.scss',
 })
@@ -34,7 +35,8 @@ export class AdminAreas implements OnInit {
 
   constructor(
     private api: Api,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -103,6 +105,32 @@ export class AdminAreas implements OnInit {
       error: (err) => {
         this.error = err.error?.message || 'Failed to update area';
         this.messageService.add({ severity: 'error', summary: 'Update area failed', detail: this.error });
+      },
+    });
+  }
+
+  confirmDelete(a: Area): void {
+    this.confirmationService.confirm({
+      message: `Delete area "${a.name}"? Clinics in this area must be removed or reassigned first.`,
+      header: 'Delete Area',
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => this.deleteArea(a),
+    });
+  }
+
+  deleteArea(a: Area): void {
+    this.api.delete<void>(`/areas/${a._id}`).subscribe({
+      next: () => {
+        this.load();
+        this.messageService.add({ severity: 'success', summary: 'Area deleted', detail: a.name });
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Delete failed',
+          detail: err.error?.message || 'Failed to delete area.',
+        });
       },
     });
   }

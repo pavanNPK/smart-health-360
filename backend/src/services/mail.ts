@@ -26,13 +26,24 @@ export interface SendMailOptions {
 
 export async function sendMail(options: SendMailOptions): Promise<void> {
   const transport = getTransporter();
-  await transport.sendMail({
-    from: process.env.MAIL_USER || 'noreply@hospital.com',
-    to: options.to,
-    subject: options.subject,
-    html: options.html,
-    text: options.text,
-  });
+  try {
+    await transport.sendMail({
+      from: process.env.MAIL_USER || 'noreply@hospital.com',
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+    });
+  } catch (err: unknown) {
+    const code = err && typeof err === 'object' && 'code' in err ? (err as { code: string }).code : '';
+    if (code === 'EAUTH') {
+      throw new Error(
+        'Mail login failed (Gmail). Use an App Password, not your normal password. ' +
+          'Enable 2-Step Verification, then create one at: https://myaccount.google.com/apppasswords'
+      );
+    }
+    throw err;
+  }
 }
 
 export async function sendPatientRegistrationEmail(patientEmail: string, patientName: string): Promise<void> {

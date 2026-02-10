@@ -8,4 +8,5 @@ router.use(roleGuard('SUPER_ADMIN'));
 router.post('/', areasController.createArea);
 router.get('/', areasController.listAreas);
 router.patch('/:id', areasController.updateArea);
+router.delete('/:id', areasController.deleteArea);
 export default router;

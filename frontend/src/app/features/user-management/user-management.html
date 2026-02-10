@@ -1,7 +1,7 @@
 <div class="flex flex-column gap-4">
   <div class="flex flex-wrap align-items-center justify-content-between gap-3">
     <h1 class="m-0 text-2xl font-semibold text-900">
-      <i class="pi pi-id-card mr-2"></i>User Management
+      <i class="pi pi-id-card mr-2 page-heading-icon"></i>User Management
     </h1>
     <p-button label="Create User" icon="pi pi-plus" (onClick)="openForm()"></p-button>
   </div>
@@ -37,10 +37,11 @@
             </td>
             <td>{{ u.specialization || '—' }}</td>
             <td>
-              <div class="flex gap-1 flex-wrap align-items-center">
+              <div class="flex gap-1 align-items-center">
                 @if (u.status === 'PENDING_VERIFICATION') {
                   <p-button label="Resend OTP" icon="pi pi-envelope" styleClass="p-button-text p-button-sm" (onClick)="resendOtp(u.email)"></p-button>
                 }
+                <p-button icon="pi pi-trash" styleClass="p-button-text p-button-sm p-button-danger" (onClick)="confirmDelete(u)" pTooltip="Delete"></p-button>
               </div>
             </td>
           </tr>
@@ -90,7 +91,7 @@
     }
   </form>
   <ng-template pTemplate="footer">
-    <p-button label="Cancel" severity="secondary" (onClick)="showForm = false" styleClass="p-button-outlined"></p-button>
-    <p-button label="Create" icon="pi pi-check" (onClick)="createUser()"></p-button>
+    <p-button label="Cancel" severity="secondary" (onClick)="showForm = false" styleClass="p-button-outlined" [disabled]="formSubmitting"></p-button>
+    <p-button label="Create" icon="pi pi-check" (onClick)="createUser()" [loading]="formSubmitting" [disabled]="formSubmitting"></p-button>
   </ng-template>
 </p-dialog>

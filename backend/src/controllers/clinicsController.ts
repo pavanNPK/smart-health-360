@@ -73,3 +73,18 @@ export async function getClinicReceptionists(req: Request, res: Response): Promi
   const receptionists = await User.find({ role: 'RECEPTIONIST', clinicId }).select('-passwordHash').populate('clinicId', 'name').lean();
   res.json({ data: receptionists });
 }
+
+export async function deleteClinic(req: Request, res: Response): Promise<void> {
+  const id = req.params.id;
+  const usersInClinic = await User.countDocuments({ clinicId: id });
+  if (usersInClinic > 0) {
+    res.status(400).json({ message: 'Cannot delete clinic: it has users. Remove or reassign users first.' });
+    return;
+  }
+  const clinic = await Clinic.findByIdAndDelete(id);
+  if (!clinic) {
+    res.status(404).json({ message: 'Clinic not found' });
+    return;
+  }
+  res.status(204).send();
+}

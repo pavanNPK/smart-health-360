@@ -46,9 +46,15 @@ export async function createUser(req: Request, res: Response): Promise<void> {
       specialization: parsed.data.specialization,
       clinicId: clinicId || undefined,
     });
-    await otpService.createAndSendOTP(email, parsed.data.name);
+    let otpMessage = 'User created. OTP sent to email for verification.';
+    try {
+      await otpService.createAndSendOTP(email, parsed.data.name);
+    } catch (e) {
+      otpMessage =
+        'User created. Verification email could not be sent (check server mail config). User can use "Resend OTP" later.';
+    }
     const { passwordHash: _, ...rest } = user.toObject();
-    res.status(201).json({ ...rest, message: 'User created. OTP sent to email for verification.' });
+    res.status(201).json({ ...rest, message: otpMessage });
     return;
   }
 
@@ -98,4 +104,14 @@ export async function updateUser(req: Request, res: Response): Promise<void> {
     return;
   }
   res.json(user);
+}
+
+export async function deleteUser(req: Request, res: Response): Promise<void> {
+  const id = req.params.id;
+  const user = await User.findByIdAndDelete(id);
+  if (!user) {
+    res.status(404).json({ message: 'User not found' });
+    return;
+  }
+  res.status(204).send();
 }

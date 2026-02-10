@@ -1,7 +1,7 @@
 <div class="flex flex-column gap-4">
   <div class="flex flex-wrap align-items-center justify-content-between gap-3">
     <h1 class="m-0 text-2xl font-semibold text-900">
-      <i class="pi pi-map mr-2"></i>Areas
+      <i class="pi pi-map mr-2 page-heading-icon"></i>Areas
     </h1>
     <p-button label="Add Area" icon="pi pi-plus" (onClick)="openDialog()"></p-button>
   </div>
@@ -24,8 +24,9 @@
             <td>{{ a.name }}</td>
             <td>{{ a.code || '—' }}</td>
             <td>
-              <div class="flex gap-1 flex-wrap align-items-center">
-                <p-button icon="pi pi-pencil" label="Edit" styleClass="p-button-text p-button-sm" (onClick)="openEdit(a)"></p-button>
+              <div class="flex gap-1 align-items-center">
+                <p-button icon="pi pi-pencil" styleClass="p-button-text p-button-sm" (onClick)="openEdit(a)" pTooltip="Edit"></p-button>
+                <p-button icon="pi pi-trash" styleClass="p-button-text p-button-sm p-button-danger" (onClick)="confirmDelete(a)" pTooltip="Delete"></p-button>
               </div>
             </td>
           </tr>

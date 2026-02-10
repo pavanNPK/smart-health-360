@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Api } from '../../core/api';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface Area {
   _id: string;
@@ -26,7 +27,7 @@ interface Clinic {
 @Component({
   selector: 'app-admin-clinics',
   standalone: true,
-  imports: [CardModule, TableModule, ButtonModule, InputTextModule, FormsModule, DialogModule, MessageModule, SelectModule],
+  imports: [CardModule, TableModule, ButtonModule, InputTextModule, FormsModule, DialogModule, MessageModule, SelectModule, TooltipModule],
   templateUrl: './admin-clinics.html',
   styleUrl: './admin-clinics.scss',
 })
@@ -44,7 +45,8 @@ export class AdminClinics implements OnInit {
 
   constructor(
     private api: Api,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -131,6 +133,32 @@ export class AdminClinics implements OnInit {
       error: (err) => {
         this.error = err.error?.message || 'Failed to update clinic';
         this.messageService.add({ severity: 'error', summary: 'Update clinic failed', detail: this.error });
+      },
+    });
+  }
+
+  confirmDelete(c: Clinic): void {
+    this.confirmationService.confirm({
+      message: `Delete clinic "${c.name}"? Users in this clinic must be removed or reassigned first.`,
+      header: 'Delete Clinic',
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => this.deleteClinic(c),
+    });
+  }
+
+  deleteClinic(c: Clinic): void {
+    this.api.delete<void>(`/clinics/${c._id}`).subscribe({
+      next: () => {
+        this.load();
+        this.messageService.add({ severity: 'success', summary: 'Clinic deleted', detail: c.name });
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Delete failed',
+          detail: err.error?.message || 'Failed to delete clinic.',
+        });
       },
     });
   }

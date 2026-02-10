@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
 import type { UserRole } from '../../core/auth';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -10,6 +10,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { DialogModule } from 'primeng/dialog';
 import { MessageModule } from 'primeng/message';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface Clinic {
   _id: string;
@@ -37,6 +38,7 @@ interface User {
     SelectModule,
     DialogModule,
     MessageModule,
+    TooltipModule,
   ],
   templateUrl: './user-management.html',
   styleUrl: './user-management.scss',
@@ -51,6 +53,7 @@ export class UserManagement implements OnInit {
   clinics: Clinic[] = [];
   error = '';
   loading = false;
+  formSubmitting = false;
   successMessage = '';
 
   roleOptions = [
@@ -61,7 +64,8 @@ export class UserManagement implements OnInit {
 
   constructor(
     private api: Api,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -94,6 +98,7 @@ export class UserManagement implements OnInit {
 
   createUser(): void {
     this.error = '';
+    this.formSubmitting = true;
     const payload: Record<string, unknown> = {
       name: this.form.name,
       email: this.form.email,
@@ -107,19 +112,30 @@ export class UserManagement implements OnInit {
     }
     this.api.post<User & { message?: string }>('/users', payload).subscribe({
       next: (res) => {
-        this.successMessage = res.message || 'User created.';
+        this.formSubmitting = false;
+        const msg = res.message || 'User created.';
+        this.successMessage = msg;
         this.showForm = false;
         this.load();
         this.messageService.add({
           severity: 'success',
           summary: 'User created',
-          detail: this.successMessage + ' They must verify email to set password and log in.',
+          detail: msg + (res.message?.includes('OTP') ? ' They must verify email to set password and log in.' : ''),
+          life: 6000,
         });
         setTimeout(() => (this.successMessage = ''), 5000);
       },
       error: (err) => {
-        this.error = err.error?.message || 'Failed to create user';
-        this.messageService.add({ severity: 'error', summary: 'Create user failed', detail: this.error });
+        this.formSubmitting = false;
+        const detail =
+          (err?.error?.message as string) || (err?.message as string) || 'Failed to create user. Check connection and try again.';
+        this.error = detail;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Create user failed',
+          detail,
+          life: 6000,
+        });
       },
     });
   }
@@ -138,6 +154,32 @@ export class UserManagement implements OnInit {
           summary: 'Resend OTP failed',
           detail: err.error?.message || 'Failed to send OTP',
         }),
+    });
+  }
+
+  confirmDelete(u: User): void {
+    this.confirmationService.confirm({
+      message: `Delete user "${u.name}" (${u.email})? This cannot be undone.`,
+      header: 'Delete User',
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => this.deleteUser(u),
+    });
+  }
+
+  deleteUser(u: User): void {
+    this.api.delete<void>(`/users/${u._id}`).subscribe({
+      next: () => {
+        this.load();
+        this.messageService.add({ severity: 'success', summary: 'User deleted', detail: u.name });
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Delete failed',
+          detail: err.error?.message || 'Failed to delete user.',
+        });
+      },
     });
   }
 }

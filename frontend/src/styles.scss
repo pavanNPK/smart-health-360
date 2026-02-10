@@ -64,6 +64,19 @@ a.text-primary:hover {
   border-bottom: 1px solid var(--surface-border);
 }
 
+/* Page heading icon (right-side screen title): larger icon, aligned with text */
+h1:has(.page-heading-icon) {
+  display: flex;
+  align-items: center;
+}
+
+h1 .page-heading-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
 /* Back-to-list link: plain text link, no button-like background */
 a.back-link {
   background: none !important;
@@ -75,4 +88,9 @@ a.back-link {
 /* Hide PrimeNG LTS license banner when using non-licensed LTS version */
 body > a[href='https://primeng.org/lts'] {
   display: none !important;
+}
+
+/* Ensure toasts appear above dialogs */
+.p-toast {
+  z-index: 1200 !important;
 }
