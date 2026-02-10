@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { Api } from '../../core/api';
 import { Auth } from '../../core/auth';
+import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 
@@ -51,7 +52,8 @@ export class DoctorDashboard implements OnInit {
 
   constructor(
     private api: Api,
-    private auth: Auth
+    private auth: Auth,
+    private messageService: MessageService
   ) {
     this.clinicId = this.auth.currentUserValue?.clinicId;
   }
@@ -69,7 +71,13 @@ export class DoctorDashboard implements OnInit {
     this.loading = true;
     this.api.get<{ data: Patient[] }>('/patients', { assignedTo: 'me' }).subscribe({
       next: (res) => (this.patients = res.data),
-      error: () => {},
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Load failed',
+          detail: err.error?.message || 'Failed to load patients.',
+        });
+      },
       complete: () => (this.loading = false),
     });
   }

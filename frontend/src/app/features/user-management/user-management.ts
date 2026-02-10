@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
 import type { UserRole } from '../../core/auth';
+import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -58,7 +59,10 @@ export class UserManagement implements OnInit {
     { label: 'Super Admin', value: 'SUPER_ADMIN' },
   ];
 
-  constructor(private api: Api) {}
+  constructor(
+    private api: Api,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -106,16 +110,34 @@ export class UserManagement implements OnInit {
         this.successMessage = res.message || 'User created.';
         this.showForm = false;
         this.load();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'User created',
+          detail: this.successMessage + ' They must verify email to set password and log in.',
+        });
         setTimeout(() => (this.successMessage = ''), 5000);
       },
-      error: (err) => (this.error = err.error?.message || 'Failed to create user'),
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to create user';
+        this.messageService.add({ severity: 'error', summary: 'Create user failed', detail: this.error });
+      },
     });
   }
 
   resendOtp(email: string): void {
     this.api.post<{ message: string }>('/auth/send-otp', { email }).subscribe({
-      next: () => alert('OTP sent to ' + email),
-      error: (err) => alert(err.error?.message || 'Failed to send OTP'),
+      next: () =>
+        this.messageService.add({
+          severity: 'success',
+          summary: 'OTP sent',
+          detail: `OTP sent to ${email}.`,
+        }),
+      error: (err) =>
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Resend OTP failed',
+          detail: err.error?.message || 'Failed to send OTP',
+        }),
     });
   }
 }

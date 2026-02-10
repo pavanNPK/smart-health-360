@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Api } from '../../core/api';
+import { MessageService } from 'primeng/api';
 import { DatePipe, JsonPipe } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
@@ -27,7 +28,10 @@ export class AuditViewer implements OnInit {
   limit = 20;
   loading = false;
 
-  constructor(private api: Api) {}
+  constructor(
+    private api: Api,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -40,7 +44,13 @@ export class AuditViewer implements OnInit {
         this.logs = res.data;
         this.total = res.total;
       },
-      error: () => {},
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Load failed',
+          detail: err.error?.message || 'Failed to load audit logs.',
+        });
+      },
       complete: () => (this.loading = false),
     });
   }

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
+import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -45,7 +46,8 @@ export class PatientForm {
 
   constructor(
     private api: Api,
-    private router: Router
+    private router: Router,
+    private messageService: MessageService
   ) {}
 
   onSubmit(): void {
@@ -63,9 +65,13 @@ export class PatientForm {
         isPrivatePatient: this.isPrivatePatient,
       })
       .subscribe({
-        next: (res) => this.router.navigate(['/reception/patients', res._id]),
+        next: (res) => {
+          this.messageService.add({ severity: 'success', summary: 'Patient registered', detail: 'Redirecting to profile…' });
+          this.router.navigate(['/reception/patients', res._id]);
+        },
         error: (err) => {
           this.error = err.error?.message || 'Failed to create patient';
+          this.messageService.add({ severity: 'error', summary: 'Registration failed', detail: this.error });
           this.loading = false;
         },
         complete: () => {

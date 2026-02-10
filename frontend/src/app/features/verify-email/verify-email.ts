@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Auth, type User } from '../../core/auth';
+import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -36,7 +37,8 @@ export class VerifyEmail implements OnInit {
     private http: HttpClient,
     private auth: Auth,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -49,15 +51,18 @@ export class VerifyEmail implements OnInit {
     this.success = '';
     if (this.password !== this.confirmPassword) {
       this.error = 'Passwords do not match';
+      this.messageService.add({ severity: 'error', summary: 'Validation', detail: this.error });
       return;
     }
     if (this.password.length < 6) {
       this.error = 'Password must be at least 6 characters';
+      this.messageService.add({ severity: 'error', summary: 'Validation', detail: this.error });
       return;
     }
     const otpDigits = this.otp.replace(/\D/g, '');
     if (otpDigits.length !== 6) {
       this.error = 'OTP must be exactly 6 digits (numbers only)';
+      this.messageService.add({ severity: 'error', summary: 'Validation', detail: this.error });
       return;
     }
     this.loading = true;
@@ -69,6 +74,7 @@ export class VerifyEmail implements OnInit {
       .subscribe({
         next: (res) => {
           this.auth.setSession(res.accessToken, res.refreshToken, res.user);
+          this.messageService.add({ severity: 'success', summary: 'Password set', detail: 'Redirecting…' });
           const user = res.user;
           if (user.role === 'SUPER_ADMIN') this.router.navigate(['/admin/users']);
           else if (user.role === 'DOCTOR') this.router.navigate(['/doctor/dashboard']);
@@ -76,6 +82,7 @@ export class VerifyEmail implements OnInit {
         },
         error: (err) => {
           this.error = err.error?.message || 'Verification failed. Check OTP and try again.';
+          this.messageService.add({ severity: 'error', summary: 'Verification failed', detail: this.error });
           this.loading = false;
         },
         complete: () => (this.loading = false),
@@ -85,14 +92,21 @@ export class VerifyEmail implements OnInit {
   resendOtp(): void {
     if (!this.email.trim()) {
       this.error = 'Enter your email first';
+      this.messageService.add({ severity: 'warn', summary: 'Email required', detail: this.error });
       return;
     }
     this.error = '';
     this.success = '';
     this.resendLoading = true;
     this.http.post<{ message: string }>(`${environment.apiUrl}/auth/send-otp`, { email: this.email.trim().toLowerCase() }).subscribe({
-      next: () => (this.success = 'OTP sent. Check your email.'),
-      error: (err) => (this.error = err.error?.message || 'Failed to send OTP'),
+      next: () => {
+        this.success = 'OTP sent. Check your email.';
+        this.messageService.add({ severity: 'success', summary: 'OTP sent', detail: this.success });
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to send OTP';
+        this.messageService.add({ severity: 'error', summary: 'Resend failed', detail: this.error });
+      },
       complete: () => (this.resendLoading = false),
     });
   }

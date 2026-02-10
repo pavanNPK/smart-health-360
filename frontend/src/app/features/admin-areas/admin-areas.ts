@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Api } from '../../core/api';
+import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -29,7 +30,10 @@ export class AdminAreas implements OnInit {
   code = '';
   error = '';
 
-  constructor(private api: Api) {}
+  constructor(
+    private api: Api,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -55,14 +59,19 @@ export class AdminAreas implements OnInit {
     this.error = '';
     if (!this.name.trim()) {
       this.error = 'Name is required';
+      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: this.error });
       return;
     }
     this.api.post<Area>('/areas', { name: this.name.trim(), code: this.code.trim() || undefined }).subscribe({
       next: () => {
         this.showDialog = false;
         this.load();
+        this.messageService.add({ severity: 'success', summary: 'Area created', detail: this.name.trim() });
       },
-      error: (err) => (this.error = err.error?.message || 'Failed to create area'),
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to create area';
+        this.messageService.add({ severity: 'error', summary: 'Create area failed', detail: this.error });
+      },
     });
   }
 }

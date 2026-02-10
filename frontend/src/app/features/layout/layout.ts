@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Auth } from '../../core/auth';
 import type { User, UserRole } from '../../core/auth';
+import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 
 @Component({
@@ -15,7 +16,8 @@ export class Layout implements OnInit {
 
   constructor(
     private auth: Auth,
-    private router: Router
+    private router: Router,
+    private messageService: MessageService
   ) {
     this.user = this.auth.currentUserValue;
     this.auth.currentUser$.subscribe((u) => (this.user = u));
@@ -32,6 +34,7 @@ export class Layout implements OnInit {
   }
 
   logout(): void {
+    this.messageService.add({ severity: 'info', summary: 'Signed out', detail: 'You have been logged out.' });
     this.auth.logout();
   }
 

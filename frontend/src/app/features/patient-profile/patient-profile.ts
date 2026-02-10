@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { Api } from '../../core/api';
 import { Auth } from '../../core/auth';
+import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
@@ -52,7 +53,8 @@ export class PatientProfile implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private api: Api,
-    private auth: Auth
+    private auth: Auth,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -93,8 +95,18 @@ export class PatientProfile implements OnInit {
 
   exportRecords(): void {
     this.api.post<{ message: string; recordCount: number }>(`/patients/${this.patientId}/export`, { format: 'PDF' }).subscribe({
-      next: (res) => alert(res.message + ' Records: ' + res.recordCount),
-      error: (err) => alert(err.error?.message || 'Export failed'),
+      next: (res) =>
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Export complete',
+          detail: `${res.message} Records: ${res.recordCount}`,
+        }),
+      error: (err) =>
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Export failed',
+          detail: err.error?.message || 'Export failed',
+        }),
     });
   }
 }

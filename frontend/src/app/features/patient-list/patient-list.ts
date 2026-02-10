@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { Api } from '../../core/api';
+import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { TableModule, type TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -44,7 +45,10 @@ export class PatientList implements OnInit {
   visibilityFilter: 'all' | 'public' | 'private' = 'all';
   loading = false;
 
-  constructor(private api: Api) {}
+  constructor(
+    private api: Api,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -69,7 +73,13 @@ export class PatientList implements OnInit {
         this.totalRecords = res.total;
         this.last = this.total === 0 ? 0 : Math.min(this.first + this.patients.length, this.total);
       },
-      error: () => {},
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Load failed',
+          detail: err.error?.message || 'Failed to load patients.',
+        });
+      },
       complete: () => {
         this.loading = false;
       },
