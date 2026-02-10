@@ -1,33 +1,56 @@
-<h1>Register Patient</h1>
-<a routerLink="/reception/patients" class="back">← Back to list</a>
-<form (ngSubmit)="onSubmit()" class="form">
-  <label>First name *</label>
-  <input type="text" [(ngModel)]="firstName" name="firstName" required />
-  <label>Last name *</label>
-  <input type="text" [(ngModel)]="lastName" name="lastName" required />
-  <label>Date of birth *</label>
-  <input type="date" [(ngModel)]="dob" name="dob" required />
-  <label>Gender</label>
-  <select [(ngModel)]="gender" name="gender">
-    <option value="">—</option>
-    <option value="M">M</option>
-    <option value="F">F</option>
-    <option value="O">O</option>
-  </select>
-  <label>Contact email</label>
-  <input type="email" [(ngModel)]="contactEmail" name="contactEmail" />
-  <label>Contact phone</label>
-  <input type="text" [(ngModel)]="contactPhone" name="contactPhone" />
-  <label>Address</label>
-  <input type="text" [(ngModel)]="address" name="address" />
-  <label class="checkbox">
-    <input type="checkbox" [(ngModel)]="isPrivatePatient" name="isPrivatePatient" />
-    Private patient (restrict visibility)
-  </label>
-  @if (error) {
-    <p class="error">{{ error }}</p>
-  }
-  <button type="submit" [disabled]="loading">
-    {{ loading ? 'Saving…' : 'Register Patient' }}
-  </button>
-</form>
+<div class="flex flex-column gap-4">
+  <div class="flex align-items-center gap-2">
+    <a [routerLink]="['/reception/patients']" class="flex align-items-center gap-1 text-primary no-underline font-medium">
+      <i class="pi pi-arrow-left"></i> Back to list
+    </a>
+  </div>
+  <p-card header="Register Patient" styleClass="shadow-2 border-round-lg">
+    <form (ngSubmit)="onSubmit()" class="flex flex-column gap-3">
+      <div class="grid">
+        <div class="col-12 md:col-6 flex flex-column gap-2">
+          <label for="firstName" class="font-medium text-900">First name *</label>
+          <input id="firstName" pInputText type="text" [(ngModel)]="firstName" name="firstName" required class="w-full" />
+        </div>
+        <div class="col-12 md:col-6 flex flex-column gap-2">
+          <label for="lastName" class="font-medium text-900">Last name *</label>
+          <input id="lastName" pInputText type="text" [(ngModel)]="lastName" name="lastName" required class="w-full" />
+        </div>
+      </div>
+      <div class="grid">
+        <div class="col-12 md:col-6 flex flex-column gap-2">
+          <label for="dob" class="font-medium text-900">Date of birth *</label>
+          <input id="dob" pInputText type="date" [(ngModel)]="dob" name="dob" required class="w-full" />
+        </div>
+        <div class="col-12 md:col-6 flex flex-column gap-2">
+          <label for="gender" class="font-medium text-900">Gender</label>
+          <p-select id="gender" [(ngModel)]="gender" name="gender" [options]="genderOptions" optionLabel="label" optionValue="value" placeholder="—" styleClass="w-full" />
+        </div>
+      </div>
+      <div class="grid">
+        <div class="col-12 md:col-6 flex flex-column gap-2">
+          <label for="contactEmail" class="font-medium text-900">Contact email</label>
+          <input id="contactEmail" pInputText type="email" [(ngModel)]="contactEmail" name="contactEmail" class="w-full" />
+        </div>
+        <div class="col-12 md:col-6 flex flex-column gap-2">
+          <label for="contactPhone" class="font-medium text-900">Contact phone</label>
+          <input id="contactPhone" pInputText type="text" [(ngModel)]="contactPhone" name="contactPhone" class="w-full" />
+        </div>
+      </div>
+      <div class="flex flex-column gap-2">
+        <label for="address" class="font-medium text-900">Address</label>
+        <input id="address" pInputText type="text" [(ngModel)]="address" name="address" class="w-full" />
+      </div>
+      <div class="flex align-items-center gap-2">
+        <p-checkbox [(ngModel)]="isPrivatePatient" name="isPrivatePatient" [binary]="true" inputId="private" />
+        <label for="private" class="font-medium text-900 cursor-pointer">Private patient (restrict visibility)</label>
+      </div>
+      @if (error) {
+        <p-message severity="error" [text]="error" styleClass="w-full"></p-message>
+      }
+      <div class="flex gap-2">
+        <p-button type="submit" [label]="loading ? 'Saving…' : 'Register Patient'" icon="pi pi-check" [loading]="loading" [disabled]="loading" />
+        <a [routerLink]="['/reception/patients']" class="no-underline"><p-button type="button" label="Cancel" icon="pi pi-times" severity="secondary" styleClass="p-button-outlined"></p-button></a>
+      </div>
+    </form>
+  </p-card>
+</div>

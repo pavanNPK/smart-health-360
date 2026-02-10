@@ -1,12 +1,6 @@
-/* Global styles - add imports or base styles here */
-:root {
-  --color-primary: #0ea5e9;
-  --color-primary-hover: #0284c7;
-  --color-text-muted: #64748b;
-  --color-border: #e2e8f0;
-  --color-error: #dc2626;
-  --color-bg-dark: #0f172a;
-}
+/* PrimeIcons + PrimeFlex (PrimeNG theme from providePrimeNG Aura) */
+@import 'primeicons/primeicons.css';
+@import 'primeflex/primeflex.css';
 
 * {
   box-sizing: border-box;
@@ -14,5 +8,10 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Hide PrimeNG LTS license banner when using non-licensed LTS version */
+body > a[href='https://primeng.org/lts'] {
+  display: none !important;
 }

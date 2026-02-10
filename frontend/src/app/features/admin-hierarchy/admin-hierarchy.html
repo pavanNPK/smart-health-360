@@ -1,0 +1,88 @@
+<div class="flex flex-column gap-4">
+  <h1 class="m-0 text-2xl font-semibold text-900">
+    <i class="pi pi-sitemap mr-2"></i>Organization Hierarchy
+  </h1>
+  <p class="text-600 m-0">Areas → Clinics → Doctors & Receptionists. Expand to load.</p>
+  <p-card styleClass="shadow-2 border-round-lg">
+    @if (loading) {
+      <div class="flex align-items-center justify-content-center py-8">
+        <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+      </div>
+    } @else {
+      <div class="flex flex-column gap-2">
+        @for (area of areas; track area._id) {
+          <div class="surface-100 border-round-lg overflow-hidden">
+            <button
+              type="button"
+              class="flex align-items-center gap-2 w-full p-3 border-none cursor-pointer surface-100 hover:surface-200 text-left font-medium text-900"
+              (click)="toggleArea(area._id)"
+            >
+              <i class="pi" [class.pi-chevron-down]="isAreaExpanded(area._id)" [class.pi-chevron-right]="!isAreaExpanded(area._id)"></i>
+              <i class="pi pi-map"></i>
+              <span>{{ area.name }}</span>
+            </button>
+            @if (isAreaExpanded(area._id)) {
+              <div class="pl-4 pr-3 pb-3">
+                @for (clinic of getClinics(area._id); track clinic._id) {
+                  <div class="surface-0 border-round p-3 mt-2">
+                    <button
+                      type="button"
+                      class="flex align-items-center gap-2 w-full p-2 border-none cursor-pointer surface-0 hover:surface-100 text-left font-medium text-900 border-round"
+                      (click)="toggleClinic(clinic._id)"
+                    >
+                      <i class="pi" [class.pi-chevron-down]="isClinicExpanded(clinic._id)" [class.pi-chevron-right]="!isClinicExpanded(clinic._id)"></i>
+                      <i class="pi pi-building"></i>
+                      <span>{{ clinic.name }}</span>
+                    </button>
+                    @if (isClinicExpanded(clinic._id)) {
+                      <div class="grid mt-2">
+                        <div class="col-12 md:col-6">
+                          <div class="font-semibold text-900 mb-2"><i class="pi pi-user mr-1"></i>Doctors</div>
+                          @for (d of getDoctors(clinic._id); track d._id) {
+                            <div class="flex align-items-center gap-2 py-1 text-900">
+                              <i class="pi pi-user text-600"></i>
+                              <span>{{ d.name }}</span>
+                              <span class="text-600 text-sm">({{ d.email }})</span>
+                              @if (d.specialization) {
+                                <span class="text-500 text-sm">· {{ d.specialization }}</span>
+                              }
+                            </div>
+                          }
+                          @if (getDoctors(clinic._id).length === 0) {
+                            <span class="text-500 text-sm">No doctors assigned</span>
+                          }
+                        </div>
+                        <div class="col-12 md:col-6">
+                          <div class="font-semibold text-900 mb-2"><i class="pi pi-users mr-1"></i>Receptionists</div>
+                          @for (r of getReceptionists(clinic._id); track r._id) {
+                            <div class="flex align-items-center gap-2 py-1 text-900">
+                              <i class="pi pi-users text-600"></i>
+                              <span>{{ r.name }}</span>
+                              <span class="text-600 text-sm">({{ r.email }})</span>
+                              @if (r.status) {
+                                <span class="text-500 text-sm" [class.text-green-600]="r.status === 'ACTIVE'" [class.text-orange-600]="r.status !== 'ACTIVE'">· {{ r.status }}</span>
+                              }
+                            </div>
+                          }
+                          @if (getReceptionists(clinic._id).length === 0) {
+                            <span class="text-500 text-sm">No receptionists assigned</span>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+                @if (getClinics(area._id).length === 0) {
+                  <p class="text-500 text-sm mt-2">No clinics in this area</p>
+                }
+              </div>
+            }
+          </div>
+        }
+        @if (areas.length === 0) {
+          <p class="text-600 m-0">No areas. Add areas and clinics first.</p>
+        }
+      </div>
+    }
+  </p-card>
+</div>

@@ -8,6 +8,9 @@ import reportsRoutes from './routes/reports';
 import importRoutes from './routes/import';
 import exportRoutes from './routes/export';
 import auditRoutes from './routes/audit';
+import areasRoutes from './routes/areas';
+import clinicsRoutes from './routes/clinics';
+import attendanceRoutes from './routes/attendance';
 
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
@@ -22,6 +25,9 @@ app.use(reportsRoutes);
 app.use(importRoutes);
 app.use(exportRoutes);
 app.use('/audit', auditRoutes);
+app.use('/areas', areasRoutes);
+app.use('/clinics', clinicsRoutes);
+app.use('/attendance', attendanceRoutes);
 
 app.get('/health', (_req, res) => res.json({ ok: true, db: 'careers' }));
 

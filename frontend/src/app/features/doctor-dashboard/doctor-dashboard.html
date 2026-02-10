@@ -1,17 +1,97 @@
-<h1>My Patients</h1>
-@if (loading) {
-  <p>Loading…</p>
-} @else {
-  <div class="grid">
-    @for (p of patients; track p._id) {
-      <a [routerLink]="['/doctor/patients', p._id]" class="card">
-        <strong>{{ p.firstName }} {{ p.lastName }}</strong>
-        <span>DOB: {{ p.dob | date : 'shortDate' }}</span>
-        <span>{{ p.contactEmail || '—' }}</span>
-      </a>
-    }
-  </div>
-  @if (patients.length === 0) {
-    <p>No assigned patients. Ask an admin to assign you as primary doctor.</p>
+<div class="flex flex-column gap-4">
+  <h1 class="m-0 text-2xl font-semibold text-900">
+    <i class="pi pi-users mr-2"></i>My Patients
+  </h1>
+  @if (stats) {
+    <div class="grid">
+      <div class="col-12 md:col-4">
+        <p-card styleClass="shadow-2 border-round-lg">
+          <div class="flex flex-column gap-1">
+            <span class="text-600 text-sm">Total patients (this clinic)</span>
+            <span class="text-2xl font-bold text-900">{{ stats.total }}</span>
+          </div>
+        </p-card>
+      </div>
+      <div class="col-12 md:col-4">
+        <p-card styleClass="shadow-2 border-round-lg">
+          <div class="flex flex-column gap-1">
+            <span class="text-600 text-sm"><i class="pi pi-globe mr-1"></i> Public</span>
+            <span class="text-2xl font-bold text-900">{{ stats.publicCount }}</span>
+          </div>
+        </p-card>
+      </div>
+      <div class="col-12 md:col-4">
+        <p-card styleClass="shadow-2 border-round-lg">
+          <div class="flex flex-column gap-1">
+            <span class="text-600 text-sm"><i class="pi pi-lock mr-1"></i> Private</span>
+            <span class="text-2xl font-bold text-900">{{ stats.privateCount }}</span>
+          </div>
+        </p-card>
+      </div>
+    </div>
   }
-}
+  @if (clinicId && (receptionists.length > 0 || attendance.length > 0)) {
+    <p-card header="Clinic receptionists &amp; attendance" styleClass="shadow-2 border-round-lg">
+      <p-table [value]="receptionists" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '24rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Today</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-r>
+          <tr>
+            <td>{{ r.name }}</td>
+            <td>{{ r.email }}</td>
+            <td>
+              @if (getAttendanceForUser(r._id); as att) {
+                <span [class]="att.status === 'PRESENT' ? 'text-green-600' : 'text-orange-600'">
+                  <i class="pi" [class.pi-check-circle]="att.status === 'PRESENT'" [class.pi-times-circle]="att.status === 'ABSENT'"></i>
+                  {{ att.status }}
+                </span>
+                @if (att.notes) { <span class="text-500 text-sm ml-1">({{ att.notes }})</span> }
+              } @else {
+                <span class="text-500">—</span>
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="3" class="text-center py-4 text-600">No receptionists in your clinic.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  }
+  @if (loading) {
+    <div class="flex align-items-center justify-content-center py-8">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+    </div>
+  } @else {
+    <div class="grid">
+      @for (p of patients; track p._id) {
+        <div class="col-12 md:col-6 lg:col-4">
+          <a [routerLink]="['/doctor/patients', p._id]" class="no-underline block">
+            <p-card styleClass="shadow-2 border-round-lg hover:shadow-4 transition-duration-200 cursor-pointer h-full">
+              <div class="flex flex-column gap-2">
+                <span class="font-semibold text-900 text-lg">{{ p.firstName }} {{ p.lastName }}</span>
+                <span class="text-600 text-sm"><i class="pi pi-calendar mr-1"></i> DOB: {{ p.dob | date : 'shortDate' }}</span>
+                <span class="text-600 text-sm"><i class="pi pi-envelope mr-1"></i> {{ p.contactEmail || '—' }}</span>
+              </div>
+              <ng-template pTemplate="footer">
+                <span class="text-primary font-medium">View profile <i class="pi pi-arrow-right ml-1"></i></span>
+              </ng-template>
+            </p-card>
+          </a>
+        </div>
+      }
+    </div>
+    @if (patients.length === 0) {
+      <p-card styleClass="shadow-2 border-round-lg">
+        <p class="text-600 m-0">No assigned patients. Ask an admin to assign you as primary doctor.</p>
+      </p-card>
+    }
+  }
+</div>

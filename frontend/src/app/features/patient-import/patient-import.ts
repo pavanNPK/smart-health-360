@@ -2,10 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-patient-import',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, CardModule, ButtonModule, InputTextModule, MessageModule],
   templateUrl: './patient-import.html',
   styleUrl: './patient-import.scss',
 })

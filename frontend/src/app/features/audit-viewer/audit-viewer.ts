@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Api } from '../../core/api';
 import { DatePipe, JsonPipe } from '@angular/common';
+import { CardModule } from 'primeng/card';
+import { TableModule } from 'primeng/table';
 
 interface AuditLog {
   _id: string;
@@ -14,7 +16,7 @@ interface AuditLog {
 
 @Component({
   selector: 'app-audit-viewer',
-  imports: [DatePipe, JsonPipe],
+  imports: [DatePipe, JsonPipe, CardModule, TableModule],
   templateUrl: './audit-viewer.html',
   styleUrl: './audit-viewer.scss',
 })

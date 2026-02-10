@@ -10,6 +10,7 @@ const createUserSchema = z.object({
   password: z.string().min(6).optional(), // optional: if omitted, user gets OTP to verify and set password
   role: z.enum(['RECEPTIONIST', 'DOCTOR', 'SUPER_ADMIN']),
   specialization: z.string().optional(),
+  clinicId: z.string().min(1).optional(), // required for DOCTOR and RECEPTIONIST
   sendVerificationOtp: z.boolean().optional().default(true), // when true, create as PENDING_VERIFICATION and send OTP
 });
 
@@ -33,6 +34,7 @@ export async function createUser(req: Request, res: Response): Promise<void> {
   const email = parsed.data.email.toLowerCase();
   const sendOtp = parsed.data.sendVerificationOtp !== false;
 
+  const clinicId = parsed.data.clinicId || undefined;
   if (sendOtp) {
     // Create user as PENDING_VERIFICATION; no password until they verify with OTP
     const user = await User.create({
@@ -42,6 +44,7 @@ export async function createUser(req: Request, res: Response): Promise<void> {
       role: parsed.data.role,
       status: 'PENDING_VERIFICATION',
       specialization: parsed.data.specialization,
+      clinicId: clinicId || undefined,
     });
     await otpService.createAndSendOTP(email, parsed.data.name);
     const { passwordHash: _, ...rest } = user.toObject();
@@ -59,6 +62,7 @@ export async function createUser(req: Request, res: Response): Promise<void> {
     role: parsed.data.role,
     status: 'ACTIVE',
     specialization: parsed.data.specialization,
+    clinicId: clinicId || undefined,
   });
   const { passwordHash: __, ...rest } = user.toObject();
   res.status(201).json(rest);
@@ -67,14 +71,16 @@ export async function createUser(req: Request, res: Response): Promise<void> {
 export async function listUsers(req: Request, res: Response): Promise<void> {
   const role = req.query.role as string | undefined;
   const status = req.query.status as string | undefined;
+  const clinicId = req.query.clinicId as string | undefined;
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
   const skip = (page - 1) * limit;
-  const filter: Record<string, string> = {};
+  const filter: Record<string, unknown> = {};
   if (role) filter.role = role;
   if (status) filter.status = status;
+  if (clinicId) filter.clinicId = clinicId;
   const [users, total] = await Promise.all([
-    User.find(filter).select('-passwordHash').skip(skip).limit(limit).lean(),
+    User.find(filter).select('-passwordHash').populate('clinicId', 'name').skip(skip).limit(limit).lean(),
     User.countDocuments(filter),
   ]);
   res.json({ data: users, total, page, limit });

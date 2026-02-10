@@ -1,33 +1,57 @@
-<div class="login-page">
-  <div class="card">
-    <h1>Smart Health 360</h1>
-    <p class="subtitle">Clinical Hospital – Sign in</p>
-    <form (ngSubmit)="onSubmit()" class="form">
-      <input
-        type="email"
-        [(ngModel)]="email"
-        name="email"
-        placeholder="Email"
-        required
-        autocomplete="email"
-      />
-      <input
-        type="password"
-        [(ngModel)]="password"
-        name="password"
-        placeholder="Password"
-        required
-        autocomplete="current-password"
-      />
+<div class="flex align-items-center justify-content-center min-h-screen surface-ground">
+  <p-card styleClass="shadow-4 border-round-xl w-full max-w-25rem" class="login-card">
+    <ng-template pTemplate="header">
+      <div class="flex flex-column align-items-center gap-2 pt-4">
+        <i class="pi pi-building text-5xl text-primary"></i>
+        <h1 class="m-0 text-2xl font-semibold text-900">Smart Health 360</h1>
+        <span class="text-600 text-sm">Clinical Hospital – Sign in</span>
+      </div>
+    </ng-template>
+    <form (ngSubmit)="onSubmit()" class="flex flex-column gap-3">
+      <div class="flex flex-column gap-2">
+        <label for="email" class="font-medium text-900">Email</label>
+        <input
+          id="email"
+          pInputText
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="your@email.com"
+          required
+          autocomplete="email"
+          class="w-full"
+        />
+      </div>
+      <div class="flex flex-column gap-2">
+        <label for="password" class="font-medium text-900">Password</label>
+        <input
+          id="password"
+          pInputText
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="••••••••"
+          required
+          autocomplete="current-password"
+          class="w-full"
+        />
+      </div>
       @if (error) {
-        <p class="error">{{ error }}</p>
+        <p-message severity="error" [text]="error" styleClass="w-full"></p-message>
         @if (showVerifyLink) {
-          <a [routerLink]="['/verify-email']" [queryParams]="{ email: email }" class="link">Set your password →</a>
+          <a [routerLink]="['/verify-email']" [queryParams]="{ email: email }" class="flex align-items-center gap-1 text-primary no-underline font-medium">
+            <i class="pi pi-envelope"></i> Set your password →
+          </a>
         }
       }
-      <button type="submit" [disabled]="loading">
-        {{ loading ? 'Signing in…' : 'Sign in' }}
-      </button>
+      <p-button
+        type="submit"
+        label="{{ loading ? 'Signing in…' : 'Sign in' }}"
+        icon="pi pi-sign-in"
+        [loading]="loading"
+        [disabled]="loading"
+        styleClass="w-full"
+      />
     </form>
-  </div>
+  </p-card>
 </div>

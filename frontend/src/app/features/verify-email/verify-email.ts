@@ -4,10 +4,21 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Auth, type User } from '../../core/auth';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-verify-email',
-  imports: [FormsModule, RouterLink],
+  imports: [
+    FormsModule,
+    RouterLink,
+    CardModule,
+    ButtonModule,
+    InputTextModule,
+    MessageModule,
+  ],
   templateUrl: './verify-email.html',
   styleUrl: './verify-email.scss',
 })

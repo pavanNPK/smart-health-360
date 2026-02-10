@@ -43,6 +43,7 @@ export async function createPatient(req: Request, res: Response): Promise<void> 
 export async function listPatients(req: Request, res: Response): Promise<void> {
   const user = req.user! as AuthUser;
   const assignedTo = req.query.assignedTo as string | undefined;
+  const visibilityFilter = req.query.visibility as string | undefined; // 'public' | 'private' | omit = all
   const search = (req.query.search as string)?.trim();
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
@@ -51,6 +52,8 @@ export async function listPatients(req: Request, res: Response): Promise<void> {
   if (user.role === 'DOCTOR' && assignedTo === 'me') {
     filter.primaryDoctorId = user.id;
   }
+  if (visibilityFilter === 'public') filter.isPrivatePatient = false;
+  else if (visibilityFilter === 'private') filter.isPrivatePatient = true;
   if (search) {
     filter.$or = [
       { firstName: new RegExp(search, 'i') },
@@ -63,6 +66,24 @@ export async function listPatients(req: Request, res: Response): Promise<void> {
     Patient.countDocuments(filter),
   ]);
   res.json({ data: patients, total, page, limit });
+}
+
+export async function patientStats(req: Request, res: Response): Promise<void> {
+  const user = req.user! as AuthUser;
+  const assignedTo = req.query.assignedTo as string | undefined;
+  const filter: Record<string, unknown> = {};
+  if (user.role === 'DOCTOR' && assignedTo === 'me') {
+    filter.primaryDoctorId = user.id;
+  } else if (user.role !== 'SUPER_ADMIN') {
+    res.status(403).json({ message: 'Forbidden' });
+    return;
+  }
+  const [total, publicCount, privateCount] = await Promise.all([
+    Patient.countDocuments(filter),
+    Patient.countDocuments({ ...filter, isPrivatePatient: false }),
+    Patient.countDocuments({ ...filter, isPrivatePatient: true }),
+  ]);
+  res.json({ total, publicCount, privateCount });
 }
 
 export async function getPatient(req: Request, res: Response): Promise<void> {

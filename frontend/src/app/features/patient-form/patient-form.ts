@@ -2,10 +2,25 @@ import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { CheckboxModule } from 'primeng/checkbox';
+import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-patient-form',
-  imports: [RouterLink, FormsModule],
+  imports: [
+    RouterLink,
+    FormsModule,
+    CardModule,
+    ButtonModule,
+    InputTextModule,
+    SelectModule,
+    CheckboxModule,
+    MessageModule,
+  ],
   templateUrl: './patient-form.html',
   styleUrl: './patient-form.scss',
 })
@@ -20,6 +35,13 @@ export class PatientForm {
   isPrivatePatient = false;
   error = '';
   loading = false;
+
+  genderOptions = [
+    { label: '—', value: '' },
+    { label: 'M', value: 'M' },
+    { label: 'F', value: 'F' },
+    { label: 'O', value: 'O' },
+  ];
 
   constructor(
     private api: Api,

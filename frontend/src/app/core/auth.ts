@@ -11,6 +11,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  clinicId?: string;
 }
 
 export interface LoginResponse {

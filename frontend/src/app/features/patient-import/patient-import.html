@@ -1,28 +1,44 @@
-<h1>Import Records</h1>
-<a [routerLink]="['/reception/patients', patientId]" class="back">← Back to patient</a>
-<p>Paste a JSON array of record objects. Each item: type, visibility (PUBLIC/PRIVATE), title, disease, notes, etc.</p>
-<textarea
-  [(ngModel)]="itemsJson"
-  name="itemsJson"
-  rows="12"
-  placeholder='[{"type":"diagnosis","visibility":"PUBLIC","disease":"Hypertension","notes":"Imported"}]'
-></textarea>
-<input type="text" [(ngModel)]="fileName" name="fileName" placeholder="File name" />
-<button type="button" (click)="submit()" [disabled]="loading">
-  {{ loading ? 'Importing…' : 'Import' }}
-</button>
-@if (error) {
-  <p class="error">{{ error }}</p>
-}
-@if (result) {
-  <div class="result">
-    <p>Imported: {{ result.successCount }} · Failed: {{ result.failureCount }}</p>
-    @if (result.errors?.length) {
-      <ul>
-        @for (e of result.errors; track e.row) {
-          <li>Row {{ e.row }}: {{ e.message }}</li>
-        }
-      </ul>
-    }
+<div class="flex flex-column gap-4">
+  <div class="flex align-items-center gap-2">
+    <a [routerLink]="['/reception/patients', patientId]" class="flex align-items-center gap-1 text-primary no-underline font-medium">
+      <i class="pi pi-arrow-left"></i> Back to patient
+    </a>
   </div>
-}
+  <p-card header="Import Records" styleClass="shadow-2 border-round-lg">
+    <p class="text-600 m-0 mb-3">Paste a JSON array of record objects. Each item: type, visibility (PUBLIC/PRIVATE), title, disease, notes, etc.</p>
+    <form (ngSubmit)="submit()" class="flex flex-column gap-3">
+      <div class="flex flex-column gap-2">
+        <label for="json" class="font-medium text-900">JSON array</label>
+        <textarea
+          id="json"
+          pInputText
+          [(ngModel)]="itemsJson"
+          name="itemsJson"
+          rows="12"
+          placeholder='[{"type":"diagnosis","visibility":"PUBLIC","disease":"Hypertension","notes":"Imported"}]'
+          class="w-full font-mono text-sm"
+        ></textarea>
+      </div>
+      <div class="flex flex-column gap-2">
+        <label for="fname" class="font-medium text-900">File name</label>
+        <input id="fname" pInputText type="text" [(ngModel)]="fileName" name="fileName" placeholder="File name" class="w-full" />
+      </div>
+      @if (error) {
+        <p-message severity="error" [text]="error" styleClass="w-full"></p-message>
+      }
+      @if (result) {
+        <div class="surface-100 border-round-lg p-3">
+          <p class="font-medium text-900 m-0">Imported: {{ result.successCount }} · Failed: {{ result.failureCount }}</p>
+          @if (result.errors && result.errors.length) {
+            <ul class="mt-2 mb-0 pl-4 text-600">
+              @for (e of result.errors; track e.row) {
+                <li>Row {{ e.row }}: {{ e.message }}</li>
+              }
+            </ul>
+          }
+        </div>
+      }
+      <p-button type="submit" [label]="loading ? 'Importing…' : 'Import'" icon="pi pi-upload" [loading]="loading" [disabled]="loading"></p-button>
+    </form>
+  </p-card>
+</div>

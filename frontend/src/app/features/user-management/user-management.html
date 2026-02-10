@@ -1,67 +1,94 @@
-<h1>User Management</h1>
-<button type="button" (click)="openForm()">Create User</button>
-@if (showForm) {
-  <div class="modal">
-    <form (ngSubmit)="createUser()" class="form">
-      <h2>New User</h2>
-      <label>Name *</label>
-      <input type="text" [(ngModel)]="form.name" name="name" required />
-      <label>Email *</label>
-      <input type="email" [(ngModel)]="form.email" name="email" required />
-      <p class="hint">Leave password blank to send OTP – user will verify email and set their own password.</p>
-      <label>Password (optional – if set, user is active immediately)</label>
-      <input type="password" [(ngModel)]="form.password" name="password" placeholder="Leave blank for OTP verification" />
-      <label>Role *</label>
-      <select [(ngModel)]="form.role" name="role">
-        <option value="RECEPTIONIST">Receptionist</option>
-        <option value="DOCTOR">Doctor</option>
-        <option value="SUPER_ADMIN">Super Admin</option>
-      </select>
-      <label>Specialization (for Doctor)</label>
-      <input type="text" [(ngModel)]="form.specialization" name="specialization" />
-      @if (error) {
-        <p class="error">{{ error }}</p>
-      }
-      <div class="actions">
-        <button type="submit">Create</button>
-        <button type="button" (click)="showForm = false">Cancel</button>
-      </div>
-    </form>
+<div class="flex flex-column gap-4">
+  <div class="flex flex-wrap align-items-center justify-content-between gap-3">
+    <h1 class="m-0 text-2xl font-semibold text-900">
+      <i class="pi pi-id-card mr-2"></i>User Management
+    </h1>
+    <p-button label="Create User" icon="pi pi-plus" (onClick)="openForm()"></p-button>
   </div>
-}
-@if (successMessage) {
-  <p class="success">{{ successMessage }} They must go to <strong>Verify email</strong> to set password and log in.</p>
-}
-@if (loading) {
-  <p>Loading…</p>
-} @else {
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Status</th>
-        <th>Specialization</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (u of users; track u._id) {
-        <tr>
-          <td>{{ u.name }}</td>
-          <td>{{ u.email }}</td>
-          <td>{{ u.role }}</td>
-          <td>{{ u.status }}</td>
-          <td>{{ u.specialization || '—' }}</td>
-          <td>
-            @if (u.status === 'PENDING_VERIFICATION') {
-              <button type="button" class="btn-resend" (click)="resendOtp(u.email)">Resend OTP</button>
-            }
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-  <p class="pagination">Page {{ page }} · {{ total }} total</p>
-}
+  @if (successMessage) {
+    <p-message severity="success" [text]="successMessage + ' They must go to Verify email to set password and log in.'" styleClass="w-full"></p-message>
+  }
+  <p-card styleClass="shadow-2 border-round-lg">
+    @if (loading) {
+      <div class="flex align-items-center justify-content-center py-8">
+        <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+      </div>
+    } @else {
+      <p-table [value]="users" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Clinic</th>
+            <th>Status</th>
+            <th>Specialization</th>
+            <th style="width: 10rem;">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-u>
+          <tr>
+            <td>{{ u.name }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.role }}</td>
+            <td>{{ getClinicName(u) }}</td>
+            <td>
+              <span [class]="u.status === 'ACTIVE' ? 'text-green-600' : 'text-orange-600'">{{ u.status }}</span>
+            </td>
+            <td>{{ u.specialization || '—' }}</td>
+            <td>
+              @if (u.status === 'PENDING_VERIFICATION') {
+                <p-button label="Resend OTP" icon="pi pi-envelope" styleClass="p-button-text p-button-sm" (onClick)="resendOtp(u.email)"></p-button>
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center py-4 text-600">No users.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <p class="text-600 text-sm mt-2">Page {{ page }} · {{ total }} total</p>
+    }
+  </p-card>
+</div>
+
+<p-dialog [(visible)]="showForm" header="New User" [modal]="true" [style]="{ width: '28rem' }" [draggable]="false" [resizable]="false" (onHide)="showForm = false">
+  <form (ngSubmit)="createUser()" class="flex flex-column gap-3">
+    <div class="flex flex-column gap-2">
+      <label for="um-name" class="font-medium text-900">Name *</label>
+      <input id="um-name" pInputText type="text" [(ngModel)]="form.name" name="name" required class="w-full" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="um-email" class="font-medium text-900">Email *</label>
+      <input id="um-email" pInputText type="email" [(ngModel)]="form.email" name="email" required class="w-full" />
+    </div>
+    <p class="text-600 text-sm m-0">Leave password blank to send OTP – user will verify email and set their own password.</p>
+    <div class="flex flex-column gap-2">
+      <label for="um-password" class="font-medium text-900">Password (optional)</label>
+      <input id="um-password" pInputText type="password" [(ngModel)]="form.password" name="password" placeholder="Leave blank for OTP verification" class="w-full" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="um-role" class="font-medium text-900">Role *</label>
+      <p-select id="um-role" [(ngModel)]="form.role" name="role" [options]="roleOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+    </div>
+    @if (form.role === 'DOCTOR' || form.role === 'RECEPTIONIST') {
+      <div class="flex flex-column gap-2">
+        <label for="um-clinic" class="font-medium text-900">Clinic *</label>
+        <p-select id="um-clinic" [(ngModel)]="form.clinicId" name="clinicId" [options]="clinics" optionLabel="name" optionValue="_id" placeholder="Select clinic" styleClass="w-full" />
+      </div>
+    }
+    <div class="flex flex-column gap-2">
+      <label for="um-spec" class="font-medium text-900">Specialization (for Doctor)</label>
+      <input id="um-spec" pInputText type="text" [(ngModel)]="form.specialization" name="specialization" class="w-full" />
+    </div>
+    @if (error) {
+      <p-message severity="error" [text]="error" styleClass="w-full"></p-message>
+    }
+  </form>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showForm = false" styleClass="p-button-outlined"></p-button>
+    <p-button label="Create" icon="pi pi-check" (onClick)="createUser()"></p-button>
+  </ng-template>
+</p-dialog>

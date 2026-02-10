@@ -1,72 +1,102 @@
 @if (loadingPatient) {
-  <p>Loading patient…</p>
-} @else if (error || !patient) {
-  <p class="error">{{ error || 'Patient not found' }}</p>
-  <a routerLink="/reception/patients">Back to list</a>
-} @else {
-  <div class="header">
-    <a routerLink="/reception/patients" class="back">← Back to list</a>
-    <h1>{{ patient.firstName }} {{ patient.lastName }}</h1>
-    <p>DOB: {{ patient.dob | date : 'shortDate' }} · {{ patient.isPrivatePatient ? 'Private' : 'Public' }} · Doctor: {{ patient.primaryDoctorId?.name || '—' }}</p>
-    <button type="button" (click)="exportRecords()">Export records</button>
+  <div class="flex align-items-center justify-content-center py-8">
+    <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
   </div>
-  <div class="tabs">
-    <button
-      type="button"
-      class="tab"
-      [class.active]="activeTab() === 'PUBLIC'"
-      (click)="setTab('PUBLIC')"
-    >
-      Public Records
-    </button>
-    @if (canViewPrivate()) {
-      <button
-        type="button"
-        class="tab"
-        [class.active]="activeTab() === 'PRIVATE'"
-        (click)="setTab('PRIVATE')"
-      >
-        Private Records
-      </button>
-    } @else {
-      <span class="tab disabled">Private (not authorized)</span>
+} @else if (error || !patient) {
+  <p-card styleClass="shadow-2 border-round-lg">
+    <p-message severity="error" [text]="error || 'Patient not found'" styleClass="w-full"></p-message>
+    <div class="mt-3">
+      <a routerLink="/reception/patients" class="flex align-items-center gap-1 text-primary no-underline font-medium">
+        <i class="pi pi-arrow-left"></i> Back to list
+      </a>
+    </div>
+  </p-card>
+} @else {
+  <div class="flex flex-column gap-4">
+    <div class="flex flex-wrap align-items-center justify-content-between gap-3">
+      <a routerLink="/reception/patients" class="flex align-items-center gap-1 text-primary no-underline font-medium">
+        <i class="pi pi-arrow-left"></i> Back to list
+      </a>
+      <p-button label="Export records" icon="pi pi-download" (onClick)="exportRecords()"></p-button>
+    </div>
+    <p-card styleClass="shadow-2 border-round-lg">
+      <div class="flex flex-column gap-2">
+        <h1 class="m-0 text-2xl font-semibold text-900">{{ patient.firstName }} {{ patient.lastName }}</h1>
+        <div class="flex flex-wrap gap-2 align-items-center text-600">
+          <span><i class="pi pi-calendar mr-1"></i> DOB: {{ patient.dob | date : 'shortDate' }}</span>
+          <span>
+            @if (patient.isPrivatePatient) {
+              <i class="pi pi-lock mr-1"></i> Private
+            } @else {
+              <i class="pi pi-globe mr-1"></i> Public
+            }
+          </span>
+          <span><i class="pi pi-user mr-1"></i> Doctor: {{ patient.primaryDoctorId?.name || '—' }}</span>
+        </div>
+      </div>
+    </p-card>
+    <div class="flex gap-2 flex-wrap">
+      <p-button
+        [label]="'Public Records'"
+        [outlined]="activeTab() !== 'PUBLIC'"
+        [severity]="activeTab() === 'PUBLIC' ? 'primary' : 'secondary'"
+        (onClick)="setTab('PUBLIC')"
+      />
+      @if (canViewPrivate()) {
+        <p-button
+          label="Private Records"
+          [outlined]="activeTab() !== 'PRIVATE'"
+          [severity]="activeTab() === 'PRIVATE' ? 'primary' : 'secondary'"
+          (onClick)="setTab('PRIVATE')"
+        />
+      } @else {
+        <span class="inline-flex align-items-center gap-1 text-500 p-2 border-round">
+          <i class="pi pi-lock"></i> Private (not authorized)
+        </span>
+      }
+    </div>
+    @if (activeTab() === 'PUBLIC') {
+      <p-card styleClass="shadow-2 border-round-lg">
+        @if (loadingRecords) {
+          <div class="flex align-items-center justify-content-center py-6">
+            <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+          </div>
+        } @else {
+          @for (r of publicRecords(); track r._id) {
+            <div class="surface-100 border-round-lg p-3 mb-3">
+              <div class="font-semibold text-900">{{ r.type }}</div>
+              <div class="text-600 text-sm">{{ r.visibility }} · {{ r.createdAt | date : 'short' }}</div>
+              @if (r.title) { <p class="m-0 mt-2">{{ r.title }}</p> }
+              @if (r.disease) { <p class="m-0 mt-1">Disease: {{ r.disease }}</p> }
+              @if (r.notes) { <p class="m-0 mt-1">{{ r.notes }}</p> }
+            </div>
+          }
+          @if (publicRecords().length === 0) {
+            <p class="text-600 m-0">No public records.</p>
+          }
+        }
+      </p-card>
+    } @else if (canViewPrivate()) {
+      <p-card styleClass="shadow-2 border-round-lg">
+        @if (loadingRecords) {
+          <div class="flex align-items-center justify-content-center py-6">
+            <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+          </div>
+        } @else {
+          @for (r of privateRecords(); track r._id) {
+            <div class="surface-100 border-round-lg p-3 mb-3">
+              <div class="font-semibold text-900">{{ r.type }}</div>
+              <div class="text-600 text-sm">{{ r.visibility }} · {{ r.createdAt | date : 'short' }}</div>
+              @if (r.title) { <p class="m-0 mt-2">{{ r.title }}</p> }
+              @if (r.disease) { <p class="m-0 mt-1">Disease: {{ r.disease }}</p> }
+              @if (r.notes) { <p class="m-0 mt-1">{{ r.notes }}</p> }
+            </div>
+          }
+          @if (privateRecords().length === 0) {
+            <p class="text-600 m-0">No private records.</p>
+          }
+        }
+      </p-card>
     }
   </div>
-  @if (activeTab() === 'PUBLIC') {
-    <div class="records">
-      @if (loadingRecords) {
-        <p>Loading…</p>
-      } @else {
-        @for (r of publicRecords(); track r._id) {
-          <div class="record-card">
-            <strong>{{ r.type }}</strong> · {{ r.visibility }} · {{ r.createdAt | date : 'short' }}
-            @if (r.title) { <p>{{ r.title }}</p> }
-            @if (r.disease) { <p>Disease: {{ r.disease }}</p> }
-            @if (r.notes) { <p>{{ r.notes }}</p> }
-          </div>
-        }
-        @if (publicRecords().length === 0) {
-          <p>No public records.</p>
-        }
-      }
-    </div>
-  } @else if (canViewPrivate()) {
-    <div class="records">
-      @if (loadingRecords) {
-        <p>Loading…</p>
-      } @else {
-        @for (r of privateRecords(); track r._id) {
-          <div class="record-card">
-            <strong>{{ r.type }}</strong> · {{ r.visibility }} · {{ r.createdAt | date : 'short' }}
-            @if (r.title) { <p>{{ r.title }}</p> }
-            @if (r.disease) { <p>Disease: {{ r.disease }}</p> }
-            @if (r.notes) { <p>{{ r.notes }}</p> }
-          </div>
-        }
-        @if (privateRecords().length === 0) {
-          <p>No private records.</p>
-        }
-      }
-    </div>
-  }
 }

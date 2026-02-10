@@ -14,10 +14,10 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-export function signAccessToken(user: AuthUser & { email?: string }): string {
+export function signAccessToken(user: AuthUser & { email?: string; clinicId?: string }): string {
   const secret = process.env.JWT_SECRET as string;
   return jwt.sign(
-    { id: user.id, role: user.role, email: user.email },
+    { id: user.id, role: user.role, email: user.email, clinicId: user.clinicId },
     secret,
     { expiresIn: process.env.JWT_EXPIRES || '24h' } as jwt.SignOptions
   );
@@ -37,7 +37,7 @@ export function verifyRefreshToken(token: string): { id: string } {
 }
 
 export type LoginResult =
-  | { ok: true; accessToken: string; refreshToken: string; user: { id: string; name: string; email: string; role: string } }
+  | { ok: true; accessToken: string; refreshToken: string; user: { id: string; name: string; email: string; role: string; clinicId?: string } }
   | { ok: false; code: 'EMAIL_NOT_VERIFIED' }
   | { ok: false; code: 'INVALID_CREDENTIALS' };
 
@@ -49,7 +49,8 @@ export async function login(email: string, password: string): Promise<LoginResul
   if (!user.passwordHash) return { ok: false, code: 'INVALID_CREDENTIALS' };
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) return { ok: false, code: 'INVALID_CREDENTIALS' };
-  const payload: AuthUser & { email?: string } = { id: user._id.toString(), role: user.role, email: user.email };
+  const clinicId = user.clinicId?.toString();
+  const payload: AuthUser & { email?: string; clinicId?: string } = { id: user._id.toString(), role: user.role, email: user.email, clinicId };
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(user._id.toString());
   await logAudit('LOGIN', user._id.toString(), { details: { email: user.email } });
@@ -62,6 +63,7 @@ export async function login(email: string, password: string): Promise<LoginResul
       name: user.name,
       email: user.email,
       role: user.role,
+      clinicId: clinicId ?? undefined,
     },
   };
 }
@@ -70,7 +72,7 @@ export async function verifyOtpAndSetPassword(
   email: string,
   otp: string,
   newPassword: string
-): Promise<{ ok: true; accessToken: string; refreshToken: string; user: { id: string; name: string; email: string; role: string } } | { ok: false; code: string }> {
+): Promise<{ ok: true; accessToken: string; refreshToken: string; user: { id: string; name: string; email: string; role: string; clinicId?: string } } | { ok: false; code: string }> {
   const { verifyOTP } = await import('./otp');
   const valid = await verifyOTP(email, otp);
   if (!valid) return { ok: false, code: 'INVALID_OR_EXPIRED_OTP' };
@@ -79,7 +81,8 @@ export async function verifyOtpAndSetPassword(
   user.passwordHash = await hashPassword(newPassword);
   user.status = 'ACTIVE';
   await user.save();
-  const payload: AuthUser & { email?: string } = { id: user._id.toString(), role: user.role, email: user.email };
+  const clinicId = user.clinicId?.toString();
+  const payload: AuthUser & { email?: string; clinicId?: string } = { id: user._id.toString(), role: user.role, email: user.email, clinicId };
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(user._id.toString());
   await logAudit('LOGIN', user._id.toString(), { details: { email: user.email, verified: true } });
@@ -92,6 +95,7 @@ export async function verifyOtpAndSetPassword(
       name: user.name,
       email: user.email,
       role: user.role,
+      clinicId: clinicId ?? undefined,
     },
   };
 }
@@ -103,7 +107,8 @@ export async function refreshTokens(refreshToken: string): Promise<{
     const { id } = verifyRefreshToken(refreshToken);
     const user = await User.findById(id);
     if (!user || user.status !== 'ACTIVE') return null;
-    const payload: AuthUser & { email?: string } = { id: user._id.toString(), role: user.role, email: user.email };
+    const clinicId = user.clinicId?.toString();
+    const payload: AuthUser & { email?: string; clinicId?: string } = { id: user._id.toString(), role: user.role, email: user.email, clinicId };
     return { accessToken: signAccessToken(payload) };
   } catch {
     return null;

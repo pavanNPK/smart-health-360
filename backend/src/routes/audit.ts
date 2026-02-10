@@ -4,6 +4,6 @@ import * as auditController from '../controllers/auditController';
 
 const router = Router();
 router.use(authMiddleware);
-router.use(roleGuard('SUPER_ADMIN'));
-router.get('/', auditController.listAuditLogs);
+// SA: all audits; Doctor: self + clinic receptionists; Receptionist: self only
+router.get('/', roleGuard('SUPER_ADMIN', 'DOCTOR', 'RECEPTIONIST'), auditController.listAuditLogs);
 export default router;

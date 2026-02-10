@@ -1,21 +1,49 @@
-<nav class="nav">
-  <a routerLink="/" class="brand">Smart Health 360</a>
-  <div class="links">
-    @if (canAccess('RECEPTIONIST')) {
-      <a routerLink="/reception/patients">Patients</a>
-      <a routerLink="/reception/patients/new">Register Patient</a>
-    }
-    @if (canAccess('DOCTOR')) {
-      <a routerLink="/doctor/dashboard">Dashboard</a>
-    }
-    @if (canAccess('SUPER_ADMIN')) {
-      <a routerLink="/admin/users">Users</a>
-      <a routerLink="/admin/audit">Audit</a>
-    }
-    <span class="user">{{ user?.name }} ({{ user?.role }})</span>
-    <button type="button" (click)="logout()">Logout</button>
+<div class="flex flex-column min-h-screen">
+  <div class="surface-section border-bottom-1 surface-border">
+    <div class="flex align-items-center justify-content-between px-4 py-3 flex-wrap gap-2">
+      <a routerLink="/" class="flex align-items-center gap-2 no-underline text-primary font-semibold text-xl">
+        <i class="pi pi-building"></i>
+        <span>Smart Health 360</span>
+      </a>
+      <div class="flex align-items-center gap-2 flex-wrap">
+        @if (canAccess('RECEPTIONIST')) {
+          <a routerLink="/reception/patients" routerLinkActive="font-bold" [routerLinkActiveOptions]="{ exact: false }" class="p-button p-button-text no-underline text-900">
+            <i class="pi pi-users mr-2"></i>Patients
+          </a>
+          <a routerLink="/reception/patients/new" routerLinkActive="font-bold" class="p-button p-button-text no-underline text-900">
+            <i class="pi pi-user-plus mr-2"></i>Register Patient
+          </a>
+        }
+        @if (canAccess('DOCTOR')) {
+          <a routerLink="/doctor/dashboard" routerLinkActive="font-bold" class="p-button p-button-text no-underline text-900">
+            <i class="pi pi-th-large mr-2"></i>Dashboard
+          </a>
+        }
+        @if (canAccess('SUPER_ADMIN')) {
+          <a routerLink="/admin/users" routerLinkActive="font-bold" class="p-button p-button-text no-underline text-900">
+            <i class="pi pi-id-card mr-2"></i>Users
+          </a>
+          <a routerLink="/admin/areas" routerLinkActive="font-bold" class="p-button p-button-text no-underline text-900">
+            <i class="pi pi-map mr-2"></i>Areas
+          </a>
+          <a routerLink="/admin/clinics" routerLinkActive="font-bold" class="p-button p-button-text no-underline text-900">
+            <i class="pi pi-building mr-2"></i>Clinics
+          </a>
+          <a routerLink="/admin/hierarchy" routerLinkActive="font-bold" class="p-button p-button-text no-underline text-900">
+            <i class="pi pi-sitemap mr-2"></i>Hierarchy
+          </a>
+        }
+        @if (canAccessAudit()) {
+          <a routerLink="/audit" routerLinkActive="font-bold" class="p-button p-button-text no-underline text-900">
+            <i class="pi pi-history mr-2"></i>Audit
+          </a>
+        }
+        <span class="text-600 text-sm ml-2">{{ user?.name }} ({{ user?.role }})</span>
+        <p-button label="Logout" icon="pi pi-sign-out" severity="secondary" (onClick)="logout()"></p-button>
+      </div>
+    </div>
   </div>
-</nav>
-<main class="main">
-  <router-outlet />
-</main>
+  <main class="flex-grow-1 p-4 surface-ground">
+    <router-outlet />
+  </main>
+</div>

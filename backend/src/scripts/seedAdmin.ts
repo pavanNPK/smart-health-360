@@ -7,8 +7,8 @@ import mongoose from 'mongoose';
 import { User } from '../models/User';
 import * as authService from '../services/auth';
 
-const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || 'admin@hospital.com';
-const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'Admin123!';
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || 'admin@smarthealth360.com';
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'Admin123SH!';
 const ADMIN_NAME = process.env.SEED_ADMIN_NAME || 'Super Admin';
 
 async function seed() {

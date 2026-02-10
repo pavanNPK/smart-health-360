@@ -5,6 +5,7 @@ export interface AuthUser {
   id: string;
   role: 'RECEPTIONIST' | 'DOCTOR' | 'SUPER_ADMIN';
   email?: string;
+  clinicId?: string;
 }
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
@@ -16,7 +17,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   const token = authHeader.slice(7);
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as AuthUser & { exp: number };
-    req.user = { id: payload.id, role: payload.role, email: payload.email };
+    req.user = { id: payload.id, role: payload.role, email: payload.email, clinicId: payload.clinicId };
     next();
   } catch {
     res.status(401).json({ message: 'Invalid token' });

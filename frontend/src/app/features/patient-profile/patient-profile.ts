@@ -3,6 +3,9 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { Api } from '../../core/api';
 import { Auth } from '../../core/auth';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { MessageModule } from 'primeng/message';
 
 interface Patient {
   _id: string;
@@ -27,7 +30,7 @@ interface Record {
 
 @Component({
   selector: 'app-patient-profile',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, CardModule, ButtonModule, MessageModule],
   templateUrl: './patient-profile.html',
   styleUrl: './patient-profile.scss',
 })

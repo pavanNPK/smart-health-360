@@ -1,0 +1,55 @@
+<div class="flex flex-column gap-4">
+  <div class="flex flex-wrap align-items-center justify-content-between gap-3">
+    <h1 class="m-0 text-2xl font-semibold text-900">
+      <i class="pi pi-map mr-2"></i>Areas
+    </h1>
+    <p-button label="Add Area" icon="pi pi-plus" (onClick)="openDialog()"></p-button>
+  </div>
+  <p-card styleClass="shadow-2 border-round-lg">
+    @if (loading) {
+      <div class="flex align-items-center justify-content-center py-8">
+        <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+      </div>
+    } @else {
+      <p-table [value]="areas" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '20rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Code</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-a>
+          <tr>
+            <td>{{ a.name }}</td>
+            <td>{{ a.code || '—' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="2" class="text-center py-4 text-600">No areas. Add one to organize clinics.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>
+
+<p-dialog [(visible)]="showDialog" header="New Area" [modal]="true" [style]="{ width: '24rem' }" [draggable]="false" [resizable]="false" (onHide)="showDialog = false">
+  <div class="flex flex-column gap-3">
+    <div class="flex flex-column gap-2">
+      <label for="area-name" class="font-medium text-900">Name *</label>
+      <input id="area-name" pInputText [(ngModel)]="name" class="w-full" placeholder="Area name" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="area-code" class="font-medium text-900">Code</label>
+      <input id="area-code" pInputText [(ngModel)]="code" class="w-full" placeholder="Optional code" />
+    </div>
+    @if (error) {
+      <p-message severity="error" [text]="error" styleClass="w-full"></p-message>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showDialog = false" styleClass="p-button-outlined"></p-button>
+    <p-button label="Create" icon="pi pi-check" (onClick)="create()"></p-button>
+  </ng-template>
+</p-dialog>

@@ -1,45 +1,91 @@
-<h1>Patients</h1>
-<div class="toolbar">
-  <input
-    type="search"
-    placeholder="Search by name or email"
-    [(ngModel)]="search"
-    (keyup.enter)="onSearch()"
-  />
-  <button type="button" (click)="onSearch()">Search</button>
-  <a routerLink="/reception/patients/new" class="btn">Register Patient</a>
-</div>
-@if (loading) {
-  <p>Loading…</p>
-} @else {
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>DOB</th>
-        <th>Email</th>
-        <th>Primary Doctor</th>
-        <th>Visibility</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (p of patients; track p._id) {
-        <tr>
-          <td>{{ p.firstName }} {{ p.lastName }}</td>
-          <td>{{ p.dob | date : 'shortDate' }}</td>
-          <td>{{ p.contactEmail || '—' }}</td>
-          <td>{{ p.primaryDoctorId?.name || '—' }}</td>
-          <td>{{ p.isPrivatePatient ? 'Private' : 'Public' }}</td>
-          <td>
-            <a [routerLink]="['/reception/patients', p._id]">View</a>
-            <a [routerLink]="['/reception/patients', p._id, 'import']">Import</a>
-          </td>
-        </tr>
+<div class="flex flex-column gap-4">
+  <div class="flex flex-wrap align-items-center justify-content-between gap-3">
+    <h1 class="m-0 text-2xl font-semibold text-900">
+      <i class="pi pi-users mr-2"></i>Patients
+    </h1>
+    <a [routerLink]="['/reception/patients/new']" class="no-underline">
+      <p-button label="Register Patient" icon="pi pi-user-plus"></p-button>
+    </a>
+  </div>
+  <p-card styleClass="shadow-2 border-round-lg">
+    <div class="flex flex-column gap-3">
+      <div class="flex flex-wrap gap-2 align-items-center">
+        <span class="p-input-icon-left flex-grow-1" style="min-width: 16rem;">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="search"
+            placeholder="Search by name or email"
+            [(ngModel)]="search"
+            (keyup.enter)="onSearch()"
+            class="w-full"
+          />
+        </span>
+        <div class="flex gap-1">
+          <p-button label="All" [outlined]="visibilityFilter !== 'all'" severity="secondary" (onClick)="visibilityFilter = 'all'; onVisibilityChange()"></p-button>
+          <p-button label="Public" [outlined]="visibilityFilter !== 'public'" severity="secondary" icon="pi pi-globe" (onClick)="visibilityFilter = 'public'; onVisibilityChange()"></p-button>
+          <p-button label="Private" [outlined]="visibilityFilter !== 'private'" severity="secondary" icon="pi pi-lock" (onClick)="visibilityFilter = 'private'; onVisibilityChange()"></p-button>
+        </div>
+        <p-button label="Search" icon="pi pi-search" (onClick)="onSearch()"></p-button>
+      </div>
+      <p class="text-600 text-sm m-0">Segregate by visibility for exports: private patients are excluded from exports when not permitted.</p>
+      @if (loading) {
+        <div class="flex align-items-center justify-content-center py-6">
+          <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+        </div>
+      } @else {
+        <p-table
+          [value]="patients"
+          [lazy]="true"
+          (onLazyLoad)="onLazyLoad($event)"
+          [paginator]="true"
+          [rows]="limit"
+          [first]="first"
+          [totalRecords]="total"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Showing {{ first }} to {{ last }} of {{ totalRecords }} patients"
+          styleClass="p-datatable-sm p-datatable-striped"
+          [tableStyle]="{ 'min-width': '50rem' }"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Name</th>
+              <th>DOB</th>
+              <th>Email</th>
+              <th>Primary Doctor</th>
+              <th>Visibility</th>
+              <th style="width: 10rem;">Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>{{ row.firstName }} {{ row.lastName }}</td>
+              <td>{{ row.dob | date : 'shortDate' }}</td>
+              <td>{{ row.contactEmail || '—' }}</td>
+              <td>{{ row.primaryDoctorId?.name || '—' }}</td>
+              <td>
+                @if (row.isPrivatePatient) {
+                  <span class="inline-flex align-items-center gap-1"><i class="pi pi-lock"></i> Private</span>
+                } @else {
+                  <span class="inline-flex align-items-center gap-1"><i class="pi pi-globe"></i> Public</span>
+                }
+              </td>
+              <td>
+                <div class="flex gap-1 flex-wrap">
+                  <a [routerLink]="['/reception/patients', row._id]" class="no-underline"><p-button label="View" icon="pi pi-eye" styleClass="p-button-text p-button-sm"></p-button></a>
+                  <a [routerLink]="['/reception/patients', row._id, 'import']" class="no-underline"><p-button label="Import" icon="pi pi-upload" styleClass="p-button-text p-button-sm"></p-button></a>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center py-4 text-600">No patients found.</td>
+            </tr>
+          </ng-template>
+        </p-table>
       }
-    </tbody>
-  </table>
-  <p class="pagination">
-    Page {{ page }} of {{ (total / limit) | number : '1.0-0' }} ({{ total }} total)
-  </p>
-}
+    </div>
+  </p-card>
+</div>

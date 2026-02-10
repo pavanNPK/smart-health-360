@@ -2,10 +2,21 @@ import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../core/auth';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink],
+  imports: [
+    FormsModule,
+    RouterLink,
+    CardModule,
+    ButtonModule,
+    InputTextModule,
+    MessageModule,
+  ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })

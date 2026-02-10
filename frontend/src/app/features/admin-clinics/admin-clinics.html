@@ -1,0 +1,61 @@
+<div class="flex flex-column gap-4">
+  <div class="flex flex-wrap align-items-center justify-content-between gap-3">
+    <h1 class="m-0 text-2xl font-semibold text-900">
+      <i class="pi pi-building mr-2"></i>Clinics
+    </h1>
+    <p-button label="Add Clinic" icon="pi pi-plus" (onClick)="openDialog()"></p-button>
+  </div>
+  <p-card styleClass="shadow-2 border-round-lg">
+    @if (loading) {
+      <div class="flex align-items-center justify-content-center py-8">
+        <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+      </div>
+    } @else {
+      <p-table [value]="clinics" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '30rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Area</th>
+            <th>Code</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-c>
+          <tr>
+            <td>{{ c.name }}</td>
+            <td>{{ getAreaName(c) }}</td>
+            <td>{{ c.code || '—' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="3" class="text-center py-4 text-600">No clinics. Add areas first, then add clinics.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>
+
+<p-dialog [(visible)]="showDialog" header="New Clinic" [modal]="true" [style]="{ width: '24rem' }" [draggable]="false" [resizable]="false" (onHide)="showDialog = false">
+  <div class="flex flex-column gap-3">
+    <div class="flex flex-column gap-2">
+      <label for="clinic-name" class="font-medium text-900">Name *</label>
+      <input id="clinic-name" pInputText [(ngModel)]="name" class="w-full" placeholder="Clinic name" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="clinic-area" class="font-medium text-900">Area *</label>
+      <p-select id="clinic-area" [(ngModel)]="areaId" [options]="areas" optionLabel="name" optionValue="_id" placeholder="Select area" styleClass="w-full" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="clinic-code" class="font-medium text-900">Code</label>
+      <input id="clinic-code" pInputText [(ngModel)]="code" class="w-full" placeholder="Optional code" />
+    </div>
+    @if (error) {
+      <p-message severity="error" [text]="error" styleClass="w-full"></p-message>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showDialog = false" styleClass="p-button-outlined"></p-button>
+    <p-button label="Create" icon="pi pi-check" (onClick)="create()"></p-button>
+  </ng-template>
+</p-dialog>

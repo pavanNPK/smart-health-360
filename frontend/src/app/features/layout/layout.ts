@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Auth } from '../../core/auth';
 import type { User, UserRole } from '../../core/auth';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterLink, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, ButtonModule],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
 })
@@ -36,5 +37,9 @@ export class Layout implements OnInit {
 
   canAccess(role: UserRole): boolean {
     return this.user?.role === role || this.user?.role === 'SUPER_ADMIN';
+  }
+
+  canAccessAudit(): boolean {
+    return this.user?.role === 'SUPER_ADMIN' || this.user?.role === 'DOCTOR' || this.user?.role === 'RECEPTIONIST';
   }
 }
