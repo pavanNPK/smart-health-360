@@ -1,0 +1,17 @@
+<h1>My Patients</h1>
+@if (loading) {
+  <p>Loading…</p>
+} @else {
+  <div class="grid">
+    @for (p of patients; track p._id) {
+      <a [routerLink]="['/doctor/patients', p._id]" class="card">
+        <strong>{{ p.firstName }} {{ p.lastName }}</strong>
+        <span>DOB: {{ p.dob | date : 'shortDate' }}</span>
+        <span>{{ p.contactEmail || '—' }}</span>
+      </a>
+    }
+  </div>
+  @if (patients.length === 0) {
+    <p>No assigned patients. Ask an admin to assign you as primary doctor.</p>
+  }
+}

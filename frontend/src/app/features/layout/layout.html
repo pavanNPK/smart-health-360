@@ -1,0 +1,21 @@
+<nav class="nav">
+  <a routerLink="/" class="brand">Smart Health 360</a>
+  <div class="links">
+    @if (canAccess('RECEPTIONIST')) {
+      <a routerLink="/reception/patients">Patients</a>
+      <a routerLink="/reception/patients/new">Register Patient</a>
+    }
+    @if (canAccess('DOCTOR')) {
+      <a routerLink="/doctor/dashboard">Dashboard</a>
+    }
+    @if (canAccess('SUPER_ADMIN')) {
+      <a routerLink="/admin/users">Users</a>
+      <a routerLink="/admin/audit">Audit</a>
+    }
+    <span class="user">{{ user?.name }} ({{ user?.role }})</span>
+    <button type="button" (click)="logout()">Logout</button>
+  </div>
+</nav>
+<main class="main">
+  <router-outlet />
+</main>

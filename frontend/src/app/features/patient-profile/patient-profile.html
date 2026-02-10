@@ -1,0 +1,72 @@
+@if (loadingPatient) {
+  <p>Loading patient…</p>
+} @else if (error || !patient) {
+  <p class="error">{{ error || 'Patient not found' }}</p>
+  <a routerLink="/reception/patients">Back to list</a>
+} @else {
+  <div class="header">
+    <a routerLink="/reception/patients" class="back">← Back to list</a>
+    <h1>{{ patient.firstName }} {{ patient.lastName }}</h1>
+    <p>DOB: {{ patient.dob | date : 'shortDate' }} · {{ patient.isPrivatePatient ? 'Private' : 'Public' }} · Doctor: {{ patient.primaryDoctorId?.name || '—' }}</p>
+    <button type="button" (click)="exportRecords()">Export records</button>
+  </div>
+  <div class="tabs">
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab() === 'PUBLIC'"
+      (click)="setTab('PUBLIC')"
+    >
+      Public Records
+    </button>
+    @if (canViewPrivate()) {
+      <button
+        type="button"
+        class="tab"
+        [class.active]="activeTab() === 'PRIVATE'"
+        (click)="setTab('PRIVATE')"
+      >
+        Private Records
+      </button>
+    } @else {
+      <span class="tab disabled">Private (not authorized)</span>
+    }
+  </div>
+  @if (activeTab() === 'PUBLIC') {
+    <div class="records">
+      @if (loadingRecords) {
+        <p>Loading…</p>
+      } @else {
+        @for (r of publicRecords(); track r._id) {
+          <div class="record-card">
+            <strong>{{ r.type }}</strong> · {{ r.visibility }} · {{ r.createdAt | date : 'short' }}
+            @if (r.title) { <p>{{ r.title }}</p> }
+            @if (r.disease) { <p>Disease: {{ r.disease }}</p> }
+            @if (r.notes) { <p>{{ r.notes }}</p> }
+          </div>
+        }
+        @if (publicRecords().length === 0) {
+          <p>No public records.</p>
+        }
+      }
+    </div>
+  } @else if (canViewPrivate()) {
+    <div class="records">
+      @if (loadingRecords) {
+        <p>Loading…</p>
+      } @else {
+        @for (r of privateRecords(); track r._id) {
+          <div class="record-card">
+            <strong>{{ r.type }}</strong> · {{ r.visibility }} · {{ r.createdAt | date : 'short' }}
+            @if (r.title) { <p>{{ r.title }}</p> }
+            @if (r.disease) { <p>Disease: {{ r.disease }}</p> }
+            @if (r.notes) { <p>{{ r.notes }}</p> }
+          </div>
+        }
+        @if (privateRecords().length === 0) {
+          <p>No private records.</p>
+        }
+      }
+    </div>
+  }
+}

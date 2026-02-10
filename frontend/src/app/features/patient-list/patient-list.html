@@ -1,0 +1,45 @@
+<h1>Patients</h1>
+<div class="toolbar">
+  <input
+    type="search"
+    placeholder="Search by name or email"
+    [(ngModel)]="search"
+    (keyup.enter)="onSearch()"
+  />
+  <button type="button" (click)="onSearch()">Search</button>
+  <a routerLink="/reception/patients/new" class="btn">Register Patient</a>
+</div>
+@if (loading) {
+  <p>Loading…</p>
+} @else {
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>DOB</th>
+        <th>Email</th>
+        <th>Primary Doctor</th>
+        <th>Visibility</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (p of patients; track p._id) {
+        <tr>
+          <td>{{ p.firstName }} {{ p.lastName }}</td>
+          <td>{{ p.dob | date : 'shortDate' }}</td>
+          <td>{{ p.contactEmail || '—' }}</td>
+          <td>{{ p.primaryDoctorId?.name || '—' }}</td>
+          <td>{{ p.isPrivatePatient ? 'Private' : 'Public' }}</td>
+          <td>
+            <a [routerLink]="['/reception/patients', p._id]">View</a>
+            <a [routerLink]="['/reception/patients', p._id, 'import']">Import</a>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  <p class="pagination">
+    Page {{ page }} of {{ (total / limit) | number : '1.0-0' }} ({{ total }} total)
+  </p>
+}

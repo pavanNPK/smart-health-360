@@ -1,0 +1,33 @@
+<h1>Register Patient</h1>
+<a routerLink="/reception/patients" class="back">← Back to list</a>
+<form (ngSubmit)="onSubmit()" class="form">
+  <label>First name *</label>
+  <input type="text" [(ngModel)]="firstName" name="firstName" required />
+  <label>Last name *</label>
+  <input type="text" [(ngModel)]="lastName" name="lastName" required />
+  <label>Date of birth *</label>
+  <input type="date" [(ngModel)]="dob" name="dob" required />
+  <label>Gender</label>
+  <select [(ngModel)]="gender" name="gender">
+    <option value="">—</option>
+    <option value="M">M</option>
+    <option value="F">F</option>
+    <option value="O">O</option>
+  </select>
+  <label>Contact email</label>
+  <input type="email" [(ngModel)]="contactEmail" name="contactEmail" />
+  <label>Contact phone</label>
+  <input type="text" [(ngModel)]="contactPhone" name="contactPhone" />
+  <label>Address</label>
+  <input type="text" [(ngModel)]="address" name="address" />
+  <label class="checkbox">
+    <input type="checkbox" [(ngModel)]="isPrivatePatient" name="isPrivatePatient" />
+    Private patient (restrict visibility)
+  </label>
+  @if (error) {
+    <p class="error">{{ error }}</p>
+  }
+  <button type="submit" [disabled]="loading">
+    {{ loading ? 'Saving…' : 'Register Patient' }}
+  </button>
+</form>

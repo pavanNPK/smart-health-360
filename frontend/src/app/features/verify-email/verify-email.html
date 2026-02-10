@@ -1,0 +1,27 @@
+<div class="verify-page">
+  <div class="card">
+    <h1>Set your password</h1>
+    <p class="subtitle">Enter the 6-digit code from your email and choose a password. You received this link because an admin created your account.</p>
+    <form (ngSubmit)="onSubmit()" class="form">
+      <label>Email *</label>
+      <input type="email" [(ngModel)]="email" name="email" required placeholder="your@email.com" />
+      <label>6-digit code (numbers only) *</label>
+      <input type="text" [(ngModel)]="otp" name="otp" maxlength="6" placeholder="000000" pattern="[0-9]*" inputmode="numeric" />
+      <label>New password *</label>
+      <input type="password" [(ngModel)]="password" name="password" required minlength="6" placeholder="Min 6 characters" />
+      <label>Confirm password *</label>
+      <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" required placeholder="Repeat password" />
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
+      @if (success) {
+        <p class="success">{{ success }}</p>
+      }
+      <button type="submit" [disabled]="loading">{{ loading ? 'Verifying…' : 'Verify and set password' }}</button>
+      <button type="button" class="resend" (click)="resendOtp()" [disabled]="resendLoading">
+        {{ resendLoading ? 'Sending…' : 'Resend OTP' }}
+      </button>
+    </form>
+    <a routerLink="/login" class="back">← Back to login</a>
+  </div>
+</div>

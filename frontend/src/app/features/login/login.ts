@@ -1,0 +1,50 @@
+import { Component } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { Auth } from '../../core/auth';
+
+@Component({
+  selector: 'app-login',
+  imports: [FormsModule, RouterLink],
+  templateUrl: './login.html',
+  styleUrl: './login.scss',
+})
+export class Login {
+  email = '';
+  password = '';
+  error = '';
+  showVerifyLink = false;
+  loading = false;
+
+  constructor(
+    private auth: Auth,
+    private router: Router
+  ) {}
+
+  onSubmit(): void {
+    this.error = '';
+    this.showVerifyLink = false;
+    this.loading = true;
+    this.auth.login(this.email, this.password).subscribe({
+      next: () => {
+        const user = this.auth.currentUserValue;
+        if (!user) return;
+        if (user.role === 'SUPER_ADMIN') this.router.navigate(['/admin/users']);
+        else if (user.role === 'DOCTOR') this.router.navigate(['/doctor/dashboard']);
+        else this.router.navigate(['/reception/patients']);
+      },
+      error: (err: { error?: { message?: string; code?: string } }) => {
+        if (err.error?.code === 'EMAIL_NOT_VERIFIED') {
+          this.error = 'Your account is pending. Check your email for the OTP and the link to set your password.';
+          this.showVerifyLink = true;
+        } else {
+          this.error = err.error?.message || 'Invalid email or password';
+        }
+        this.loading = false;
+      },
+      complete: () => {
+        this.loading = false;
+      },
+    });
+  }
+}

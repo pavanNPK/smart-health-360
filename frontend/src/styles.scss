@@ -1,0 +1,18 @@
+/* Global styles - add imports or base styles here */
+:root {
+  --color-primary: #0ea5e9;
+  --color-primary-hover: #0284c7;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-error: #dc2626;
+  --color-bg-dark: #0f172a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+}

@@ -1,0 +1,28 @@
+<h1>Import Records</h1>
+<a [routerLink]="['/reception/patients', patientId]" class="back">← Back to patient</a>
+<p>Paste a JSON array of record objects. Each item: type, visibility (PUBLIC/PRIVATE), title, disease, notes, etc.</p>
+<textarea
+  [(ngModel)]="itemsJson"
+  name="itemsJson"
+  rows="12"
+  placeholder='[{"type":"diagnosis","visibility":"PUBLIC","disease":"Hypertension","notes":"Imported"}]'
+></textarea>
+<input type="text" [(ngModel)]="fileName" name="fileName" placeholder="File name" />
+<button type="button" (click)="submit()" [disabled]="loading">
+  {{ loading ? 'Importing…' : 'Import' }}
+</button>
+@if (error) {
+  <p class="error">{{ error }}</p>
+}
+@if (result) {
+  <div class="result">
+    <p>Imported: {{ result.successCount }} · Failed: {{ result.failureCount }}</p>
+    @if (result.errors?.length) {
+      <ul>
+        @for (e of result.errors; track e.row) {
+          <li>Row {{ e.row }}: {{ e.message }}</li>
+        }
+      </ul>
+    }
+  </div>
+}

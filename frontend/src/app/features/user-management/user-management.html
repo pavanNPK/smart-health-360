@@ -1,0 +1,67 @@
+<h1>User Management</h1>
+<button type="button" (click)="openForm()">Create User</button>
+@if (showForm) {
+  <div class="modal">
+    <form (ngSubmit)="createUser()" class="form">
+      <h2>New User</h2>
+      <label>Name *</label>
+      <input type="text" [(ngModel)]="form.name" name="name" required />
+      <label>Email *</label>
+      <input type="email" [(ngModel)]="form.email" name="email" required />
+      <p class="hint">Leave password blank to send OTP – user will verify email and set their own password.</p>
+      <label>Password (optional – if set, user is active immediately)</label>
+      <input type="password" [(ngModel)]="form.password" name="password" placeholder="Leave blank for OTP verification" />
+      <label>Role *</label>
+      <select [(ngModel)]="form.role" name="role">
+        <option value="RECEPTIONIST">Receptionist</option>
+        <option value="DOCTOR">Doctor</option>
+        <option value="SUPER_ADMIN">Super Admin</option>
+      </select>
+      <label>Specialization (for Doctor)</label>
+      <input type="text" [(ngModel)]="form.specialization" name="specialization" />
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
+      <div class="actions">
+        <button type="submit">Create</button>
+        <button type="button" (click)="showForm = false">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+@if (successMessage) {
+  <p class="success">{{ successMessage }} They must go to <strong>Verify email</strong> to set password and log in.</p>
+}
+@if (loading) {
+  <p>Loading…</p>
+} @else {
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Specialization</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (u of users; track u._id) {
+        <tr>
+          <td>{{ u.name }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.role }}</td>
+          <td>{{ u.status }}</td>
+          <td>{{ u.specialization || '—' }}</td>
+          <td>
+            @if (u.status === 'PENDING_VERIFICATION') {
+              <button type="button" class="btn-resend" (click)="resendOtp(u.email)">Resend OTP</button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  <p class="pagination">Page {{ page }} · {{ total }} total</p>
+}

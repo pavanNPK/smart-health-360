@@ -1,0 +1,26 @@
+<h1>Audit Logs</h1>
+@if (loading) {
+  <p>Loading…</p>
+} @else {
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Action</th>
+        <th>User</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (log of logs; track log._id) {
+        <tr>
+          <td>{{ log.createdAt | date : 'short' }}</td>
+          <td>{{ log.action }}</td>
+          <td>{{ log.userId.name }} ({{ log.userId.email }})</td>
+          <td>{{ log.details | json }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  <p class="pagination">Page {{ page }} · {{ total }} total</p>
+}
