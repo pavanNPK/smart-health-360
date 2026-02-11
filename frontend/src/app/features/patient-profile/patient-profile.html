@@ -17,7 +17,14 @@
       <a routerLink="/reception/patients" class="back-link flex align-items-center gap-1 no-underline font-medium">
         <i class="pi pi-arrow-left"></i> Back to list
       </a>
-      <p-button label="Export records" icon="pi pi-download" styleClass="p-button-outlined" (onClick)="exportRecords()"></p-button>
+      <div class="flex gap-2 align-items-center">
+        @if (canEditPatient()) {
+          <a [routerLink]="['/reception/patients', patient._id, 'edit']" class="no-underline">
+            <p-button label="Edit patient" icon="pi pi-pencil" styleClass="p-button-outlined"></p-button>
+          </a>
+        }
+        <p-button label="Export records" icon="pi pi-download" styleClass="p-button-outlined" (onClick)="exportRecords()"></p-button>
+      </div>
     </div>
     <p-card styleClass="shadow-2 border-round-lg">
       <div class="flex flex-column gap-2">
@@ -68,7 +75,7 @@
               <td>{{ r.createdBy?.name || '—' }}</td>
               @if (canChangeVisibility()) {
                 <td>
-                  <p-button label="Change status" icon="pi pi-refresh" styleClass="p-button-text p-button-sm" (onClick)="openChangeStatus(r)"></p-button>
+                  <p-button icon="pi pi-refresh" styleClass="p-button-text p-button-sm" pTooltip="Change status" (onClick)="openChangeStatus(r)"></p-button>
                 </td>
               }
             </tr>

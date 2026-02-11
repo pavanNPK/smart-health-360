@@ -1,0 +1,94 @@
+<div class="flex flex-column gap-4">
+  <h1 class="m-0 text-2xl font-semibold text-900">
+    <i class="pi pi-users mr-2 page-heading-icon"></i>Staff
+  </h1>
+  <p class="text-600 m-0">Receptionists in your clinic, attendance, and patients they registered.</p>
+
+  @if (!clinicId) {
+    <p-card styleClass="shadow-2 border-round-lg">
+      <p class="text-600 m-0">Receptionist list is shown when your clinic is set. Ask an admin to assign you to a clinic.</p>
+    </p-card>
+  } @else {
+    <p-card header="Receptionists &amp; shift / log times (attendance)" styleClass="shadow-2 border-round-lg receptionists-attendance-card">
+      @if (receptionistsError) {
+        <p class="text-red-600 text-sm m-0 mb-2">{{ receptionistsError }}</p>
+      }
+      @if (loadingReceptionists) {
+        <div class="flex align-items-center justify-content-center py-4">
+          <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+        </div>
+      } @else {
+        <p-table [value]="receptionists" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '28rem' }" showGridlines>
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Patients registered</th>
+              <th>Today (attendance)</th>
+              <th style="width: 10rem;">Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-r>
+            <tr>
+              <td>{{ r.name }}</td>
+              <td>{{ r.email }}</td>
+              <td>{{ r.patientCount ?? 0 }}</td>
+              <td>
+                @if (getAttendanceForUser(r._id); as att) {
+                  <span [class]="att.status === 'PRESENT' ? 'text-green-600' : 'text-orange-600'">
+                    <i class="pi" [class.pi-check-circle]="att.status === 'PRESENT'" [class.pi-times-circle]="att.status === 'ABSENT'"></i>
+                    {{ att.status }}
+                  </span>
+                  @if (att.notes) { <span class="text-500 text-sm ml-1">({{ att.notes }})</span> }
+                } @else {
+                  <span class="text-500">—</span>
+                }
+              </td>
+              <td>
+                <p-button icon="pi pi-list" styleClass="p-button-text p-button-sm" pTooltip="Show patients" (onClick)="openPatientsByReceptionist(r)"></p-button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="5" class="text-center py-4 text-600">No receptionists in your clinic.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
+  }
+
+  <p-dialog
+    [(visible)]="showPatientsByReceptionist"
+    [header]="selectedReceptionist ? 'Patients registered by ' + selectedReceptionist.name : 'Patients'"
+    [modal]="true"
+    [style]="{ width: '32rem' }"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="closePatientsByReceptionist()"
+  >
+    @if (loadingPatientsByReceptionist) {
+      <div class="flex align-items-center justify-content-center py-6">
+        <i class="pi pi-spin pi-spinner text-3xl text-primary"></i>
+      </div>
+    } @else if (patientsByReceptionist.length === 0) {
+      <p class="text-600 m-0">No patients registered by this receptionist (among your assigned patients).</p>
+    } @else {
+      <ul class="list-none p-0 m-0 flex flex-column gap-2">
+        @for (p of patientsByReceptionist; track p._id) {
+          <li>
+            <a [routerLink]="['/doctor/patients', p._id]" (click)="closePatientsByReceptionist()" class="flex align-items-center gap-2 no-underline text-900 hover:text-primary">
+              <i class="pi pi-user"></i>
+              <span>{{ p.firstName }} {{ p.lastName }}</span>
+              <span class="text-500 text-sm">({{ p.dob | date : 'shortDate' }})</span>
+            </a>
+          </li>
+        }
+      </ul>
+    }
+    <ng-template pTemplate="footer">
+      <p-button label="Close" icon="pi pi-times" (onClick)="closePatientsByReceptionist()"></p-button>
+    </ng-template>
+  </p-dialog>
+</div>

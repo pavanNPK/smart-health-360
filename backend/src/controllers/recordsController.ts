@@ -95,6 +95,34 @@ export async function listRecords(req: Request, res: Response): Promise<void> {
   res.json({ data: records, total, page, limit });
 }
 
+export async function recordsSummary(req: Request, res: Response): Promise<void> {
+  const patient = await Patient.findById(req.params.id);
+  if (!patient) {
+    res.status(404).json({ message: 'Patient not found' });
+    return;
+  }
+  const user = req.user! as AuthUser;
+  if (!canViewPatient(patient, user)) {
+    res.status(403).json({ message: 'Forbidden' });
+    return;
+  }
+  const [byVisibility, byType] = await Promise.all([
+    Record.aggregate<{ _id: string; count: number }>([
+      { $match: { patientId: patient._id } },
+      { $group: { _id: '$visibility', count: { $sum: 1 } } },
+    ]).exec(),
+    Record.aggregate<{ _id: string; count: number }>([
+      { $match: { patientId: patient._id } },
+      { $group: { _id: '$type', count: { $sum: 1 } } },
+    ]).exec(),
+  ]);
+  const visACount = byVisibility.find((r) => r._id === 'VIS_A')?.count ?? 0;
+  const visBCount = byVisibility.find((r) => r._id === 'VIS_B')?.count ?? 0;
+  const byTypeMap: Record<string, number> = {};
+  byType.forEach((r) => { byTypeMap[r._id] = r.count; });
+  res.json({ visACount, visBCount, byType: byTypeMap });
+}
+
 export async function updateVisibility(req: Request, res: Response): Promise<void> {
   const record = await Record.findById(req.params.recordId).populate('patientId');
   if (!record || !record.patientId) {

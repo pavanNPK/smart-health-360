@@ -1,0 +1,15 @@
+{
+  "/auth": { "target": "http://localhost:3000", "secure": false },
+  "/users": { "target": "http://localhost:3000", "secure": false },
+  "/patients": { "target": "http://localhost:3000", "secure": false },
+  "/records": { "target": "http://localhost:3000", "secure": false },
+  "/reports": { "target": "http://localhost:3000", "secure": false },
+  "/import": { "target": "http://localhost:3000", "secure": false },
+  "/export": { "target": "http://localhost:3000", "secure": false },
+  "/admin": { "target": "http://localhost:3000", "secure": false },
+  "/audit": { "target": "http://localhost:3000", "secure": false },
+  "/areas": { "target": "http://localhost:3000", "secure": false },
+  "/clinics": { "target": "http://localhost:3000", "secure": false },
+  "/attendance": { "target": "http://localhost:3000", "secure": false },
+  "/health": { "target": "http://localhost:3000", "secure": false }
+}

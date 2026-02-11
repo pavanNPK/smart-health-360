@@ -14,26 +14,15 @@ interface Patient {
   dob: string;
   contactEmail?: string;
   primaryDoctorId?: { name: string };
+  createdBy?: { name: string; email: string };
+  visACount?: number;
+  visBCount?: number;
 }
 
 interface Stats {
   total: number;
   visACount: number;
   visBCount: number;
-}
-
-interface ReceptionistUser {
-  _id: string;
-  name: string;
-  email: string;
-}
-
-interface AttendanceRecord {
-  _id: string;
-  userId: { _id: string; name: string; email: string };
-  date: string;
-  status: 'PRESENT' | 'ABSENT';
-  notes?: string;
 }
 
 @Component({
@@ -45,26 +34,17 @@ interface AttendanceRecord {
 export class DoctorDashboard implements OnInit {
   patients: Patient[] = [];
   stats: Stats | null = null;
-  receptionists: ReceptionistUser[] = [];
-  attendance: AttendanceRecord[] = [];
   loading = false;
-  clinicId: string | undefined;
 
   constructor(
     private api: Api,
     private auth: Auth,
     private messageService: MessageService
-  ) {
-    this.clinicId = this.auth.currentUserValue?.clinicId;
-  }
+  ) {}
 
   ngOnInit(): void {
     this.load();
-    if (this.clinicId) {
-      this.loadStats();
-      this.loadReceptionists();
-      this.loadAttendance();
-    }
+    this.loadStats();
   }
 
   load(): void {
@@ -86,23 +66,5 @@ export class DoctorDashboard implements OnInit {
     this.api.get<Stats>('/patients/stats', { assignedTo: 'me' }).subscribe({
       next: (res) => (this.stats = res),
     });
-  }
-
-  loadReceptionists(): void {
-    if (!this.clinicId) return;
-    this.api.get<{ data: ReceptionistUser[] }>(`/clinics/${this.clinicId}/receptionists`).subscribe({
-      next: (res) => (this.receptionists = res.data),
-    });
-  }
-
-  loadAttendance(): void {
-    const today = new Date().toISOString().slice(0, 10);
-    this.api.get<{ data: AttendanceRecord[] }>('/attendance', { date: today }).subscribe({
-      next: (res) => (this.attendance = res.data),
-    });
-  }
-
-  getAttendanceForUser(userId: string): AttendanceRecord | undefined {
-    return this.attendance.find((a) => (a.userId as { _id: string })._id === userId);
   }
 }

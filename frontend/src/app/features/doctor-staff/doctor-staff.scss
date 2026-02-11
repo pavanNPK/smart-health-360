@@ -1,0 +1,14 @@
+:host ::ng-deep .p-card .p-card-body {
+  padding: 1rem 1.5rem;
+}
+
+/* Receptionists & attendance card: padded header like SA quick-links */
+.receptionists-attendance-card {
+  padding: 1rem;
+  border-radius: 8px;
+
+  ::ng-deep .p-card-title {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+}

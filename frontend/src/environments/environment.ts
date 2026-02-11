@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000',
+  /** Use same origin so dev server proxy forwards /auth, /users, etc. to backend (http://localhost:3000). */
+  apiUrl: '',
 };

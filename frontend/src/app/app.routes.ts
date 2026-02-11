@@ -17,6 +17,7 @@ export const routes: Routes = [
         children: [
           { path: 'patients', loadComponent: () => import('./features/patient-list/patient-list').then((m) => m.PatientList) },
           { path: 'patients/new', loadComponent: () => import('./features/patient-form/patient-form').then((m) => m.PatientForm) },
+          { path: 'patients/:id/edit', loadComponent: () => import('./features/patient-form/patient-form').then((m) => m.PatientForm) },
           { path: 'patients/:id', loadComponent: () => import('./features/patient-profile/patient-profile').then((m) => m.PatientProfile) },
           { path: 'patients/:id/import', loadComponent: () => import('./features/patient-import/patient-import').then((m) => m.PatientImport) },
         ],
@@ -27,6 +28,8 @@ export const routes: Routes = [
         data: { roles: ['DOCTOR'] },
         children: [
           { path: 'dashboard', loadComponent: () => import('./features/doctor-dashboard/doctor-dashboard').then((m) => m.DoctorDashboard) },
+          { path: 'staff', loadComponent: () => import('./features/doctor-staff/doctor-staff').then((m) => m.DoctorStaff) },
+          { path: 'patients', loadComponent: () => import('./features/doctor-patient-list/doctor-patient-list').then((m) => m.DoctorPatientList) },
           { path: 'patients/:id', loadComponent: () => import('./features/patient-profile/patient-profile').then((m) => m.PatientProfile) },
         ],
       },

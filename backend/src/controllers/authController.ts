@@ -1,8 +1,42 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { User } from '../models/User';
+import { Clinic } from '../models/Clinic';
 import * as authService from '../services/auth';
 import * as otpService from '../services/otp';
+
+async function getClinicWithArea(clinicId: string | undefined): Promise<{ id: string; name: string; areaName: string } | undefined> {
+  if (!clinicId || String(clinicId).trim() === '') return undefined;
+  const id = String(clinicId).trim();
+  const clinic = await Clinic.findById(id).populate('areaId', 'name').lean();
+  if (!clinic) return undefined;
+  const area = clinic.areaId as { _id: unknown; name?: string } | null;
+  const areaName = area && typeof area === 'object' && area.name != null ? String(area.name) : '';
+  return {
+    id: clinic._id.toString(),
+    name: clinic.name ?? '',
+    areaName,
+  };
+}
+
+export async function me(req: Request, res: Response): Promise<void> {
+  const user = await User.findById(req.user!.id).select('-passwordHash').lean();
+  if (!user) {
+    res.status(404).json({ message: 'User not found' });
+    return;
+  }
+  const rawClinicId = user.clinicId;
+  const clinicId = rawClinicId != null ? String(rawClinicId) : undefined;
+  const clinic = await getClinicWithArea(clinicId);
+  res.json({
+    id: user._id.toString(),
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    clinicId: clinicId ?? undefined,
+    clinic: clinic ?? undefined,
+  });
+}
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -39,10 +73,12 @@ export async function login(req: Request, res: Response): Promise<void> {
     res.status(401).json({ message: 'Invalid email or password' });
     return;
   }
+  const userPayload = result.user as { id: string; name: string; email: string; role: string; clinicId?: string };
+  const clinic = await getClinicWithArea(userPayload.clinicId);
   res.json({
     accessToken: result.accessToken,
     refreshToken: result.refreshToken,
-    user: result.user,
+    user: { ...userPayload, clinic },
   });
 }
 
@@ -74,10 +110,12 @@ export async function verifyOtp(req: Request, res: Response): Promise<void> {
     res.status(400).json({ code: result.code, message: result.code === 'INVALID_OR_EXPIRED_OTP' ? 'Invalid or expired OTP.' : 'User not found.' });
     return;
   }
+  const userPayload = result.user as { id: string; name: string; email: string; role: string; clinicId?: string };
+  const clinic = await getClinicWithArea(userPayload.clinicId);
   res.json({
     accessToken: result.accessToken,
     refreshToken: result.refreshToken,
-    user: result.user,
+    user: { ...userPayload, clinic },
   });
 }
 

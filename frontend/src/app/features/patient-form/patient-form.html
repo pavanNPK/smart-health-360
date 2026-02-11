@@ -4,7 +4,26 @@
       <i class="pi pi-arrow-left"></i> Back to list
     </a>
   </div>
-  <p-card header="Register Patient" styleClass="shadow-2 border-round-lg card-header-plain">
+  @if (loadingPatient) {
+    <div class="flex align-items-center justify-content-center py-8">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+    </div>
+  } @else {
+  @if (isEditMode && recordSummary) {
+    <p-card header="Records (VIS_A / VIS_B)" styleClass="shadow-2 border-round-lg mb-3">
+      <div class="flex flex-wrap gap-3 align-items-center">
+        <span class="font-medium text-900">VIS_A: {{ recordSummary.visACount }}</span>
+        <span class="font-medium text-900">VIS_B: {{ recordSummary.visBCount }}</span>
+        <span class="text-600">|</span>
+        @for (type of ['diagnosis', 'medication', 'note', 'lab', 'report', 'attachment']; track type) {
+          @if (recordSummary.byType[type] > 0) {
+            <span class="text-600">{{ type }}: {{ recordSummary.byType[type] }}</span>
+          }
+        }
+      </div>
+    </p-card>
+  }
+  <p-card [header]="isEditMode ? 'Edit Patient' : 'Register Patient'" styleClass="shadow-2 border-round-lg card-header-plain">
     <form (ngSubmit)="onSubmit()" class="flex flex-column gap-3">
       <div class="grid">
         <div class="col-12 md:col-6 flex flex-column gap-2">
@@ -52,9 +71,10 @@
         <p-message severity="error" [text]="error" styleClass="w-full"></p-message>
       }
       <div class="flex gap-2">
-        <p-button type="submit" [label]="loading ? 'Saving…' : 'Register Patient'" icon="pi pi-check" [loading]="loading" [disabled]="loading" />
-        <a [routerLink]="['/reception/patients']" class="no-underline"><p-button type="button" label="Cancel" icon="pi pi-times" severity="secondary" styleClass="p-button-outlined"></p-button></a>
+        <p-button type="submit" [label]="loading ? 'Saving…' : (isEditMode ? 'Save changes' : 'Register Patient')" icon="pi pi-check" [loading]="loading" [disabled]="loading" />
+        <a [routerLink]="isEditMode ? ['/reception/patients', patientId] : ['/reception/patients']" class="no-underline"><p-button type="button" label="Cancel" icon="pi pi-times" severity="secondary" styleClass="p-button-outlined"></p-button></a>
       </div>
     </form>
   </p-card>
+  }
 </div>

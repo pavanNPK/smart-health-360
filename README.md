@@ -30,8 +30,9 @@ npm install
 npm start
 ```
 
-App runs at **http://localhost:4200**.  
-Set `apiUrl` in `frontend/src/environments/environment.ts` if the API is not on `http://localhost:3000`.
+App runs at **http://localhost:4200**. API requests are proxied to **http://localhost:3000** (ensure the backend is running).  
+To check the API: open **http://localhost:3000/health** — you should see `{"ok":true,"db":"careers"}`.  
+**GET /auth/me** requires a valid `Authorization: Bearer <token>` header; without it you get **401**. If you see **404** for `/auth/me`, the server on port 3000 is not the backend — start it with `cd backend && npm run dev`.
 
 ### 3. First login
 
@@ -64,6 +65,19 @@ MongoDB is connected to the **medical_coding** database as per your `DB_URL`. Al
 Export is role-filtered: Receptionist = VIS_A only; Doctor = VIS_A + VIS_B for assigned patients; SA = configurable (default VIS_A only; VIS_B requires override + audit). When **inspection mode** (Emergency Hide) is ON, all exports are VIS_A only.
 
 **Migration**: If you have existing patients with the old `isPrivatePatient` field, run once: `cd backend && npm run migrate:patient-visibility`.
+
+### Realtime / demo data seed
+
+To wipe existing data (except Super Admin) and create plenty of interconnected areas, clinics, doctors, receptionists, patients, and records:
+
+```bash
+cd backend && npm run seed:realtime
+```
+
+- **Keeps**: Super Admin users only.
+- **Removes**: Areas, clinics, doctors, receptionists, patients, records, reports, attendance.
+- **Creates**: 5 areas, ~14 clinics, doctors and receptionists per clinic (2–3 each), 12–30 patients per clinic, 3–8 records per patient, today’s attendance for receptionists.
+- **Seeded doctor/receptionist password**: `Password123!` (emails like `doctor.1@clinic....demo`, `receptionist.1@clinic....demo`).
 
 ---
 

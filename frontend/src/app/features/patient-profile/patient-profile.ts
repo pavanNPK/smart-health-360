@@ -12,6 +12,7 @@ import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface Patient {
   _id: string;
@@ -47,6 +48,7 @@ interface PatientRecord {
     SelectModule,
     InputTextModule,
     DialogModule,
+    TooltipModule,
   ],
   templateUrl: './patient-profile.html',
   styleUrl: './patient-profile.scss',
@@ -80,6 +82,11 @@ export class PatientProfile implements OnInit {
   canChangeVisibility = computed(() => {
     const u = this.auth.currentUserValue;
     return u?.role === 'DOCTOR' || u?.role === 'SUPER_ADMIN';
+  });
+
+  canEditPatient = computed(() => {
+    const u = this.auth.currentUserValue;
+    return u?.role === 'RECEPTIONIST' || u?.role === 'SUPER_ADMIN';
   });
 
   constructor(

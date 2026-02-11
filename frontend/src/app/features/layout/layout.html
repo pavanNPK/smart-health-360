@@ -17,6 +17,14 @@
           <i class="pi pi-th-large"></i>
           <span>Dashboard</span>
         </a>
+        <a routerLink="/doctor/patients" routerLinkActive="sidebar-link-active" [routerLinkActiveOptions]="{ exact: false }" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
+          <i class="pi pi-id-card"></i>
+          <span>Patients</span>
+        </a>
+        <a routerLink="/doctor/staff" routerLinkActive="sidebar-link-active" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
+          <i class="pi pi-users"></i>
+          <span>Staff</span>
+        </a>
       }
       @if (canAccess('RECEPTIONIST')) {
         <a routerLink="/reception/patients" routerLinkActive="sidebar-link-active" [routerLinkActiveOptions]="{ exact: false }" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
@@ -52,9 +60,33 @@
       }
     </nav>
     <div class="sidebar-footer border-top-1 surface-border px-3 py-3">
-      <div class="text-600 text-sm mb-2">{{ user?.name }}</div>
-      <div class="text-500 text-xs mb-2">{{ user?.role }}</div>
-      <p-button label="Logout" icon="pi pi-sign-out" severity="secondary" (onClick)="logout()" styleClass="w-full"></p-button>
+      <button
+        type="button"
+        class="profile-trigger w-full flex align-items-center gap-2 px-2 py-2 border-none border-round cursor-pointer surface-hover text-left"
+        (click)="profilePopover.toggle($event, $any($event.currentTarget))"
+        aria-label="Profile menu"
+      >
+        <i class="pi pi-user text-xl text-600 flex-shrink-0"></i>
+        <div class="profile-trigger-text flex flex-column flex-grow-1 min-w-0 overflow-hidden">
+          <span class="text-600 text-sm font-medium truncate">{{ user?.name }}</span>
+          <span class="text-500 text-xs truncate">{{ user?.email }}</span>
+        </div>
+        <i class="pi pi-chevron-down text-500 text-xs flex-shrink-0"></i>
+      </button>
+      <p-popover #profilePopover [dismissable]="true" styleClass="profile-popover">
+        <div class="profile-dropdown flex flex-column gap-2">
+          <div class="text-900 font-semibold">{{ user?.name }}</div>
+          <div class="text-600 text-sm">{{ user?.email }}</div>
+          <div class="text-500 text-xs">{{ user?.role }}</div>
+          @if (user?.role === 'DOCTOR' || user?.role === 'RECEPTIONIST') {
+            <div class="border-top-1 surface-border pt-2 mt-1">
+              <div class="text-500 text-xs">Area: {{ user?.clinic?.areaName || '—' }}</div>
+              <div class="text-500 text-xs">Clinic: {{ user?.clinic?.name || '—' }}</div>
+            </div>
+          }
+          <p-button label="Logout" icon="pi pi-sign-out" severity="secondary" (onClick)="logout(profilePopover)" styleClass="w-full mt-2"></p-button>
+        </div>
+      </p-popover>
     </div>
   </aside>
   <!-- Main content -->

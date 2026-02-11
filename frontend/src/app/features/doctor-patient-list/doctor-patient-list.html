@@ -1,14 +1,8 @@
 <div class="flex flex-column gap-4">
-  <div class="flex flex-wrap align-items-center justify-content-between gap-3">
-    <h1 class="m-0 text-2xl font-semibold text-900">
-      <i class="pi pi-users mr-2 page-heading-icon"></i>Patients
-    </h1>
-    @if (isReceptionist()) {
-      <a [routerLink]="['/reception/patients/new']" class="no-underline">
-        <p-button label="Register Patient" icon="pi pi-user-plus"></p-button>
-      </a>
-    }
-  </div>
+  <h1 class="m-0 text-2xl font-semibold text-900">
+    <i class="pi pi-id-card mr-2 page-heading-icon"></i>My Patients
+  </h1>
+  <p class="text-600 m-0">Your assigned patients. Filter by status (VIS_A / VIS_B).</p>
   <p-card styleClass="shadow-2 border-round-lg">
     <div class="flex flex-column gap-3">
       <div class="flex flex-wrap gap-3 align-items-end">
@@ -41,7 +35,6 @@
           />
         </div>
       </div>
-      <p class="text-600 text-sm m-0">Filter by status (VIS_A / VIS_B). Export rules apply by role.</p>
       @if (loading && !hasLoadedOnce) {
         <div class="flex align-items-center justify-content-center py-8">
           <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
@@ -50,7 +43,7 @@
         <div class="flex flex-column align-items-center justify-content-center py-8 text-600">
           <i class="pi pi-inbox text-4xl mb-2"></i>
           <p class="m-0 font-medium">No patients found.</p>
-          <p class="m-0 text-sm mt-1">Try changing filters or search, or register a patient (Receptionist only).</p>
+          <p class="m-0 text-sm mt-1">Try changing filters or search.</p>
         </div>
       } @else {
         <p-table
@@ -77,7 +70,7 @@
               <th>Visibility</th>
               <th>Registered by</th>
               <th>VIS_A / VIS_B records</th>
-              <th style="width: 10rem;">Actions</th>
+              <th style="width: 6rem;">Actions</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-row>
@@ -95,12 +88,9 @@
               <td>{{ row.createdBy?.name || '—' }}</td>
               <td>{{ row.visACount ?? 0 }} / {{ row.visBCount ?? 0 }}</td>
               <td>
-                <div class="flex gap-1 flex-wrap align-items-center">
-                  <a [routerLink]="['/reception/patients', row._id]" class="no-underline" pTooltip="View"><p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm"></p-button></a>
-                  <a [routerLink]="['/reception/patients', row._id, 'edit']" class="no-underline" pTooltip="Edit"><p-button icon="pi pi-pencil" styleClass="p-button-text p-button-sm"></p-button></a>
-                  <a [routerLink]="['/reception/patients', row._id, 'import']" class="no-underline" pTooltip="Import"><p-button icon="pi pi-upload" styleClass="p-button-text p-button-sm"></p-button></a>
-                  <p-button icon="pi pi-trash" styleClass="p-button-text p-button-sm p-button-danger" pTooltip="Delete" (onClick)="confirmDelete(row)"></p-button>
-                </div>
+                <a [routerLink]="['/doctor/patients', row._id]" class="no-underline" pTooltip="View">
+                  <p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm"></p-button>
+                </a>
               </td>
             </tr>
           </ng-template>

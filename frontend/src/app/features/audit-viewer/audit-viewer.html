@@ -25,7 +25,7 @@
             <td>{{ log.userId.name }} ({{ log.userId.email }})</td>
             <td><code class="text-sm surface-200 px-2 py-1 border-round">{{ log.details | json }}</code></td>
             <td>
-              <p-button icon="pi pi-eye" label="View" styleClass="p-button-text p-button-sm" (onClick)="viewDetails(log)"></p-button>
+              <p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm" pTooltip="View" (onClick)="viewDetails(log)"></p-button>
             </td>
           </tr>
         </ng-template>

@@ -30,45 +30,6 @@
       </div>
     </div>
   }
-  @if (clinicId && (receptionists.length > 0 || attendance.length > 0)) {
-    <p-card header="Clinic receptionists &amp; attendance" styleClass="shadow-2 border-round-lg">
-      <p-table [value]="receptionists" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '24rem' }" showGridlines>
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Today</th>
-            <th style="width: 6rem;">Actions</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-r>
-          <tr>
-            <td>{{ r.name }}</td>
-            <td>{{ r.email }}</td>
-            <td>
-              @if (getAttendanceForUser(r._id); as att) {
-                <span [class]="att.status === 'PRESENT' ? 'text-green-600' : 'text-orange-600'">
-                  <i class="pi" [class.pi-check-circle]="att.status === 'PRESENT'" [class.pi-times-circle]="att.status === 'ABSENT'"></i>
-                  {{ att.status }}
-                </span>
-                @if (att.notes) { <span class="text-500 text-sm ml-1">({{ att.notes }})</span> }
-              } @else {
-                <span class="text-500">—</span>
-              }
-            </td>
-            <td>
-              <span class="text-500 text-sm">—</span>
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="4" class="text-center py-4 text-600">No receptionists in your clinic.</td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </p-card>
-  }
   @if (loading) {
     <div class="flex align-items-center justify-content-center py-8">
       <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
@@ -83,6 +44,13 @@
                 <span class="font-semibold text-900 text-lg">{{ p.firstName }} {{ p.lastName }}</span>
                 <span class="text-600 text-sm"><i class="pi pi-calendar mr-1"></i> DOB: {{ p.dob | date : 'shortDate' }}</span>
                 <span class="text-600 text-sm"><i class="pi pi-envelope mr-1"></i> {{ p.contactEmail || '—' }}</span>
+                @if (p.createdBy) {
+                  <span class="text-600 text-sm"><i class="pi pi-user-plus mr-1"></i> Registered by: {{ p.createdBy.name }}</span>
+                }
+                <span class="text-600 text-sm">
+                  <i class="pi pi-globe mr-1"></i> VIS_A: {{ p.visACount ?? 0 }}
+                  <span class="ml-2"><i class="pi pi-lock mr-1"></i> VIS_B: {{ p.visBCount ?? 0 }}</span>
+                </span>
               </div>
               <ng-template pTemplate="footer">
                 <span class="text-primary font-medium">View profile <i class="pi pi-arrow-right ml-1"></i></span>

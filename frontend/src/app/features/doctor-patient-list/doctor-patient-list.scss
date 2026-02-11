@@ -1,0 +1,21 @@
+.patient-search-input-wrap {
+  display: block;
+  position: relative;
+  width: 100%;
+
+  i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--p-input-placeholder-color, #6b7280);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  input {
+    width: 100%;
+    padding-left: 2.25rem;
+    box-sizing: border-box;
+  }
+}

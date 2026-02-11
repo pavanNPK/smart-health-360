@@ -6,6 +6,7 @@ import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface AuditLog {
   _id: string;
@@ -19,7 +20,7 @@ interface AuditLog {
 
 @Component({
   selector: 'app-audit-viewer',
-  imports: [DatePipe, JsonPipe, CardModule, TableModule, ButtonModule, DialogModule],
+  imports: [DatePipe, JsonPipe, CardModule, TableModule, ButtonModule, DialogModule, TooltipModule],
   templateUrl: './audit-viewer.html',
   styleUrl: './audit-viewer.scss',
 })

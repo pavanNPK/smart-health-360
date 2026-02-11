@@ -18,6 +18,7 @@ const updateUserSchema = z.object({
   name: z.string().min(1).optional(),
   status: z.enum(['ACTIVE', 'INACTIVE', 'PENDING_VERIFICATION']).optional(),
   specialization: z.string().optional(),
+  clinicId: z.string().min(1).optional().nullable(),
 });
 
 export async function createUser(req: Request, res: Response): Promise<void> {
@@ -34,7 +35,12 @@ export async function createUser(req: Request, res: Response): Promise<void> {
   const email = parsed.data.email.toLowerCase();
   const sendOtp = parsed.data.sendVerificationOtp !== false;
 
-  const clinicId = parsed.data.clinicId || undefined;
+  const role = parsed.data.role;
+  const clinicId = parsed.data.clinicId?.trim() || undefined;
+  if ((role === 'DOCTOR' || role === 'RECEPTIONIST') && !clinicId) {
+    res.status(400).json({ message: 'Clinic is required for Doctor and Receptionist roles.' });
+    return;
+  }
   if (sendOtp) {
     // Create user as PENDING_VERIFICATION; no password until they verify with OTP
     const user = await User.create({
@@ -98,7 +104,11 @@ export async function updateUser(req: Request, res: Response): Promise<void> {
     res.status(400).json({ message: 'Invalid input' });
     return;
   }
-  const user = await User.findByIdAndUpdate(req.params.id, { $set: parsed.data }, { new: true }).select('-passwordHash');
+  const update: Record<string, unknown> = { ...parsed.data };
+  if ('clinicId' in parsed.data) {
+    update.clinicId = parsed.data.clinicId === null || parsed.data.clinicId === '' ? null : parsed.data.clinicId;
+  }
+  const user = await User.findByIdAndUpdate(req.params.id, { $set: update }, { new: true }).select('-passwordHash');
   if (!user) {
     res.status(404).json({ message: 'User not found' });
     return;

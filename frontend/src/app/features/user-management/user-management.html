@@ -39,7 +39,7 @@
             <td>
               <div class="flex gap-1 align-items-center">
                 @if (u.status === 'PENDING_VERIFICATION') {
-                  <p-button label="Resend OTP" icon="pi pi-envelope" styleClass="p-button-text p-button-sm" (onClick)="resendOtp(u.email)"></p-button>
+                  <p-button icon="pi pi-envelope" styleClass="p-button-text p-button-sm" pTooltip="Resend OTP" (onClick)="resendOtp(u.email)"></p-button>
                 }
                 <p-button icon="pi pi-trash" styleClass="p-button-text p-button-sm p-button-danger" (onClick)="confirmDelete(u)" pTooltip="Delete"></p-button>
               </div>

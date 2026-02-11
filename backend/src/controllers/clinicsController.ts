@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { Clinic } from '../models/Clinic';
 import { User } from '../models/User';
+import { Patient } from '../models/Patient';
 import { AuthUser } from '../middleware/auth';
 
 const createClinicSchema = z.object({
@@ -72,6 +73,32 @@ export async function getClinicReceptionists(req: Request, res: Response): Promi
   }
   const receptionists = await User.find({ role: 'RECEPTIONIST', clinicId }).select('-passwordHash').populate('clinicId', 'name').lean();
   res.json({ data: receptionists });
+}
+
+export async function getClinicReceptionistsWithStats(req: Request, res: Response): Promise<void> {
+  const user = req.user! as AuthUser;
+  const clinicId = req.params.id;
+  if (user.role !== 'SUPER_ADMIN' && user.clinicId !== clinicId) {
+    res.status(403).json({ message: 'Forbidden' });
+    return;
+  }
+  const receptionists = await User.find({ role: 'RECEPTIONIST', clinicId }).select('-passwordHash').select('name email').lean();
+  const recIds = receptionists.map((r) => r._id);
+  const patientCounts = await Patient.aggregate([
+    { $match: { createdBy: { $in: recIds } } },
+    { $group: { _id: '$createdBy', patientCount: { $sum: 1 } } },
+  ]).exec();
+  const countMap: Record<string, number> = {};
+  patientCounts.forEach((r: { _id: { toString: () => string }; patientCount: number }) => {
+    countMap[r._id.toString()] = r.patientCount;
+  });
+  const data = receptionists.map((r) => ({
+    _id: r._id,
+    name: r.name,
+    email: r.email,
+    patientCount: countMap[(r._id as { toString: () => string }).toString()] ?? 0,
+  }));
+  res.json({ data });
 }
 
 export async function deleteClinic(req: Request, res: Response): Promise<void> {

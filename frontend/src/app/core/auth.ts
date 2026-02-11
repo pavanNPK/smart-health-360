@@ -12,6 +12,7 @@ export interface User {
   email: string;
   role: UserRole;
   clinicId?: string;
+  clinic?: { id: string; name: string; areaName: string };
 }
 
 export interface LoginResponse {
@@ -86,6 +87,22 @@ export class Auth {
       .post<{ accessToken: string }>(`${environment.apiUrl}/auth/refresh`, { refreshToken: refresh })
       .pipe(
         tap((res) => sessionStorage.setItem('accessToken', res.accessToken))
+      );
+  }
+
+  /** Refresh current user from API (e.g. to get clinicId for doctor/receptionist). */
+  refreshUser() {
+    const token = this.accessToken;
+    if (!token) return EMPTY;
+    return this.http
+      .get<User>(`${environment.apiUrl}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .pipe(
+        tap((user) => {
+          sessionStorage.setItem('user', JSON.stringify(user));
+          this.currentUserSubject.next(user);
+        })
       );
   }
 }

@@ -4,10 +4,11 @@ import { Auth } from '../../core/auth';
 import type { User, UserRole } from '../../core/auth';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
+import { PopoverModule } from 'primeng/popover';
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, ButtonModule],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, ButtonModule, PopoverModule],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
 })
@@ -24,6 +25,10 @@ export class Layout implements OnInit {
   }
 
   ngOnInit(): void {
+    // Refresh user from API so doctor/receptionist have clinicId (Staff, patient form doctors dropdown)
+    if (this.auth.isLoggedIn()) {
+      this.auth.refreshUser().subscribe({ error: () => {} });
+    }
     const url = this.router.url;
     if (url === '/' || url === '') {
       const u = this.auth.currentUserValue;
@@ -33,7 +38,8 @@ export class Layout implements OnInit {
     }
   }
 
-  logout(): void {
+  logout(profilePopover?: { hide(): void }): void {
+    profilePopover?.hide();
     this.messageService.add({ severity: 'info', summary: 'Signed out', detail: 'You have been logged out.' });
     this.auth.logout();
   }

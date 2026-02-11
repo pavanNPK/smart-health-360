@@ -8,6 +8,7 @@ router.use(authMiddleware);
 router.get('/', clinicsController.listClinics);
 router.get('/:id/doctors', clinicsController.getClinicDoctors);
 router.get('/:id/receptionists', clinicsController.getClinicReceptionists);
+router.get('/:id/receptionists-with-stats', clinicsController.getClinicReceptionistsWithStats);
 // create: SA only
 router.post('/', roleGuard('SUPER_ADMIN'), clinicsController.createClinic);
 router.patch('/:id', roleGuard('SUPER_ADMIN'), clinicsController.updateClinic);

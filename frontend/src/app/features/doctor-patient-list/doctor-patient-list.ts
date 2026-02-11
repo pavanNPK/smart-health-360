@@ -1,10 +1,9 @@
-import { Component, OnInit, computed } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { Api } from '../../core/api';
-import { Auth } from '../../core/auth';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { TableModule, type TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -26,7 +25,7 @@ interface Patient {
 }
 
 @Component({
-  selector: 'app-patient-list',
+  selector: 'app-doctor-patient-list',
   imports: [
     RouterLink,
     FormsModule,
@@ -38,10 +37,10 @@ interface Patient {
     SelectModule,
     TooltipModule,
   ],
-  templateUrl: './patient-list.html',
-  styleUrl: './patient-list.scss',
+  templateUrl: './doctor-patient-list.html',
+  styleUrl: './doctor-patient-list.scss',
 })
-export class PatientList implements OnInit {
+export class DoctorPatientList implements OnInit {
   patients: Patient[] = [];
   total = 0;
   totalRecords = 0;
@@ -60,15 +59,11 @@ export class PatientList implements OnInit {
     { label: 'VIS_B', value: 'VIS_B' },
   ];
 
-  isReceptionist = computed(() => this.auth.currentUserValue?.role === 'RECEPTIONIST');
-
   private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private api: Api,
-    private auth: Auth,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -84,7 +79,11 @@ export class PatientList implements OnInit {
 
   load(): void {
     this.loading = true;
-    const params: Record<string, string | number | boolean> = { page: this.page, limit: this.limit };
+    const params: Record<string, string | number | boolean> = {
+      assignedTo: 'me',
+      page: this.page,
+      limit: this.limit,
+    };
     if (this.search.trim()) params['search'] = this.search.trim();
     if (this.visibilityFilter !== 'all') params['visibility'] = this.visibilityFilter;
     this.api.get<{ data: Patient[]; total: number }>('/patients', params).subscribe({
@@ -125,31 +124,5 @@ export class PatientList implements OnInit {
     this.first = 0;
     this.page = 1;
     this.load();
-  }
-
-  confirmDelete(row: Patient): void {
-    this.confirmationService.confirm({
-      message: `Delete patient ${row.firstName} ${row.lastName}? This cannot be undone.`,
-      header: 'Delete Patient',
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonStyleClass: 'p-button-danger',
-      accept: () => this.deletePatient(row._id),
-    });
-  }
-
-  deletePatient(id: string): void {
-    this.api.delete(`/patients/${id}`).subscribe({
-      next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Patient deleted' });
-        this.load();
-      },
-      error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Delete failed',
-          detail: err.error?.message || 'Failed to delete patient.',
-        });
-      },
-    });
   }
 }
