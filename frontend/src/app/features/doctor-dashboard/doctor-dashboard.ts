@@ -18,8 +18,8 @@ interface Patient {
 
 interface Stats {
   total: number;
-  publicCount: number;
-  privateCount: number;
+  visACount: number;
+  visBCount: number;
 }
 
 interface ReceptionistUser {

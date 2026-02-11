@@ -4,7 +4,7 @@ import * as patientsController from '../controllers/patientsController';
 
 const router = Router();
 router.use(authMiddleware);
-router.post('/', roleGuard('RECEPTIONIST', 'SUPER_ADMIN'), patientsController.createPatient);
+router.post('/', roleGuard('RECEPTIONIST'), patientsController.createPatient);
 router.get('/', patientsController.listPatients);
 router.get('/stats', patientsController.patientStats);
 router.get('/:id', patientsController.getPatient);

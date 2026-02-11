@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.page-heading-icon {
+  vertical-align: middle;
+}
+
+.quick-links-card {
+  padding: 1rem;
+  border-radius: 8px;
+
+  ::ng-deep .p-card-title {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+}
+
+.quick-links-content {
+  padding: 1rem 0;
+  border-radius: 8px;
+}

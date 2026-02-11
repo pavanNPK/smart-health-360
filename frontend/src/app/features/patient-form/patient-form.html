@@ -40,9 +40,13 @@
         <label for="address" class="font-medium text-900">Address</label>
         <input id="address" pInputText type="text" [(ngModel)]="address" name="address" class="w-full" />
       </div>
-      <div class="flex align-items-center gap-2">
-        <p-checkbox [(ngModel)]="isPrivatePatient" name="isPrivatePatient" [binary]="true" inputId="private" />
-        <label for="private" class="font-medium text-900 cursor-pointer">Private patient (restrict visibility)</label>
+      <div class="flex flex-column gap-2">
+        <label for="doctor" class="font-medium text-900">Assign doctor *</label>
+        <p-select id="doctor" [(ngModel)]="primaryDoctorId" name="primaryDoctorId" [options]="doctors" optionLabel="name" optionValue="_id" placeholder="Select doctor" styleClass="w-full" required />
+      </div>
+      <div class="flex flex-column gap-2">
+        <label class="font-medium text-900">Default record visibility</label>
+        <p-select [(ngModel)]="patientVisibility" name="patientVisibility" [options]="visibilityOptions" optionLabel="label" optionValue="value" styleClass="w-full" placeholder="VIS_A" />
       </div>
       @if (error) {
         <p-message severity="error" [text]="error" styleClass="w-full"></p-message>

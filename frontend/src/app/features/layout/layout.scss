@@ -1,14 +1,17 @@
 .layout-wrapper {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .sidebar {
   width: 16rem;
   min-width: 16rem;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .sidebar-header {
@@ -16,7 +19,9 @@
 }
 
 .sidebar-nav {
+  flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .sidebar-group {
@@ -63,5 +68,8 @@
 }
 
 .layout-main {
+  flex: 1;
   min-width: 0;
+  min-height: 0;
+  overflow: auto;
 }

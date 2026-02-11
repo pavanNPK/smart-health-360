@@ -4,7 +4,8 @@ import { Patient } from '../models/Patient';
 import { Record } from '../models/Record';
 import { Report } from '../models/Report';
 import { AuthUser } from '../middleware/auth';
-import { canViewPatient, canExportPrivate, canViewRecord } from '../services/permissions';
+import { canViewPatient, canExportVisB, canViewRecord } from '../services/permissions';
+import { getInspectionMode } from '../services/inspectionMode';
 import { logAudit } from '../services/audit';
 import { sendExportAuditEmail } from '../services/mail';
 import { User } from '../models/User';
@@ -32,9 +33,10 @@ export async function exportRecords(req: Request, res: Response): Promise<void> 
   const fromDate = parsed.success && parsed.data.fromDate ? new Date(parsed.data.fromDate) : undefined;
   const toDate = parsed.success && parsed.data.toDate ? new Date(parsed.data.toDate) : undefined;
   const types = parsed.success ? parsed.data.types : undefined;
-  const includePrivate = canExportPrivate(patient, user);
+  const inspectionModeOn = await getInspectionMode();
+  const includeVisB = !inspectionModeOn && canExportVisB(patient, user);
   const recordFilter: Record<string, unknown> = { patientId: patient._id };
-  if (!includePrivate) recordFilter.visibility = 'PUBLIC';
+  if (!includeVisB) recordFilter.visibility = 'VIS_A';
   const dateCond: Record<string, Date> = {};
   if (fromDate) dateCond.$gte = fromDate;
   if (toDate) dateCond.$lte = toDate;
@@ -43,10 +45,11 @@ export async function exportRecords(req: Request, res: Response): Promise<void> 
   let records = await Record.find(recordFilter).populate('createdBy', 'name').sort({ createdAt: -1 }).lean();
   records = records.filter((r) => canViewRecord(r as any, patient, user));
   const reportFilter: Record<string, unknown> = { patientId: patient._id };
-  if (!includePrivate) reportFilter.visibility = 'PUBLIC';
+  if (!includeVisB) reportFilter.visibility = 'VIS_A';
+  if (inspectionModeOn) reportFilter._vaulted = { $ne: true };
   let reports = await Report.find(reportFilter).lean();
   reports = reports.filter((r) => {
-    if (r.visibility === 'PUBLIC') return true;
+    if (r.visibility === 'VIS_A') return true;
     if (user.role === 'RECEPTIONIST') return false;
     if (user.role === 'DOCTOR') return patient.primaryDoctorId?.toString() === user.id;
     return true;
@@ -54,7 +57,7 @@ export async function exportRecords(req: Request, res: Response): Promise<void> 
   const recordCount = records.length;
   await logAudit('EXPORT_RECORDS', user.id, {
     patientId: patient._id.toString(),
-    details: { recordCount, format: parsed.success ? parsed.data.format : 'PDF', includePrivate },
+    details: { recordCount, format: parsed.success ? parsed.data.format : 'PDF', includeVisB, inspectionModeOn },
   });
   const saUsers = await User.find({ role: 'SUPER_ADMIN' }).select('email').limit(1).lean();
   if (saUsers[0]?.email) {

@@ -4,6 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "check:forbidden": "node ../scripts/check-forbidden-words.js",
+    "prebuild": "node ../scripts/check-forbidden-words.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"

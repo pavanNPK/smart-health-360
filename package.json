@@ -1,0 +1,8 @@
+{
+  "name": "smart-health-360",
+  "version": "1.0.0",
+  "description": "Clinical hospital management – Angular + Node + MongoDB",
+  "scripts": {
+    "check:forbidden": "node scripts/check-forbidden-words.js"
+  }
+}

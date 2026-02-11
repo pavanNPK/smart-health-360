@@ -35,6 +35,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['SUPER_ADMIN'] },
         children: [
+          { path: 'dashboard', loadComponent: () => import('./features/admin-dashboard/admin-dashboard').then((m) => m.AdminDashboard) },
           { path: 'users', loadComponent: () => import('./features/user-management/user-management').then((m) => m.UserManagement) },
           { path: 'areas', loadComponent: () => import('./features/admin-areas/admin-areas').then((m) => m.AdminAreas) },
           { path: 'clinics', loadComponent: () => import('./features/admin-clinics/admin-clinics').then((m) => m.AdminClinics) },

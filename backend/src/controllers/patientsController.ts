@@ -14,7 +14,8 @@ const createPatientSchema = z.object({
   contactPhone: z.string().optional(),
   address: z.string().optional(),
   nationalId: z.string().optional(),
-  isPrivatePatient: z.boolean().optional().default(false),
+  patientVisibility: z.enum(['VIS_A', 'VIS_B']).optional().default('VIS_A'),
+  primaryDoctorId: z.string().min(1), // required: receptionist must assign doctor at creation
 });
 
 const assignDoctorSchema = z.object({
@@ -32,6 +33,7 @@ export async function createPatient(req: Request, res: Response): Promise<void> 
   const patient = await Patient.create({
     ...data,
     dob: new Date(data.dob),
+    primaryDoctorId: parsed.data.primaryDoctorId,
     createdBy: user.id,
   });
   if (patient.contactEmail) {
@@ -43,7 +45,7 @@ export async function createPatient(req: Request, res: Response): Promise<void> 
 export async function listPatients(req: Request, res: Response): Promise<void> {
   const user = req.user! as AuthUser;
   const assignedTo = req.query.assignedTo as string | undefined;
-  const visibilityFilter = req.query.visibility as string | undefined; // 'public' | 'private' | omit = all
+  const visibilityFilter = req.query.visibility as string | undefined; // 'VIS_A' | 'VIS_B' | omit = all
   const search = (req.query.search as string)?.trim();
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
@@ -52,8 +54,8 @@ export async function listPatients(req: Request, res: Response): Promise<void> {
   if (user.role === 'DOCTOR' && assignedTo === 'me') {
     filter.primaryDoctorId = user.id;
   }
-  if (visibilityFilter === 'public') filter.isPrivatePatient = false;
-  else if (visibilityFilter === 'private') filter.isPrivatePatient = true;
+  if (visibilityFilter === 'VIS_A') filter.patientVisibility = 'VIS_A';
+  else if (visibilityFilter === 'VIS_B') filter.patientVisibility = 'VIS_B';
   if (search) {
     filter.$or = [
       { firstName: new RegExp(search, 'i') },
@@ -78,12 +80,12 @@ export async function patientStats(req: Request, res: Response): Promise<void> {
     res.status(403).json({ message: 'Forbidden' });
     return;
   }
-  const [total, publicCount, privateCount] = await Promise.all([
+  const [total, visACount, visBCount] = await Promise.all([
     Patient.countDocuments(filter),
-    Patient.countDocuments({ ...filter, isPrivatePatient: false }),
-    Patient.countDocuments({ ...filter, isPrivatePatient: true }),
+    Patient.countDocuments({ ...filter, patientVisibility: 'VIS_A' }),
+    Patient.countDocuments({ ...filter, patientVisibility: 'VIS_B' }),
   ]);
-  res.json({ total, publicCount, privateCount });
+  res.json({ total, visACount, visBCount });
 }
 
 export async function getPatient(req: Request, res: Response): Promise<void> {

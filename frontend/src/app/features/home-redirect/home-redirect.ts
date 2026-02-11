@@ -14,7 +14,7 @@ export class HomeRedirect implements OnInit {
 
   ngOnInit(): void {
     const user = this.auth.currentUserValue;
-    if (user?.role === 'SUPER_ADMIN') this.router.navigate(['/admin/users']);
+    if (user?.role === 'SUPER_ADMIN') this.router.navigate(['/admin/dashboard']);
     else if (user?.role === 'DOCTOR') this.router.navigate(['/doctor/dashboard']);
     else this.router.navigate(['/reception/patients']);
   }

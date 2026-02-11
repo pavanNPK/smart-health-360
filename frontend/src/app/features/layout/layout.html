@@ -6,7 +6,13 @@
       <a routerLink="/" class="no-underline font-semibold text-xl text-900">Smart Health 360</a>
     </div>
     <nav class="sidebar-nav flex flex-column flex-grow-1 py-2">
-      @if (canAccess('DOCTOR')) {
+      @if (user?.role === 'SUPER_ADMIN') {
+        <a routerLink="/admin/dashboard" routerLinkActive="sidebar-link-active" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
+          <i class="pi pi-th-large"></i>
+          <span>Dashboard</span>
+        </a>
+      }
+      @if (user?.role === 'DOCTOR') {
         <a routerLink="/doctor/dashboard" routerLinkActive="sidebar-link-active" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
           <i class="pi pi-th-large"></i>
           <span>Dashboard</span>

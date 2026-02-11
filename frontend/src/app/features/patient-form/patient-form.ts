@@ -1,14 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
+import { Auth } from '../../core/auth';
 import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { CheckboxModule } from 'primeng/checkbox';
 import { MessageModule } from 'primeng/message';
+
+interface Doctor {
+  _id: string;
+  name: string;
+  email?: string;
+}
 
 @Component({
   selector: 'app-patient-form',
@@ -19,13 +25,12 @@ import { MessageModule } from 'primeng/message';
     ButtonModule,
     InputTextModule,
     SelectModule,
-    CheckboxModule,
     MessageModule,
   ],
   templateUrl: './patient-form.html',
   styleUrl: './patient-form.scss',
 })
-export class PatientForm {
+export class PatientForm implements OnInit {
   firstName = '';
   lastName = '';
   dob = '';
@@ -33,9 +38,16 @@ export class PatientForm {
   contactEmail = '';
   contactPhone = '';
   address = '';
-  isPrivatePatient = false;
+  patientVisibility: 'VIS_A' | 'VIS_B' = 'VIS_A';
+  primaryDoctorId = '';
+  doctors: Doctor[] = [];
   error = '';
   loading = false;
+
+  visibilityOptions = [
+    { label: 'VIS_A', value: 'VIS_A' },
+    { label: 'VIS_B', value: 'VIS_B' },
+  ];
 
   genderOptions = [
     { label: '—', value: '' },
@@ -46,9 +58,19 @@ export class PatientForm {
 
   constructor(
     private api: Api,
+    private auth: Auth,
     private router: Router,
     private messageService: MessageService
   ) {}
+
+  ngOnInit(): void {
+    const clinicId = this.auth.currentUserValue?.clinicId;
+    if (clinicId) {
+      this.api.get<{ data: Doctor[] }>(`/clinics/${clinicId}/doctors`).subscribe({
+        next: (res) => (this.doctors = res.data),
+      });
+    }
+  }
 
   onSubmit(): void {
     this.error = '';
@@ -62,7 +84,8 @@ export class PatientForm {
         contactEmail: this.contactEmail || undefined,
         contactPhone: this.contactPhone || undefined,
         address: this.address || undefined,
-        isPrivatePatient: this.isPrivatePatient,
+        patientVisibility: this.patientVisibility,
+        primaryDoctorId: this.primaryDoctorId,
       })
       .subscribe({
         next: (res) => {

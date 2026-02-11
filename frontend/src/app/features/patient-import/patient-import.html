@@ -1,11 +1,11 @@
 <div class="flex flex-column gap-4">
   <div class="flex align-items-center gap-2">
-    <a [routerLink]="['/reception/patients', patientId]" class="flex align-items-center gap-1 text-primary no-underline font-medium">
+    <a [routerLink]="['/reception/patients', patientId]" class="back-link flex align-items-center gap-1 no-underline font-medium">
       <i class="pi pi-arrow-left"></i> Back to patient
     </a>
   </div>
-  <p-card header="Import Records" styleClass="shadow-2 border-round-lg">
-    <p class="text-600 m-0 mb-3">Paste a JSON array of record objects. Each item: type, visibility (PUBLIC/PRIVATE), title, disease, notes, etc.</p>
+  <p-card header="Import Records" styleClass="shadow-2 border-round-lg card-header-plain">
+    <p class="text-600 m-0 mb-3">Paste a JSON array of record objects. Each item: type, visibility (VIS_A/VIS_B), title, disease, notes, etc.</p>
     <form (ngSubmit)="submit()" class="flex flex-column gap-3">
       <div class="flex flex-column gap-2">
         <label for="json" class="font-medium text-900">JSON array</label>
@@ -15,7 +15,7 @@
           [(ngModel)]="itemsJson"
           name="itemsJson"
           rows="12"
-          placeholder='[{"type":"diagnosis","visibility":"PUBLIC","disease":"Hypertension","notes":"Imported"}]'
+          placeholder='[{"type":"diagnosis","visibility":"VIS_A","disease":"Hypertension","notes":"Imported"}]'
           class="w-full font-mono text-sm"
         ></textarea>
       </div>
@@ -38,7 +38,7 @@
           }
         </div>
       }
-      <p-button type="submit" [label]="loading ? 'Importing…' : 'Import'" icon="pi pi-upload" [loading]="loading" [disabled]="loading"></p-button>
+      <p-button type="submit" [label]="loading ? 'Importing…' : 'Import'" icon="pi pi-upload" styleClass="p-button-outlined" [loading]="loading" [disabled]="loading"></p-button>
     </form>
   </p-card>
 </div>

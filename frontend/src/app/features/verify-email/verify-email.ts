@@ -76,7 +76,7 @@ export class VerifyEmail implements OnInit {
           this.auth.setSession(res.accessToken, res.refreshToken, res.user);
           this.messageService.add({ severity: 'success', summary: 'Password set', detail: 'Redirecting…' });
           const user = res.user;
-          if (user.role === 'SUPER_ADMIN') this.router.navigate(['/admin/users']);
+          if (user.role === 'SUPER_ADMIN') this.router.navigate(['/admin/dashboard']);
           else if (user.role === 'DOCTOR') this.router.navigate(['/doctor/dashboard']);
           else this.router.navigate(['/reception/patients']);
         },

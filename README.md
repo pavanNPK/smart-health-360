@@ -1,6 +1,6 @@
-# Smart Health 360 – Clinical Hospital (Private/Public Records)
+# Smart Health 360 – Clinical Hospital (VIS_A / VIS_B Records)
 
-Clinical hospital system with strict patient record privacy: **Angular 20** frontend, **Node.js + Express + TypeScript** API, **MongoDB** (database: **careers**), and **Nodemailer** for email.
+Clinical hospital system with role-based record visibility (VIS_A / VIS_B): **Angular 20** frontend, **Node.js + Express + TypeScript** API, **MongoDB** (database: **medical_coding**), and **Nodemailer** for email.
 
 ## Quick start
 
@@ -39,13 +39,13 @@ Set `apiUrl` in `frontend/src/environments/environment.ts` if the API is not on 
 2. In **Admin → Users**, create a **Receptionist** and a **Doctor**.
 3. In **Patients**, register a patient (Receptionist).
 4. In **Admin → Users** (or a future “Assign doctor” flow), assign the doctor to the patient (PATCH `/patients/:id/assign-doctor` with `doctorId`).
-5. Log in as Doctor to see **Dashboard → My Patients** and open a patient to view **Public** / **Private** records.
+5. Log in as Doctor to see **Dashboard → My Patients** and open a patient to view records (single table with Status VIS_A / VIS_B).
 
 ## Flow summary
 
-- **Receptionist**: Register patients, view patient list, view patient profile (public records only), import records.
-- **Doctor**: Dashboard (assigned patients), patient profile with **Public** and **Private** tabs, create records, export (public + own private).
-- **Super Admin**: User management, assign primary doctor, audit logs, full access.
+- **Receptionist**: Create patients (must assign doctor), view patient list and profile (VIS_A + VIS_B in-app), import records with VIS_A/VIS_B tag; export is **VIS_A only**.
+- **Doctor**: Dashboard (assigned patients), patient profile single table (Status VIS_A/VIS_B), create/update records, change status VIS_A ↔ VIS_B (reason + audit), export VIS_A + VIS_B for assigned patients.
+- **Super Admin**: User management, assign doctor, audit logs, emergency hide/restore VIS_B; cannot create patients.
 
 MongoDB is connected to the **medical_coding** database as per your `DB_URL`. All collections (users, patients, records, reports, audit_logs, imports) are created in that database.
 
@@ -54,13 +54,16 @@ MongoDB is connected to the **medical_coding** database as per your `DB_URL`. Al
 - **Auth**: `POST /auth/login`, `POST /auth/refresh`, `POST /auth/send-otp`, `POST /auth/verify-otp`
 - **Users** (SA): `POST /users`, `GET /users`, `PATCH /users/:id`
 - **Patients**: `POST /patients`, `GET /patients`, `GET /patients/:id`, `PATCH /patients/:id/assign-doctor`
-- **Records**: `POST /patients/:id/records`, `GET /patients/:id/records?visibility=PUBLIC|PRIVATE`, `PATCH /records/:recordId/visibility`
+- **Records**: `POST /patients/:id/records`, `GET /patients/:id/records?status=VIS_A|VIS_B|all&type=...&fromDate=...&toDate=...`, `PATCH /records/:recordId/visibility`
+- **Emergency Hide** (SA only): `POST /admin/emergency-hide` (body: `{ reason }`), `POST /admin/emergency-restore`, `GET /admin/inspection-mode`
 - **Reports**: `POST /patients/:id/reports` (multipart), `GET /patients/:id/reports`
 - **Import**: `POST /patients/:id/import`
 - **Export**: `POST /patients/:id/export`
 - **Audit** (SA): `GET /audit`
 
-Export and record visibility respect role-based and record-level permissions; private records are only included for the assigned doctor (and SA).
+Export is role-filtered: Receptionist = VIS_A only; Doctor = VIS_A + VIS_B for assigned patients; SA = configurable (default VIS_A only; VIS_B requires override + audit). When **inspection mode** (Emergency Hide) is ON, all exports are VIS_A only.
+
+**Migration**: If you have existing patients with the old `isPrivatePatient` field, run once: `cd backend && npm run migrate:patient-visibility`.
 
 ---
 

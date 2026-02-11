@@ -1,0 +1,95 @@
+<div class="flex flex-column gap-4">
+  <h1 class="m-0 text-2xl font-semibold text-900">
+    <i class="pi pi-th-large mr-2 page-heading-icon"></i>Admin Dashboard
+  </h1>
+  <p class="text-600 m-0">Overview of users, clinics, reports, and patients. Use the links below for the full flow.</p>
+
+  @if (loading) {
+    <div class="flex align-items-center justify-content-center py-8">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+    </div>
+  } @else if (error) {
+    <p-card styleClass="shadow-2 border-round-lg">
+      <p class="text-red-600 m-0">{{ error }}</p>
+    </p-card>
+  } @else if (stats) {
+    <div class="grid">
+      <div class="col-12 sm:col-6 lg:col-4">
+        <a routerLink="/admin/users" class="no-underline block">
+          <p-card styleClass="shadow-2 border-round-lg hover:shadow-4 transition-duration-200 cursor-pointer h-full">
+            <div class="flex flex-column gap-2">
+              <span class="text-600 text-sm"><i class="pi pi-user-plus mr-1"></i> Doctors</span>
+              <span class="text-3xl font-bold text-900">{{ stats.doctors }}</span>
+              <span class="text-500 text-xs">Manage users →</span>
+            </div>
+          </p-card>
+        </a>
+      </div>
+      <div class="col-12 sm:col-6 lg:col-4">
+        <a routerLink="/admin/users" class="no-underline block">
+          <p-card styleClass="shadow-2 border-round-lg hover:shadow-4 transition-duration-200 cursor-pointer h-full">
+            <div class="flex flex-column gap-2">
+              <span class="text-600 text-sm"><i class="pi pi-users mr-1"></i> Receptionists</span>
+              <span class="text-3xl font-bold text-900">{{ stats.receptionists }}</span>
+              <span class="text-500 text-xs">Manage users →</span>
+            </div>
+          </p-card>
+        </a>
+      </div>
+      <div class="col-12 sm:col-6 lg:col-4">
+        <a routerLink="/admin/clinics" class="no-underline block">
+          <p-card styleClass="shadow-2 border-round-lg hover:shadow-4 transition-duration-200 cursor-pointer h-full">
+            <div class="flex flex-column gap-2">
+              <span class="text-600 text-sm"><i class="pi pi-building mr-1"></i> Clinics linked</span>
+              <span class="text-3xl font-bold text-900">{{ stats.clinics }}</span>
+              <span class="text-500 text-xs">Manage clinics →</span>
+            </div>
+          </p-card>
+        </a>
+      </div>
+      <div class="col-12 sm:col-6 lg:col-4">
+        <p-card styleClass="shadow-2 border-round-lg">
+          <div class="flex flex-column gap-2">
+            <span class="text-600 text-sm"><i class="pi pi-file mr-1"></i> Reports</span>
+            <span class="text-3xl font-bold text-900">{{ stats.reports }}</span>
+            <span class="text-500 text-xs">Total report uploads</span>
+          </div>
+        </p-card>
+      </div>
+      <div class="col-12 sm:col-6 lg:col-4">
+        <a routerLink="/reception/patients" class="no-underline block">
+          <p-card styleClass="shadow-2 border-round-lg hover:shadow-4 transition-duration-200 cursor-pointer h-full">
+            <div class="flex flex-column gap-2">
+              <span class="text-600 text-sm"><i class="pi pi-id-card mr-1"></i> Patients</span>
+              <span class="text-3xl font-bold text-900">{{ stats.patients }}</span>
+              <span class="text-500 text-xs">View patient list →</span>
+            </div>
+          </p-card>
+        </a>
+      </div>
+    </div>
+
+    <p-card header="Quick links" styleClass="shadow-2 border-round-lg mt-2 quick-links-card">
+      <div class="flex flex-wrap gap-2 quick-links-content">
+        <a routerLink="/admin/users" class="no-underline">
+          <p-button label="Users" icon="pi pi-id-card" styleClass="p-button-outlined"></p-button>
+        </a>
+        <a routerLink="/admin/areas" class="no-underline">
+          <p-button label="Areas" icon="pi pi-map" styleClass="p-button-outlined"></p-button>
+        </a>
+        <a routerLink="/admin/clinics" class="no-underline">
+          <p-button label="Clinics" icon="pi pi-building" styleClass="p-button-outlined"></p-button>
+        </a>
+        <a routerLink="/admin/hierarchy" class="no-underline">
+          <p-button label="Hierarchy" icon="pi pi-sitemap" styleClass="p-button-outlined"></p-button>
+        </a>
+        <a routerLink="/reception/patients" class="no-underline">
+          <p-button label="Patients" icon="pi pi-users" styleClass="p-button-outlined"></p-button>
+        </a>
+        <a routerLink="/audit" class="no-underline">
+          <p-button label="Audit" icon="pi pi-history" styleClass="p-button-outlined"></p-button>
+        </a>
+      </div>
+    </p-card>
+  }
+</div>

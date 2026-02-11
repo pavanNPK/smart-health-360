@@ -3,35 +3,54 @@
     <h1 class="m-0 text-2xl font-semibold text-900">
       <i class="pi pi-users mr-2 page-heading-icon"></i>Patients
     </h1>
-    <a [routerLink]="['/reception/patients/new']" class="no-underline">
-      <p-button label="Register Patient" icon="pi pi-user-plus"></p-button>
-    </a>
+    @if (isReceptionist()) {
+      <a [routerLink]="['/reception/patients/new']" class="no-underline">
+        <p-button label="Register Patient" icon="pi pi-user-plus"></p-button>
+      </a>
+    }
   </div>
   <p-card styleClass="shadow-2 border-round-lg">
     <div class="flex flex-column gap-3">
-      <div class="flex flex-wrap gap-2 align-items-center">
-        <span class="p-input-icon-left flex-grow-1" style="min-width: 16rem;">
-          <i class="pi pi-search"></i>
-          <input
-            pInputText
-            type="search"
-            placeholder="Search by name or email"
-            [(ngModel)]="search"
-            (keyup.enter)="onSearch()"
-            class="w-full"
-          />
-        </span>
-        <div class="flex gap-1">
-          <p-button label="All" [outlined]="visibilityFilter !== 'all'" severity="secondary" (onClick)="visibilityFilter = 'all'; onVisibilityChange()"></p-button>
-          <p-button label="Public" [outlined]="visibilityFilter !== 'public'" severity="secondary" icon="pi pi-globe" (onClick)="visibilityFilter = 'public'; onVisibilityChange()"></p-button>
-          <p-button label="Private" [outlined]="visibilityFilter !== 'private'" severity="secondary" icon="pi pi-lock" (onClick)="visibilityFilter = 'private'; onVisibilityChange()"></p-button>
+      <div class="flex flex-wrap gap-3 align-items-end">
+        <div class="flex flex-column gap-2 patient-search-wrap" style="min-width: 16rem; max-width: 22rem;">
+          <label for="patient-search" class="font-medium text-900">Search</label>
+          <div class="p-input-icon-left patient-search-input-wrap">
+            <i class="pi pi-search"></i>
+            <input
+              id="patient-search"
+              pInputText
+              type="text"
+              placeholder="Search by name or email"
+              [(ngModel)]="search"
+              (input)="onSearchInput()"
+              class="w-full"
+            />
+          </div>
         </div>
-        <p-button label="Search" icon="pi pi-search" (onClick)="onSearch()"></p-button>
+        <div class="flex flex-column gap-2" style="min-width: 10rem;">
+          <label for="patient-status" class="font-medium text-900">Status</label>
+          <p-select
+            id="patient-status"
+            [(ngModel)]="visibilityFilter"
+            [options]="statusOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="All"
+            styleClass="w-full"
+            (onChange)="onVisibilityFilterChange()"
+          />
+        </div>
       </div>
-      <p class="text-600 text-sm m-0">Segregate by visibility for exports: private patients are excluded from exports when not permitted.</p>
-      @if (loading) {
-        <div class="flex align-items-center justify-content-center py-6">
+      <p class="text-600 text-sm m-0">Filter by status (VIS_A / VIS_B). Export rules apply by role.</p>
+      @if (loading && !hasLoadedOnce) {
+        <div class="flex align-items-center justify-content-center py-8">
           <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+        </div>
+      } @else if (hasLoadedOnce && total === 0) {
+        <div class="flex flex-column align-items-center justify-content-center py-8 text-600">
+          <i class="pi pi-inbox text-4xl mb-2"></i>
+          <p class="m-0 font-medium">No patients found.</p>
+          <p class="m-0 text-sm mt-1">Try changing filters or search, or register a patient (Receptionist only).</p>
         </div>
       } @else {
         <p-table
@@ -66,11 +85,10 @@
               <td>{{ row.contactEmail || '—' }}</td>
               <td>{{ row.primaryDoctorId?.name || '—' }}</td>
               <td>
-                @if (row.isPrivatePatient) {
-                  <span class="inline-flex align-items-center gap-1"><i class="pi pi-lock"></i> Private</span>
-                } @else {
-                  <span class="inline-flex align-items-center gap-1"><i class="pi pi-globe"></i> Public</span>
-                }
+                <span class="inline-flex align-items-center gap-1">
+                  <i [class]="row.patientVisibility === 'VIS_B' ? 'pi pi-lock' : 'pi pi-globe'"></i>
+                  {{ row.patientVisibility }}
+                </span>
               </td>
               <td>
                 <div class="flex gap-1 flex-wrap align-items-center">

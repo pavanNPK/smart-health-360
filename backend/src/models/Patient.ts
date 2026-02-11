@@ -9,7 +9,7 @@ export interface IPatient extends Document {
   contactPhone?: string;
   address?: string;
   nationalId?: string;
-  isPrivatePatient: boolean;
+  patientVisibility: 'VIS_A' | 'VIS_B';
   primaryDoctorId?: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -26,7 +26,7 @@ const PatientSchema = new Schema<IPatient>(
     contactPhone: { type: String },
     address: { type: String },
     nationalId: { type: String },
-    isPrivatePatient: { type: Boolean, default: false },
+    patientVisibility: { type: String, enum: ['VIS_A', 'VIS_B'], default: 'VIS_A' },
     primaryDoctorId: { type: Schema.Types.ObjectId, ref: 'User' },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },

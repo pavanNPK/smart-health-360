@@ -27,7 +27,7 @@ export class Layout implements OnInit {
     const url = this.router.url;
     if (url === '/' || url === '') {
       const u = this.auth.currentUserValue;
-      if (u?.role === 'SUPER_ADMIN') this.router.navigate(['/admin/users']);
+      if (u?.role === 'SUPER_ADMIN') this.router.navigate(['/admin/dashboard']);
       else if (u?.role === 'DOCTOR') this.router.navigate(['/doctor/dashboard']);
       else this.router.navigate(['/reception/patients']);
     }

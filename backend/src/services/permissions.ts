@@ -12,10 +12,10 @@ export function canViewPatient(patient: IPatient, user: AuthUser): boolean {
 }
 
 export function canViewRecord(record: IRecord, patient: IPatient, user: AuthUser): boolean {
-  if (record.visibility === 'PUBLIC') {
+  if (record.visibility === 'VIS_A') {
     return ['RECEPTIONIST', 'DOCTOR', 'SUPER_ADMIN'].includes(user.role);
   }
-  if (record.visibility === 'PRIVATE') {
+  if (record.visibility === 'VIS_B') {
     if (user.role === 'RECEPTIONIST') return false;
     if (user.role === 'DOCTOR') {
       return (
@@ -28,7 +28,7 @@ export function canViewRecord(record: IRecord, patient: IPatient, user: AuthUser
   return false;
 }
 
-export function canExportPrivate(patient: IPatient, user: AuthUser): boolean {
+export function canExportVisB(patient: IPatient, user: AuthUser): boolean {
   if (user.role === 'SUPER_ADMIN') return true;
   if (user.role === 'DOCTOR') return patient.primaryDoctorId?.toString() === user.id;
   return false;

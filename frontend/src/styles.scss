@@ -77,12 +77,16 @@ h1 .page-heading-icon {
   align-items: center;
 }
 
-/* Back-to-list link: plain text link, no button-like background */
+/* Back-to-list / Back-to-patient link: plain text, no background */
 a.back-link {
   background: none !important;
   border: none !important;
   padding: 0;
+  color: var(--brand-primary) !important;
   transition: color 0.15s;
+}
+a.back-link:hover {
+  color: var(--brand-primary-hover) !important;
 }
 
 /* Hide PrimeNG LTS license banner when using non-licensed LTS version */

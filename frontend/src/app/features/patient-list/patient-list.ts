@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { Api } from '../../core/api';
+import { Auth } from '../../core/auth';
 import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { TableModule, type TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 
 interface Patient {
   _id: string;
@@ -16,7 +18,7 @@ interface Patient {
   dob: string;
   contactEmail?: string;
   primaryDoctorId?: { name: string };
-  isPrivatePatient: boolean;
+  patientVisibility: 'VIS_A' | 'VIS_B';
 }
 
 @Component({
@@ -29,6 +31,7 @@ interface Patient {
     TableModule,
     ButtonModule,
     InputTextModule,
+    SelectModule,
   ],
   templateUrl: './patient-list.html',
   styleUrl: './patient-list.scss',
@@ -42,11 +45,23 @@ export class PatientList implements OnInit {
   page = 1;
   limit = 10;
   search = '';
-  visibilityFilter: 'all' | 'public' | 'private' = 'all';
+  visibilityFilter: 'all' | 'VIS_A' | 'VIS_B' = 'all';
   loading = false;
+  hasLoadedOnce = false;
+
+  statusOptions = [
+    { label: 'All', value: 'all' },
+    { label: 'VIS_A', value: 'VIS_A' },
+    { label: 'VIS_B', value: 'VIS_B' },
+  ];
+
+  isReceptionist = computed(() => this.auth.currentUserValue?.role === 'RECEPTIONIST');
+
+  private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private api: Api,
+    private auth: Auth,
     private messageService: MessageService
   ) {}
 
@@ -64,7 +79,7 @@ export class PatientList implements OnInit {
   load(): void {
     this.loading = true;
     const params: Record<string, string | number | boolean> = { page: this.page, limit: this.limit };
-    if (this.search) params['search'] = this.search;
+    if (this.search.trim()) params['search'] = this.search.trim();
     if (this.visibilityFilter !== 'all') params['visibility'] = this.visibilityFilter;
     this.api.get<{ data: Patient[]; total: number }>('/patients', params).subscribe({
       next: (res) => {
@@ -72,8 +87,12 @@ export class PatientList implements OnInit {
         this.total = res.total;
         this.totalRecords = res.total;
         this.last = this.total === 0 ? 0 : Math.min(this.first + this.patients.length, this.total);
+        this.hasLoadedOnce = true;
       },
       error: (err) => {
+        this.patients = [];
+        this.total = 0;
+        this.hasLoadedOnce = true;
         this.messageService.add({
           severity: 'error',
           summary: 'Load failed',
@@ -86,13 +105,17 @@ export class PatientList implements OnInit {
     });
   }
 
-  onSearch(): void {
-    this.first = 0;
-    this.page = 1;
-    this.load();
+  onSearchInput(): void {
+    if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    this.searchDebounceTimer = setTimeout(() => {
+      this.first = 0;
+      this.page = 1;
+      this.load();
+      this.searchDebounceTimer = null;
+    }, 300);
   }
 
-  onVisibilityChange(): void {
+  onVisibilityFilterChange(): void {
     this.first = 0;
     this.page = 1;
     this.load();

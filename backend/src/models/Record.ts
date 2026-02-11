@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type RecordVisibility = 'PUBLIC' | 'PRIVATE';
+export type RecordVisibility = 'VIS_A' | 'VIS_B';
 export type RecordType = 'diagnosis' | 'medication' | 'report' | 'note' | 'lab' | 'attachment';
 
 export interface IRecord extends Document {
@@ -31,7 +31,7 @@ const RecordSchema = new Schema<IRecord>(
     encounterId: { type: Schema.Types.ObjectId, ref: 'Encounter' },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     assignedDoctorId: { type: Schema.Types.ObjectId, ref: 'User' },
-    visibility: { type: String, enum: ['PUBLIC', 'PRIVATE'], required: true },
+    visibility: { type: String, enum: ['VIS_A', 'VIS_B'], required: true },
     type: { type: String, enum: ['diagnosis', 'medication', 'report', 'note', 'lab', 'attachment'], required: true },
     title: { type: String },
     description: { type: String },

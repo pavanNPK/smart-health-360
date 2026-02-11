@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type RecordVisibility = 'PUBLIC' | 'PRIVATE';
+export type RecordVisibility = 'VIS_A' | 'VIS_B';
 
 export interface IReport extends Document {
   patientId: mongoose.Types.ObjectId;
@@ -16,6 +16,9 @@ export interface IReport extends Document {
   labName?: string;
   reportDate?: Date;
   description?: string;
+  _vaulted?: boolean;
+  _vaultedAt?: Date;
+  _vaultedBy?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,7 +28,7 @@ const ReportSchema = new Schema<IReport>(
     patientId: { type: Schema.Types.ObjectId, ref: 'Patient', required: true },
     recordId: { type: Schema.Types.ObjectId, ref: 'Record' },
     uploadedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    visibility: { type: String, enum: ['PUBLIC', 'PRIVATE'], required: true },
+    visibility: { type: String, enum: ['VIS_A', 'VIS_B'], required: true },
     fileName: { type: String, required: true },
     mimeType: { type: String, required: true },
     size: { type: Number, required: true },
@@ -35,6 +38,9 @@ const ReportSchema = new Schema<IReport>(
     labName: { type: String },
     reportDate: { type: Date },
     description: { type: String },
+    _vaulted: { type: Boolean },
+    _vaultedAt: { type: Date },
+    _vaultedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );

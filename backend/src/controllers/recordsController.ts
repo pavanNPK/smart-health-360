@@ -10,7 +10,7 @@ import type { RecordVisibility, RecordType } from '../models/Record';
 
 const createRecordSchema = z.object({
   type: z.enum(['diagnosis', 'medication', 'report', 'note', 'lab', 'attachment']),
-  visibility: z.enum(['PUBLIC', 'PRIVATE']).default('PUBLIC'),
+  visibility: z.enum(['VIS_A', 'VIS_B']).default('VIS_A'),
   title: z.string().optional(),
   description: z.string().optional(),
   disease: z.string().optional(),
@@ -27,7 +27,7 @@ const createRecordSchema = z.object({
 });
 
 const visibilitySchema = z.object({
-  visibility: z.enum(['PUBLIC', 'PRIVATE']),
+  visibility: z.enum(['VIS_A', 'VIS_B']),
   reason: z.string().min(1),
 });
 
@@ -58,9 +58,9 @@ export async function createRecord(req: Request, res: Response): Promise<void> {
 }
 
 export async function listRecords(req: Request, res: Response): Promise<void> {
-  const visibility = req.query.visibility as RecordVisibility | undefined;
-  if (!visibility || !['PUBLIC', 'PRIVATE'].includes(visibility)) {
-    res.status(400).json({ message: 'visibility must be PUBLIC or PRIVATE' });
+  const status = req.query.status as string | undefined; // VIS_A | VIS_B | all (omit = all)
+  if (status && status !== 'all' && !['VIS_A', 'VIS_B'].includes(status)) {
+    res.status(400).json({ message: 'status must be VIS_A, VIS_B, or all' });
     return;
   }
   const patient = await Patient.findById(req.params.id);
@@ -77,8 +77,18 @@ export async function listRecords(req: Request, res: Response): Promise<void> {
   const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 20));
   const skip = (page - 1) * limit;
   const type = req.query.type as RecordType | undefined;
-  const filter: Record<string, unknown> = { patientId: patient._id, visibility };
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate as string) : undefined;
+  const toDate = req.query.toDate ? new Date(req.query.toDate as string) : undefined;
+  const createdBy = req.query.createdBy as string | undefined;
+  const filter: Record<string, unknown> = { patientId: patient._id };
+  if (status && status !== 'all') filter.visibility = status;
   if (type) filter.type = type;
+  if (fromDate || toDate) {
+    filter.createdAt = {};
+    if (fromDate) (filter.createdAt as Record<string, Date>).$gte = fromDate;
+    if (toDate) (filter.createdAt as Record<string, Date>).$lte = toDate;
+  }
+  if (createdBy) filter.createdBy = createdBy;
   let records = await Record.find(filter).populate('createdBy', 'name').sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
   records = records.filter((r) => canViewRecord(r as any, patient, user));
   const total = await Record.countDocuments(filter);

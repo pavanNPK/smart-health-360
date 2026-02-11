@@ -4,11 +4,14 @@
   "description": "Clinical Hospital API - Node.js + Express + TypeScript + MongoDB",
   "main": "dist/server.js",
   "scripts": {
+    "check:forbidden": "node ../scripts/check-forbidden-words.js",
+    "prebuild": "node ../scripts/check-forbidden-words.js",
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "seed": "npx ts-node src/scripts/seedAdmin.ts",
-    "test-mail": "npx ts-node src/scripts/testMail.ts"
+    "test-mail": "npx ts-node src/scripts/testMail.ts",
+    "migrate:patient-visibility": "npx ts-node src/scripts/migratePatientVisibility.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

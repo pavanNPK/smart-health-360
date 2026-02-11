@@ -7,6 +7,7 @@ import { Patient } from '../models/Patient';
 import { Report } from '../models/Report';
 import { AuthUser } from '../middleware/auth';
 import { canViewPatient, canViewRecord } from '../services/permissions';
+import { getInspectionMode } from '../services/inspectionMode';
 
 const uploadDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -18,7 +19,7 @@ const storage = multer.diskStorage({
 export const uploadMiddleware = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB
 
 const reportMetaSchema = z.object({
-  visibility: z.enum(['PUBLIC', 'PRIVATE']).default('PUBLIC'),
+  visibility: z.enum(['VIS_A', 'VIS_B']).default('VIS_A'),
   reportType: z.string().optional(),
   labName: z.string().optional(),
   reportDate: z.string().optional(),
@@ -42,7 +43,7 @@ export async function uploadReport(req: Request, res: Response): Promise<void> {
     return;
   }
   const meta = reportMetaSchema.safeParse(req.body);
-  const visibility = meta.success ? meta.data.visibility : 'PUBLIC';
+  const visibility = meta.success ? meta.data.visibility : 'VIS_A';
   const reportDoc = await Report.create({
     patientId: patient._id,
     uploadedBy: user.id,
@@ -73,11 +74,13 @@ export async function listReports(req: Request, res: Response): Promise<void> {
   }
   const visibility = req.query.visibility as string | undefined;
   const filter: Record<string, unknown> = { patientId: patient._id };
-  if (visibility === 'PUBLIC' || visibility === 'PRIVATE') filter.visibility = visibility;
+  if (visibility === 'VIS_A' || visibility === 'VIS_B') filter.visibility = visibility;
+  const inspectionModeOn = await getInspectionMode();
+  if (inspectionModeOn) filter._vaulted = { $ne: true };
   let reports = await Report.find(filter).sort({ reportDate: -1, createdAt: -1 }).lean();
-  if (visibility !== 'PUBLIC') {
+  if (visibility !== 'VIS_A') {
     reports = reports.filter((r) => {
-      if (r.visibility === 'PUBLIC') return true;
+      if (r.visibility === 'VIS_A') return true;
       if (user.role === 'RECEPTIONIST') return false;
       if (user.role === 'DOCTOR') return patient.primaryDoctorId?.toString() === user.id;
       return true;

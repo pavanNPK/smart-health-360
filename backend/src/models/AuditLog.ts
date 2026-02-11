@@ -6,7 +6,9 @@ export type AuditAction =
   | 'EXPORT_RECORDS'
   | 'IMPORT_RECORDS'
   | 'BREAK_GLASS_ACCESS'
-  | 'LOGIN';
+  | 'LOGIN'
+  | 'EMERGENCY_HIDE'
+  | 'EMERGENCY_RESTORE';
 
 export interface IAuditLog extends Document {
   action: AuditAction;
@@ -20,7 +22,7 @@ export interface IAuditLog extends Document {
 
 const AuditLogSchema = new Schema<IAuditLog>(
   {
-    action: { type: String, enum: ['VIEW_PRIVATE_RECORD', 'MOVE_VISIBILITY', 'EXPORT_RECORDS', 'IMPORT_RECORDS', 'BREAK_GLASS_ACCESS', 'LOGIN'], required: true },
+    action: { type: String, enum: ['VIEW_PRIVATE_RECORD', 'MOVE_VISIBILITY', 'EXPORT_RECORDS', 'IMPORT_RECORDS', 'BREAK_GLASS_ACCESS', 'LOGIN', 'EMERGENCY_HIDE', 'EMERGENCY_RESTORE'], required: true },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     patientId: { type: Schema.Types.ObjectId, ref: 'Patient' },
     recordId: { type: Schema.Types.ObjectId, ref: 'Record' },

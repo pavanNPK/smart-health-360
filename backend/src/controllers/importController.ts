@@ -9,7 +9,7 @@ import { logAudit } from '../services/audit';
 
 const itemSchema = z.object({
   type: z.enum(['diagnosis', 'medication', 'report', 'note', 'lab', 'attachment']),
-  visibility: z.enum(['PUBLIC', 'PRIVATE']).default('PUBLIC'),
+  visibility: z.enum(['VIS_A', 'VIS_B']).default('VIS_A'),
   title: z.string().optional(),
   description: z.string().optional(),
   disease: z.string().optional(),
