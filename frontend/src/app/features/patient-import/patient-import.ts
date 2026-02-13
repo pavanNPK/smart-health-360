@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
 import { MessageService } from 'primeng/api';
@@ -22,8 +22,14 @@ export class PatientImport implements OnInit {
   error = '';
   loading = false;
 
+  /** Base path for patient routes from current URL (admin vs reception). */
+  get patientsBase(): string {
+    return this.router.url.startsWith('/admin') ? '/admin/patients' : '/reception/patients';
+  }
+
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private api: Api,
     private messageService: MessageService
   ) {}

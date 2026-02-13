@@ -1,6 +1,6 @@
 <div class="flex flex-column gap-4">
   <div class="flex align-items-center gap-2">
-    <a [routerLink]="['/reception/patients']" class="back-link flex align-items-center gap-1 no-underline text-600 hover:text-900">
+    <a [routerLink]="[patientsBase]" class="back-link flex align-items-center gap-1 no-underline text-600 hover:text-900">
       <i class="pi pi-arrow-left"></i> Back to list
     </a>
   </div>
@@ -72,7 +72,7 @@
       }
       <div class="flex gap-2">
         <p-button type="submit" [label]="loading ? 'Saving…' : (isEditMode ? 'Save changes' : 'Register Patient')" icon="pi pi-check" [loading]="loading" [disabled]="loading" />
-        <a [routerLink]="isEditMode ? ['/reception/patients', patientId] : ['/reception/patients']" class="no-underline"><p-button type="button" label="Cancel" icon="pi pi-times" severity="secondary" styleClass="p-button-outlined"></p-button></a>
+        <a [routerLink]="isEditMode ? [patientsBase, patientId] : [patientsBase]" class="no-underline"><p-button type="button" label="Cancel" icon="pi pi-times" severity="secondary" styleClass="p-button-outlined"></p-button></a>
       </div>
     </form>
   </p-card>

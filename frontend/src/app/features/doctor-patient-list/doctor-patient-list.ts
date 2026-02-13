@@ -71,9 +71,10 @@ export class DoctorPatientList implements OnInit {
   }
 
   onLazyLoad(event: TableLazyLoadEvent): void {
-    this.first = event.first ?? 0;
     this.limit = event.rows ?? 10;
-    this.page = this.limit > 0 ? Math.floor(this.first / this.limit) + 1 : 1;
+    const rawFirst = event.first ?? 0;
+    this.page = this.limit > 0 ? Math.floor(rawFirst / this.limit) + 1 : 1;
+    this.first = (this.page - 1) * this.limit;
     this.load();
   }
 
@@ -88,9 +89,16 @@ export class DoctorPatientList implements OnInit {
     if (this.visibilityFilter !== 'all') params['visibility'] = this.visibilityFilter;
     this.api.get<{ data: Patient[]; total: number }>('/patients', params).subscribe({
       next: (res) => {
+        const total = res.total;
+        if (total > 0 && this.first >= total) {
+          this.first = Math.max(0, (Math.ceil(total / this.limit) - 1) * this.limit);
+          this.page = Math.ceil(total / this.limit);
+          this.load();
+          return;
+        }
         this.patients = res.data;
-        this.total = res.total;
-        this.totalRecords = res.total;
+        this.total = total;
+        this.totalRecords = total;
         this.last = this.total === 0 ? 0 : Math.min(this.first + this.patients.length, this.total);
         this.hasLoadedOnce = true;
       },

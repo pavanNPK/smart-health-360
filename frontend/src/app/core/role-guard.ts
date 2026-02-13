@@ -8,7 +8,16 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const router = inject(Router);
   const allowedRoles = (route.data['roles'] as UserRole[]) || [];
   const user = auth.currentUserValue;
-  if (!user || !allowedRoles.includes(user.role)) {
+  if (!user) {
+    router.navigate(['/login']);
+    return false;
+  }
+  if (!allowedRoles.includes(user.role)) {
+    // SA must not use reception routes; send to admin patients instead
+    if (user.role === 'SUPER_ADMIN' && route.pathFromRoot.some((r) => r.routeConfig?.path === 'reception')) {
+      router.navigate(['/admin/patients']);
+      return false;
+    }
     router.navigate(['/login']);
     return false;
   }

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Request, Response } from 'express';
 import { AuditLog } from '../models/AuditLog';
 import { User } from '../models/User';
@@ -19,7 +20,15 @@ export async function listAuditLogs(req: Request, res: Response): Promise<void> 
   if (user.role === 'SUPER_ADMIN') {
     if (userIdQuery) filter.userId = userIdQuery;
   } else if (user.role === 'DOCTOR' && user.clinicId) {
-    const receptionistIds = await User.find({ role: 'RECEPTIONIST', clinicId: user.clinicId }).distinct('_id');
+    let clinicObjectId: mongoose.Types.ObjectId | null = null;
+    try {
+      clinicObjectId = new mongoose.Types.ObjectId(user.clinicId);
+    } catch {
+      // invalid clinicId string; fall back to self-only below
+    }
+    const receptionistIds = clinicObjectId
+      ? await User.find({ role: 'RECEPTIONIST', clinicId: clinicObjectId }).distinct('_id')
+      : [];
     const allowedUserIds = [user.id, ...receptionistIds.map((id) => id.toString())];
     filter.userId = { $in: allowedUserIds };
   } else {

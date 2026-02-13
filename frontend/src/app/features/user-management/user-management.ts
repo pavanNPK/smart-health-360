@@ -63,6 +63,8 @@ export class UserManagement implements OnInit {
   formSubmitting = false;
   successMessage = '';
 
+  tableStyle = { 'min-width': '50rem' };
+
   roleOptions = [
     { label: 'Receptionist', value: 'RECEPTIONIST' },
     { label: 'Doctor', value: 'DOCTOR' },
@@ -87,9 +89,10 @@ export class UserManagement implements OnInit {
   }
 
   onLazyLoad(event: TableLazyLoadEvent): void {
-    this.first = event.first ?? 0;
     this.limit = event.rows ?? 10;
-    this.page = this.limit > 0 ? Math.floor(this.first / this.limit) + 1 : 1;
+    const rawFirst = event.first ?? 0;
+    this.page = this.limit > 0 ? Math.floor(rawFirst / this.limit) + 1 : 1;
+    this.first = (this.page - 1) * this.limit;
     this.load();
   }
 
@@ -97,8 +100,15 @@ export class UserManagement implements OnInit {
     this.loading = true;
     this.api.get<{ data: User[]; total: number }>('/users', { page: this.page, limit: this.limit }).subscribe({
       next: (res) => {
+        const total = res.total;
+        if (total > 0 && this.first >= total) {
+          this.first = Math.max(0, (Math.ceil(total / this.limit) - 1) * this.limit);
+          this.page = Math.ceil(total / this.limit);
+          this.load();
+          return;
+        }
         this.users = res.data;
-        this.total = res.total;
+        this.total = total;
         this.last = this.total === 0 ? 0 : Math.min(this.first + this.users.length, this.total);
       },
       error: (err) => {

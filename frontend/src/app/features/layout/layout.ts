@@ -70,6 +70,13 @@ export class Layout implements OnInit {
     return this.user?.role === 'SUPER_ADMIN' || this.user?.role === 'DOCTOR' || this.user?.role === 'RECEPTIONIST';
   }
 
+  /** Role-based audit path: SA → /admin/audit, Doctor → /doctor/audit, Receptionist → /reception/audit */
+  get auditUrl(): string {
+    if (this.user?.role === 'SUPER_ADMIN') return '/admin/audit';
+    if (this.user?.role === 'DOCTOR') return '/doctor/audit';
+    return '/reception/audit';
+  }
+
   private updateProfileLocation(user: User | null): void {
     if (!user || (user.role !== 'DOCTOR' && user.role !== 'RECEPTIONIST')) {
       this.profileArea = '—';

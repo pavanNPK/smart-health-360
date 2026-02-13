@@ -2,6 +2,7 @@
   <h1 class="m-0 text-2xl font-semibold text-900">
     <i class="pi pi-history mr-2 page-heading-icon"></i>Audit Logs
   </h1>
+  <p class="text-600 m-0 text-sm">{{ auditScopeDescription }}</p>
   <p-card styleClass="shadow-2 border-round-lg">
     <div class="flex flex-wrap align-items-center gap-2 mb-3">
       <label class="text-700 font-medium">Action:</label>
@@ -45,7 +46,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-log let-rowIndex="rowIndex">
           <tr>
-            <td>{{ first + rowIndex + 1 }}</td>
+            <td>{{ (page - 1) * limit + rowIndex + 1 }}</td>
             <td>{{ log.createdAt | date : 'short' }}</td>
             <td>{{ log.action }}</td>
             <td>

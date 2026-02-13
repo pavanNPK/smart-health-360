@@ -20,9 +20,9 @@
       [totalRecords]="total"
       [rowsPerPageOptions]="[10, 25, 50]"
       [showCurrentPageReport]="true"
-      currentPageReportTemplate="Showing {{ first }} to {{ last }} of {{ total }} users"
+      currentPageReportTemplate="Showing {{ first + 1 }} to {{ last }} of {{ total }} users"
       styleClass="p-datatable-sm p-datatable-striped"
-      [tableStyle]="{ 'min-width': '50rem' }"
+      [tableStyle]="tableStyle"
       showGridlines
     >
         <ng-template pTemplate="header">
@@ -39,7 +39,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-u let-rowIndex="rowIndex">
           <tr>
-            <td>{{ first + rowIndex + 1 }}</td>
+            <td>{{ (page - 1) * limit + rowIndex + 1 }}</td>
             <td>{{ u.name }}</td>
             <td>{{ u.email }}</td>
             <td>{{ u.role }}</td>

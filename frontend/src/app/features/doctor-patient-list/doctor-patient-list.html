@@ -57,7 +57,7 @@
           [totalRecords]="total"
           [rowsPerPageOptions]="[10, 25, 50]"
           [showCurrentPageReport]="true"
-          currentPageReportTemplate="Showing {{ first }} to {{ last }} of {{ totalRecords }} patients"
+          currentPageReportTemplate="Showing {{ first + 1 }} to {{ last }} of {{ totalRecords }} patients"
           styleClass="p-datatable-sm p-datatable-striped"
           [tableStyle]="{ 'min-width': '50rem' }"
           showGridlines
@@ -77,7 +77,7 @@
           </ng-template>
           <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
             <tr>
-              <td>{{ first + rowIndex + 1 }}</td>
+              <td>{{ (page - 1) * limit + rowIndex + 1 }}</td>
               <td>{{ row.firstName }} {{ row.lastName }}</td>
               <td>{{ row.dob | date : 'shortDate' }}</td>
               <td>{{ row.contactEmail || '—' }}</td>

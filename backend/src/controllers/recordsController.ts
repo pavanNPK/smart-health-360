@@ -132,20 +132,26 @@ export async function updateVisibility(req: Request, res: Response): Promise<voi
   const patient = record.patientId as any;
   const user = req.user! as AuthUser;
   if (!canChangeVisibility(patient, user)) {
-    res.status(403).json({ message: 'Forbidden' });
+    res.status(403).json({
+      message: 'Only the primary doctor, receptionist (for this patient), or Super Admin can change record visibility.',
+    });
     return;
   }
   const parsed = visibilitySchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ message: 'reason and visibility required' });
+    res.status(400).json({ message: 'Reason and new visibility are required.' });
     return;
   }
   const previousVisibility = record.visibility;
   record.visibility = parsed.data.visibility as RecordVisibility;
   await record.save();
+  const patientIdStr =
+    (record.patientId as any)?._id != null
+      ? (record.patientId as any)._id.toString()
+      : record.patientId?.toString?.();
   await logAudit('MOVE_VISIBILITY', user.id, {
     recordId: record._id.toString(),
-    patientId: record.patientId.toString(),
+    patientId: patientIdStr,
     details: {
       previousVisibility,
       newVisibility: parsed.data.visibility,

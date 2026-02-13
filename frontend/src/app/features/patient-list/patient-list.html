@@ -4,7 +4,7 @@
       <i class="pi pi-users mr-2 page-heading-icon"></i>Patients
     </h1>
     @if (isReceptionist()) {
-      <a [routerLink]="['/reception/patients/new']" class="no-underline">
+      <a [routerLink]="[patientsBase(), 'new']" class="no-underline">
         <p-button label="Register Patient" icon="pi pi-user-plus"></p-button>
       </a>
     }
@@ -64,7 +64,7 @@
           [totalRecords]="total"
           [rowsPerPageOptions]="[10, 25, 50]"
           [showCurrentPageReport]="true"
-          currentPageReportTemplate="Showing {{ first }} to {{ last }} of {{ totalRecords }} patients"
+          currentPageReportTemplate="Showing {{ first + 1 }} to {{ last }} of {{ totalRecords }} patients"
           styleClass="p-datatable-sm p-datatable-striped"
           [tableStyle]="{ 'min-width': '50rem' }"
           showGridlines
@@ -84,7 +84,7 @@
           </ng-template>
           <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
             <tr>
-              <td>{{ first + rowIndex + 1 }}</td>
+              <td>{{ (page - 1) * limit + rowIndex + 1 }}</td>
               <td>{{ row.firstName }} {{ row.lastName }}</td>
               <td>{{ row.dob | date : 'shortDate' }}</td>
               <td>{{ row.contactEmail || '—' }}</td>
@@ -99,9 +99,9 @@
               <td>{{ row.visACount ?? 0 }} / {{ row.visBCount ?? 0 }}</td>
               <td>
                 <div class="flex gap-1 flex-wrap align-items-center">
-                  <a [routerLink]="['/reception/patients', row._id]" class="no-underline" pTooltip="View"><p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm"></p-button></a>
-                  <a [routerLink]="['/reception/patients', row._id, 'edit']" class="no-underline" pTooltip="Edit"><p-button icon="pi pi-pencil" styleClass="p-button-text p-button-sm"></p-button></a>
-                  <a [routerLink]="['/reception/patients', row._id, 'import']" class="no-underline" pTooltip="Import"><p-button icon="pi pi-upload" styleClass="p-button-text p-button-sm"></p-button></a>
+                  <a [routerLink]="[patientsBase(), row._id]" class="no-underline" pTooltip="View"><p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm"></p-button></a>
+                  <a [routerLink]="[patientsBase(), row._id, 'edit']" class="no-underline" pTooltip="Edit"><p-button icon="pi pi-pencil" styleClass="p-button-text p-button-sm"></p-button></a>
+                  <a [routerLink]="[patientsBase(), row._id, 'import']" class="no-underline" pTooltip="Import"><p-button icon="pi pi-upload" styleClass="p-button-text p-button-sm"></p-button></a>
                   <p-button icon="pi pi-trash" styleClass="p-button-text p-button-sm p-button-danger" pTooltip="Delete" (onClick)="confirmDelete(row)"></p-button>
                 </div>
               </td>

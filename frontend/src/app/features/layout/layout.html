@@ -26,17 +26,15 @@
           <span>Staff</span>
         </a>
       }
-      @if (canAccess('RECEPTIONIST')) {
+      @if (user?.role === 'RECEPTIONIST') {
         <a routerLink="/reception/patients" routerLinkActive="sidebar-link-active" [routerLinkActiveOptions]="{ exact: false }" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
           <i class="pi pi-users"></i>
           <span>Patients</span>
         </a>
-        @if (user?.role === 'RECEPTIONIST') {
-          <a routerLink="/reception/doctors" routerLinkActive="sidebar-link-active" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
-            <i class="pi pi-id-card"></i>
-            <span>Doctors</span>
-          </a>
-        }
+        <a routerLink="/reception/doctors" routerLinkActive="sidebar-link-active" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
+          <i class="pi pi-id-card"></i>
+          <span>Doctors</span>
+        </a>
       }
       @if (canAccess('SUPER_ADMIN')) {
         <div class="px-3 py-1 text-500 text-sm font-semibold">Admin</div>
@@ -56,10 +54,14 @@
           <i class="pi pi-sitemap"></i>
           <span>Hierarchy</span>
         </a>
+        <a routerLink="/admin/patients" routerLinkActive="sidebar-link-active" [routerLinkActiveOptions]="{ exact: false }" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
+          <i class="pi pi-users"></i>
+          <span>Patients</span>
+        </a>
       }
       @if (canAccessAudit()) {
         <div class="px-3 py-1 mt-2 text-500 text-sm font-semibold">System</div>
-        <a routerLink="/audit" routerLinkActive="sidebar-link-active" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
+        <a [routerLink]="auditUrl" routerLinkActive="sidebar-link-active" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
           <i class="pi pi-history"></i>
           <span>Audit</span>
         </a>

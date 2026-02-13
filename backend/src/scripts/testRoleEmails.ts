@@ -17,15 +17,15 @@ import {
 const DEMO = {
   doctor: {
     email: 'narendravarapusatya@gmail.com',
-    name: 'Dr. Narendra Varapusatya',
+    name: 'Dr. Narendravarapu Satya',
   },
   receptionist: {
     email: 'narendravarapusatyavenkat@gmail.com',
-    name: 'Venkat (Receptionist)',
+    name: 'Venkat',
   },
   patient: {
     email: 'satyanarendravarapu27@gmail.com',
-    name: 'Satya Narendra Varapu',
+    name: 'Satya Narendravarapu',
   },
 };
 

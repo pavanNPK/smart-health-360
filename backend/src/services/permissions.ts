@@ -46,6 +46,10 @@ export function canExportVisB(patient: IPatient, user: AuthUser): boolean {
 
 export function canChangeVisibility(patient: IPatient, user: AuthUser): boolean {
   if (user.role === 'SUPER_ADMIN') return true;
-  if (user.role === 'DOCTOR') return getPrimaryDoctorId(patient) === user.id;
+  if (user.role === 'DOCTOR') {
+    const primaryId = getPrimaryDoctorId(patient);
+    return primaryId === user.id || primaryId === undefined;
+  }
+  if (user.role === 'RECEPTIONIST') return canViewPatient(patient, user);
   return false;
 }

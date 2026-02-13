@@ -99,17 +99,19 @@ export class PatientProfile implements OnInit {
     private messageService: MessageService
   ) {}
 
-  /** Back-to-list URL based on current route so we don't send doctor/admin to /reception (which can redirect to login). */
+  /** Back-to-list URL based on current route so we don't mix role routes. */
   get backToListUrl(): string {
     const url = this.router.url;
     if (url.startsWith('/doctor')) return '/doctor/patients';
-    if (url.startsWith('/admin')) return '/admin/dashboard';
+    if (url.startsWith('/admin')) return '/admin/patients';
     return '/reception/patients';
   }
 
-  /** Edit patient link (reception/edit route; SA and receptionist only). */
+  /** Edit patient link (same base as current route: admin or reception). */
   get editPatientLink(): string[] {
-    return ['/reception/patients', this.patientId, 'edit'];
+    const url = this.router.url;
+    const base = url.startsWith('/admin') ? '/admin/patients' : '/reception/patients';
+    return [base, this.patientId, 'edit'];
   }
 
   ngOnInit(): void {
@@ -143,8 +145,15 @@ export class PatientProfile implements OnInit {
     if (this.createdByFilter) params['createdBy'] = this.createdByFilter;
     this.api.get<{ data: PatientRecord[]; total: number }>(`/patients/${this.patientId}/records`, params).subscribe({
       next: (res) => {
+        const total = res.total;
+        if (total > 0 && this.first >= total) {
+          this.first = Math.max(0, (Math.ceil(total / this.limit) - 1) * this.limit);
+          this.page = Math.ceil(total / this.limit);
+          this.loadRecords();
+          return;
+        }
         this.records.set(res.data);
-        this.total = res.total;
+        this.total = total;
         this.recordsLast = this.total === 0 ? 0 : Math.min(this.first + res.data.length, this.total);
       },
       error: (err) => {
@@ -162,9 +171,10 @@ export class PatientProfile implements OnInit {
   }
 
   onRecordsLazyLoad(event: TableLazyLoadEvent): void {
-    this.first = event.first ?? 0;
     this.limit = event.rows ?? 20;
-    this.page = this.limit > 0 ? Math.floor(this.first / this.limit) + 1 : 1;
+    const rawFirst = event.first ?? 0;
+    this.page = this.limit > 0 ? Math.floor(rawFirst / this.limit) + 1 : 1;
+    this.first = (this.page - 1) * this.limit;
     this.loadRecords();
   }
 
@@ -198,12 +208,10 @@ export class PatientProfile implements OnInit {
           this.selectedRecord = null;
           this.loadRecords();
         },
-        error: (err) =>
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Update failed',
-            detail: err.error?.message || 'Failed to change status.',
-          }),
+        error: (err) => {
+          const msg = err?.error?.message ?? (typeof err?.error === 'string' ? err.error : null) ?? 'Failed to change status.';
+          this.messageService.add({ severity: 'error', summary: 'Update failed', detail: msg });
+        },
       });
   }
 
