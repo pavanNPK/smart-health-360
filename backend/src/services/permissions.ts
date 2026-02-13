@@ -1,6 +1,7 @@
 import { AuthUser } from '../middleware/auth';
 import { IPatient } from '../models/Patient';
 import { IRecord } from '../models/Record';
+import { User } from '../models/User';
 
 /** Get id as string from a ref (ObjectId or populated doc). */
 function refId(ref: unknown): string | undefined {
@@ -10,7 +11,7 @@ function refId(ref: unknown): string | undefined {
   return (ref as { toString: () => string }).toString?.() ?? String(ref);
 }
 
-function getPrimaryDoctorId(patient: IPatient): string | undefined {
+export function getPrimaryDoctorId(patient: IPatient): string | undefined {
   return refId(patient.primaryDoctorId);
 }
 
@@ -20,6 +21,25 @@ export function canViewPatient(patient: IPatient, user: AuthUser): boolean {
   if (user.role === 'DOCTOR') {
     const primaryId = getPrimaryDoctorId(patient);
     return primaryId === user.id || primaryId === undefined;
+  }
+  return false;
+}
+
+/**
+ * Async version: doctors can also view patients in the same clinic (patient's primary doctor has same clinicId).
+ * Use in getPatient, listRecords, etc. when you need same-clinic access for doctors.
+ */
+export async function canViewPatientAsync(patient: IPatient, user: AuthUser): Promise<boolean> {
+  if (user.role === 'SUPER_ADMIN') return true;
+  if (user.role === 'RECEPTIONIST') return true;
+  if (user.role === 'DOCTOR') {
+    const primaryId = getPrimaryDoctorId(patient);
+    if (primaryId === user.id || primaryId === undefined) return true;
+    if (user.clinicId && primaryId) {
+      const primaryDoctor = await User.findById(primaryId).select('clinicId').lean();
+      if (primaryDoctor?.clinicId?.toString() === user.clinicId) return true;
+    }
+    return false;
   }
   return false;
 }

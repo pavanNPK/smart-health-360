@@ -4,7 +4,7 @@ import { Patient } from '../models/Patient';
 import { Record } from '../models/Record';
 import { User } from '../models/User';
 import { AuthUser } from '../middleware/auth';
-import { canViewPatient } from '../services/permissions';
+import { canViewPatient, canViewPatientAsync } from '../services/permissions';
 import { sendPatientRegistrationEmail } from '../services/mail';
 import * as whatsappService from '../services/whatsapp';
 
@@ -225,10 +225,11 @@ export async function getPatient(req: Request, res: Response): Promise<void> {
     return;
   }
   const user = req.user! as AuthUser;
-  if (!canViewPatient(patient, user)) {
+  const allowed = await canViewPatientAsync(patient, user);
+  if (!allowed) {
     const message =
       user.role === 'DOCTOR'
-        ? 'This patient is not assigned to you. You can only view patients where you are the primary doctor.'
+        ? 'You can only view patients assigned to you or to another doctor in your clinic.'
         : 'Forbidden';
     res.status(403).json({ message });
     return;

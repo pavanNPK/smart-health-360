@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { Patient } from '../models/Patient';
 import { Record } from '../models/Record';
 import { AuthUser } from '../middleware/auth';
-import { canViewPatient, canViewRecord, canChangeVisibility } from '../services/permissions';
+import { canViewPatient, canViewPatientAsync, canViewRecord, canChangeVisibility } from '../services/permissions';
 import { logAudit } from '../services/audit';
 import type { RecordVisibility, RecordType } from '../models/Record';
 
@@ -38,7 +38,8 @@ export async function createRecord(req: Request, res: Response): Promise<void> {
     return;
   }
   const user = req.user! as AuthUser;
-  if (!canViewPatient(patient, user)) {
+  const canView = await canViewPatientAsync(patient, user);
+  if (!canView) {
     res.status(403).json({ message: 'Forbidden' });
     return;
   }
@@ -69,7 +70,8 @@ export async function listRecords(req: Request, res: Response): Promise<void> {
     return;
   }
   const user = req.user! as AuthUser;
-  if (!canViewPatient(patient, user)) {
+  const canView = await canViewPatientAsync(patient, user);
+  if (!canView) {
     res.status(403).json({ message: 'Forbidden' });
     return;
   }
@@ -102,7 +104,8 @@ export async function recordsSummary(req: Request, res: Response): Promise<void>
     return;
   }
   const user = req.user! as AuthUser;
-  if (!canViewPatient(patient, user)) {
+  const canView = await canViewPatientAsync(patient, user);
+  if (!canView) {
     res.status(403).json({ message: 'Forbidden' });
     return;
   }
