@@ -1,0 +1,61 @@
+<div class="flex flex-column gap-4">
+  <h1 class="m-0 text-2xl font-semibold text-900">
+    <i class="pi pi-users mr-2 page-heading-icon"></i>Doctors
+  </h1>
+  <p class="text-600 m-0">Doctors in your clinic. Use these when assigning a primary doctor to a patient.</p>
+
+  @if (!clinicId) {
+    <p-card styleClass="shadow-2 border-round-lg">
+      <p class="text-600 m-0">Doctor list is shown when your clinic is set. Ask an admin to assign you to a clinic.</p>
+    </p-card>
+  } @else {
+    <p-card styleClass="shadow-2 border-round-lg">
+      @if (error) {
+        <p class="text-red-600 text-sm m-0 mb-2">{{ error }}</p>
+        <p-button label="Retry" icon="pi pi-refresh" severity="secondary" size="small" (onClick)="load()"></p-button>
+      }
+      @if (loading) {
+        <div class="flex align-items-center justify-content-center py-8">
+          <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+        </div>
+      } @else {
+        <p-table
+          [value]="doctors"
+          [paginator]="true"
+          [rows]="rows"
+          [first]="first"
+          (onLazyLoad)="onPage($event)"
+          [totalRecords]="doctors.length"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Showing {{ first + 1 }} to {{ displayEnd }} of {{ doctors.length }} doctors"
+          styleClass="p-datatable-sm p-datatable-striped"
+          [tableStyle]="{ 'min-width': '28rem' }"
+          showGridlines
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="width: 4rem;">S.No</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Specialization</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-d let-rowIndex="rowIndex">
+            <tr>
+              <td>{{ first + rowIndex + 1 }}</td>
+              <td>{{ d.name }}</td>
+              <td>{{ d.email || '—' }}</td>
+              <td>{{ d.specialization || '—' }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4" class="text-center py-4 text-600">No doctors in your clinic.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
+  }
+</div>

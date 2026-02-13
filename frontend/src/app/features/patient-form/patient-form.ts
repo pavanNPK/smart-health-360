@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil, filter } from 'rxjs/operators';
 import { Api } from '../../core/api';
 import { Auth } from '../../core/auth';
 import { MessageService } from 'primeng/api';
@@ -30,7 +32,7 @@ interface Doctor {
   templateUrl: './patient-form.html',
   styleUrl: './patient-form.scss',
 })
-export class PatientForm implements OnInit {
+export class PatientForm implements OnInit, OnDestroy {
   patientId: string | null = null;
   firstName = '';
   lastName = '';
@@ -46,6 +48,8 @@ export class PatientForm implements OnInit {
   loadingPatient = false;
   loading = false;
   recordSummary: { visACount: number; visBCount: number; byType: Record<string, number> } | null = null;
+  private destroy$ = new Subject<void>();
+  private doctorsLoadedForClinicId: string | null = null;
 
   visibilityOptions = [
     { label: 'VIS_A', value: 'VIS_A' },
@@ -71,9 +75,16 @@ export class PatientForm implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     const clinicId = this.auth.currentUserValue?.clinicId;
     if (clinicId) {
-      this.api.get<{ data: Doctor[] }>(`/clinics/${clinicId}/doctors`).subscribe({
-        next: (res) => (this.doctors = res.data),
-      });
+      this.loadDoctors(clinicId);
+    } else {
+      this.auth.currentUser$
+        .pipe(
+          filter((u) => !!u?.clinicId),
+          takeUntil(this.destroy$)
+        )
+        .subscribe((u) => {
+          if (u?.clinicId) this.loadDoctors(u.clinicId);
+        });
     }
     if (id) {
       this.patientId = id;
@@ -108,6 +119,20 @@ export class PatientForm implements OnInit {
       });
       this.loadRecordSummary(id);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadDoctors(clinicId: string): void {
+    if (this.doctorsLoadedForClinicId === clinicId) return;
+    this.doctorsLoadedForClinicId = clinicId;
+    this.api.get<{ data: Doctor[] }>(`/clinics/${clinicId}/doctors`).subscribe({
+      next: (res) => (this.doctors = res.data),
+      error: () => (this.doctors = []),
+    });
   }
 
   loadRecordSummary(patientId: string): void {

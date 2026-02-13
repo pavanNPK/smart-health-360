@@ -11,17 +11,32 @@
         <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
       </div>
     } @else {
-      <p-table [value]="clinics" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '30rem' }" showGridlines>
+      <p-table
+        [value]="clinics"
+        [paginator]="true"
+        [rows]="rows"
+        [first]="first"
+        (onLazyLoad)="onPage($event)"
+        [totalRecords]="clinics.length"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {{ first + 1 }} to {{ displayEnd }} of {{ clinics.length }} clinics"
+        styleClass="p-datatable-sm p-datatable-striped"
+        [tableStyle]="{ 'min-width': '30rem' }"
+        showGridlines
+      >
         <ng-template pTemplate="header">
           <tr>
+            <th style="width: 4rem;">S.No</th>
             <th>Name</th>
             <th>Area</th>
             <th>Code</th>
             <th style="width: 8rem;">Actions</th>
           </tr>
         </ng-template>
-        <ng-template pTemplate="body" let-c>
+        <ng-template pTemplate="body" let-c let-rowIndex="rowIndex">
           <tr>
+            <td>{{ first + rowIndex + 1 }}</td>
             <td>{{ c.name }}</td>
             <td>{{ getAreaName(c) }}</td>
             <td>{{ c.code || '—' }}</td>
@@ -35,7 +50,7 @@
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="4" class="text-center py-4 text-600">No clinics. Add areas first, then add clinics.</td>
+            <td colspan="5" class="text-center py-4 text-600">No clinics. Add areas first, then add clinics.</td>
           </tr>
         </ng-template>
       </p-table>

@@ -31,6 +31,12 @@
           <i class="pi pi-users"></i>
           <span>Patients</span>
         </a>
+        @if (user?.role === 'RECEPTIONIST') {
+          <a routerLink="/reception/doctors" routerLinkActive="sidebar-link-active" class="sidebar-link flex align-items-center gap-2 px-3 py-2 no-underline text-700">
+            <i class="pi pi-id-card"></i>
+            <span>Doctors</span>
+          </a>
+        }
       }
       @if (canAccess('SUPER_ADMIN')) {
         <div class="px-3 py-1 text-500 text-sm font-semibold">Admin</div>

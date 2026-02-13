@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Api } from '../../core/api';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
+import { TableModule, type TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
@@ -25,6 +25,8 @@ interface Area {
 })
 export class AdminAreas implements OnInit {
   areas: Area[] = [];
+  first = 0;
+  rows = 10;
   loading = false;
   showDialog = false;
   showEditDialog = false;
@@ -41,6 +43,15 @@ export class AdminAreas implements OnInit {
 
   ngOnInit(): void {
     this.load();
+  }
+
+  onPage(event: TableLazyLoadEvent): void {
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? 10;
+  }
+
+  get displayEnd(): number {
+    return Math.min(this.first + this.rows, this.areas.length);
   }
 
   load(): void {

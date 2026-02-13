@@ -53,10 +53,28 @@ export async function listClinics(req: Request, res: Response): Promise<void> {
   res.json({ data: clinics });
 }
 
+async function getUserClinicId(user: AuthUser): Promise<string | undefined> {
+  if (user.clinicId) return user.clinicId;
+  const dbUser = await User.findById(user.id).select('clinicId').lean();
+  return dbUser?.clinicId?.toString();
+}
+
 export async function getClinicDoctors(req: Request, res: Response): Promise<void> {
   const user = req.user! as AuthUser;
   const clinicId = req.params.id;
-  if (user.role !== 'SUPER_ADMIN' && user.clinicId !== clinicId) {
+  if (user.role === 'SUPER_ADMIN') {
+    // SA can access any clinic
+  } else if (user.role === 'DOCTOR' || user.role === 'RECEPTIONIST') {
+    const userClinicId = await getUserClinicId(user);
+    if (!userClinicId) {
+      res.status(403).json({ message: 'You are not assigned to a clinic. Ask an administrator to assign you.' });
+      return;
+    }
+    if (userClinicId !== clinicId) {
+      res.status(403).json({ message: 'You can only view your own clinic.' });
+      return;
+    }
+  } else {
     res.status(403).json({ message: 'Forbidden' });
     return;
   }
@@ -67,7 +85,19 @@ export async function getClinicDoctors(req: Request, res: Response): Promise<voi
 export async function getClinicReceptionists(req: Request, res: Response): Promise<void> {
   const user = req.user! as AuthUser;
   const clinicId = req.params.id;
-  if (user.role !== 'SUPER_ADMIN' && user.clinicId !== clinicId) {
+  if (user.role === 'SUPER_ADMIN') {
+    // SA can access any clinic
+  } else if (user.role === 'DOCTOR' || user.role === 'RECEPTIONIST') {
+    const userClinicId = await getUserClinicId(user);
+    if (!userClinicId) {
+      res.status(403).json({ message: 'You are not assigned to a clinic. Ask an administrator to assign you.' });
+      return;
+    }
+    if (userClinicId !== clinicId) {
+      res.status(403).json({ message: 'You can only view your own clinic\'s staff.' });
+      return;
+    }
+  } else {
     res.status(403).json({ message: 'Forbidden' });
     return;
   }
@@ -78,7 +108,19 @@ export async function getClinicReceptionists(req: Request, res: Response): Promi
 export async function getClinicReceptionistsWithStats(req: Request, res: Response): Promise<void> {
   const user = req.user! as AuthUser;
   const clinicId = req.params.id;
-  if (user.role !== 'SUPER_ADMIN' && user.clinicId !== clinicId) {
+  if (user.role === 'SUPER_ADMIN') {
+    // SA can access any clinic
+  } else if (user.role === 'DOCTOR' || user.role === 'RECEPTIONIST') {
+    const userClinicId = await getUserClinicId(user);
+    if (!userClinicId) {
+      res.status(403).json({ message: 'You are not assigned to a clinic. Ask an administrator to assign you.' });
+      return;
+    }
+    if (userClinicId !== clinicId) {
+      res.status(403).json({ message: 'You can only view your own clinic\'s staff.' });
+      return;
+    }
+  } else {
     res.status(403).json({ message: 'Forbidden' });
     return;
   }

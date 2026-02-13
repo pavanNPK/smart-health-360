@@ -14,9 +14,24 @@
         <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
       </div>
     } @else {
-      <p-table [value]="users" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }" showGridlines>
+      <p-table
+        [value]="users"
+        [lazy]="true"
+        (onLazyLoad)="onLazyLoad($event)"
+        [paginator]="true"
+        [rows]="limit"
+        [first]="first"
+        [totalRecords]="total"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {{ first }} to {{ last }} of {{ total }} users"
+        styleClass="p-datatable-sm p-datatable-striped"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        showGridlines
+      >
         <ng-template pTemplate="header">
           <tr>
+            <th style="width: 4rem;">S.No</th>
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
@@ -26,8 +41,9 @@
             <th style="width: 10rem;">Actions</th>
           </tr>
         </ng-template>
-        <ng-template pTemplate="body" let-u>
+        <ng-template pTemplate="body" let-u let-rowIndex="rowIndex">
           <tr>
+            <td>{{ first + rowIndex + 1 }}</td>
             <td>{{ u.name }}</td>
             <td>{{ u.email }}</td>
             <td>{{ u.role }}</td>
@@ -38,6 +54,7 @@
             <td>{{ u.specialization || '—' }}</td>
             <td>
               <div class="flex gap-1 align-items-center">
+                <p-button icon="pi pi-pencil" styleClass="p-button-text p-button-sm" pTooltip="Edit" (onClick)="openEditForm(u)"></p-button>
                 @if (u.status === 'PENDING_VERIFICATION') {
                   <p-button icon="pi pi-envelope" styleClass="p-button-text p-button-sm" pTooltip="Resend OTP" (onClick)="resendOtp(u.email)"></p-button>
                 }
@@ -48,11 +65,10 @@
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="7" class="text-center py-4 text-600">No users.</td>
+            <td colspan="8" class="text-center py-4 text-600">No users.</td>
           </tr>
         </ng-template>
       </p-table>
-      <p class="text-600 text-sm mt-2">Page {{ page }} · {{ total }} total</p>
     }
   </p-card>
 </div>
@@ -95,5 +111,42 @@
   <ng-template pTemplate="footer">
     <p-button label="Cancel" severity="secondary" (onClick)="showForm = false" styleClass="p-button-outlined" [disabled]="formSubmitting"></p-button>
     <p-button label="Create" icon="pi pi-check" (onClick)="createUser()" [loading]="formSubmitting" [disabled]="formSubmitting"></p-button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="showEditForm" header="Edit User" [modal]="true" [style]="{ width: '28rem' }" [draggable]="false" [resizable]="false" (onHide)="showEditForm = false">
+  @if (editingUser) {
+    <form (ngSubmit)="updateUser()" class="flex flex-column gap-3">
+      <div class="flex flex-column gap-2">
+        <label for="edit-name" class="font-medium text-900">Name *</label>
+        <input id="edit-name" pInputText type="text" [(ngModel)]="editForm.name" name="editName" required class="w-full" />
+      </div>
+      <div class="flex flex-column gap-2">
+        <span class="text-500 text-sm">{{ editingUser.email }}</span>
+      </div>
+      <div class="flex flex-column gap-2">
+        <label for="edit-status" class="font-medium text-900">Status</label>
+        <p-select id="edit-status" [(ngModel)]="editForm.status" name="editStatus" [options]="statusOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+      </div>
+      @if (editingUser.role === 'DOCTOR') {
+        <div class="flex flex-column gap-2">
+          <label for="edit-spec" class="font-medium text-900">Specialization</label>
+          <input id="edit-spec" pInputText type="text" [(ngModel)]="editForm.specialization" name="editSpec" class="w-full" />
+        </div>
+      }
+      @if (editingUser.role === 'DOCTOR' || editingUser.role === 'RECEPTIONIST') {
+        <div class="flex flex-column gap-2">
+          <label for="edit-clinic" class="font-medium text-900">Clinic</label>
+          <p-select id="edit-clinic" [(ngModel)]="editForm.clinicId" name="editClinicId" [options]="clinics" optionLabel="name" optionValue="_id" placeholder="Select clinic" styleClass="w-full" />
+        </div>
+      }
+      @if (editError) {
+        <p-message severity="error" [text]="editError" styleClass="w-full"></p-message>
+      }
+    </form>
+  }
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showEditForm = false; editingUser = null" styleClass="p-button-outlined" [disabled]="editSubmitting"></p-button>
+    <p-button label="Save" icon="pi pi-check" (onClick)="updateUser()" [loading]="editSubmitting" [disabled]="editSubmitting"></p-button>
   </ng-template>
 </p-dialog>

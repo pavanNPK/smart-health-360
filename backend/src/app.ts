@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { auditRequestMiddleware } from './middleware/auditRequest';
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
 import patientsRoutes from './routes/patients';
@@ -17,6 +18,9 @@ const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Audit every authenticated request (method, path, status) for all roles
+app.use(auditRequestMiddleware);
 
 app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);

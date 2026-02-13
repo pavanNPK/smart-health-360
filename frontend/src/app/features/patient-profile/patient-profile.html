@@ -55,9 +55,24 @@
           <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
         </div>
       } @else {
-        <p-table [value]="records()" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '40rem' }" showGridlines>
+        <p-table
+          [value]="records()"
+          [lazy]="true"
+          (onLazyLoad)="onRecordsLazyLoad($event)"
+          [paginator]="true"
+          [rows]="limit"
+          [first]="first"
+          [totalRecords]="total"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Showing {{ first + 1 }} to {{ recordsLast }} of {{ total }} records"
+          styleClass="p-datatable-sm p-datatable-striped"
+          [tableStyle]="{ 'min-width': '40rem' }"
+          showGridlines
+        >
           <ng-template pTemplate="header">
             <tr>
+              <th style="width: 4rem;">S.No</th>
               <th>Type</th>
               <th>Status</th>
               <th>Date</th>
@@ -67,8 +82,9 @@
               }
             </tr>
           </ng-template>
-          <ng-template pTemplate="body" let-r>
+          <ng-template pTemplate="body" let-r let-rowIndex="rowIndex">
             <tr>
+              <td>{{ first + rowIndex + 1 }}</td>
               <td>{{ r.type }}</td>
               <td><span [class]="r.visibility === 'VIS_B' ? 'text-orange-600' : 'text-600'">{{ r.visibility }}</span></td>
               <td>{{ r.createdAt | date : 'short' }}</td>
@@ -82,11 +98,10 @@
           </ng-template>
           <ng-template pTemplate="emptymessage">
             <tr>
-              <td [attr.colspan]="canChangeVisibility() ? 5 : 4" class="text-center py-4 text-600">No records.</td>
+              <td [attr.colspan]="canChangeVisibility() ? 6 : 5" class="text-center py-4 text-600">No records.</td>
             </tr>
           </ng-template>
         </p-table>
-        <p class="text-600 text-sm mt-2">{{ total }} total</p>
       }
     </p-card>
   </div>

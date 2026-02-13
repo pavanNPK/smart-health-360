@@ -7,7 +7,7 @@ import { Api } from '../../core/api';
 import { Auth } from '../../core/auth';
 import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
+import { TableModule, type TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
@@ -48,6 +48,8 @@ interface AttendanceRecord {
 export class DoctorStaff implements OnInit, OnDestroy {
   receptionists: ReceptionistUser[] = [];
   attendance: AttendanceRecord[] = [];
+  first = 0;
+  rows = 10;
   loadingReceptionists = false;
   receptionistsError = '';
   clinicId: string | undefined;
@@ -91,6 +93,15 @@ export class DoctorStaff implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  onPage(event: TableLazyLoadEvent): void {
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? 10;
+  }
+
+  get displayEnd(): number {
+    return Math.min(this.first + this.rows, this.receptionists.length);
+  }
+
   loadReceptionists(): void {
     if (!this.clinicId) return;
     this.loadingReceptionists = true;
@@ -104,6 +115,19 @@ export class DoctorStaff implements OnInit, OnDestroy {
         this.receptionistsError = err.error?.message || 'Failed to load receptionists';
         this.receptionists = [];
         this.loadingReceptionists = false;
+      },
+    });
+  }
+
+  retryLoad(): void {
+    this.receptionistsError = '';
+    this.auth.refreshUser().subscribe({
+      next: () => {
+        this.clinicId = this.auth.currentUserValue?.clinicId;
+        if (this.clinicId) this.loadReceptionists();
+      },
+      error: () => {
+        if (this.clinicId) this.loadReceptionists();
       },
     });
   }

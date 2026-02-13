@@ -4,7 +4,7 @@ import { Api } from '../../core/api';
 import type { UserRole } from '../../core/auth';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
+import { TableModule, type TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
@@ -48,8 +48,15 @@ export class UserManagement implements OnInit {
   total = 0;
   page = 1;
   limit = 10;
+  first = 0;
+  last = 0;
   showForm = false;
   form = { name: '', email: '', password: '', role: 'RECEPTIONIST' as UserRole, specialization: '', clinicId: '' };
+  showEditForm = false;
+  editingUser: User | null = null;
+  editForm = { name: '', status: '', specialization: '', clinicId: '' as string | null };
+  editError = '';
+  editSubmitting = false;
   clinics: Clinic[] = [];
   error = '';
   loading = false;
@@ -60,6 +67,12 @@ export class UserManagement implements OnInit {
     { label: 'Receptionist', value: 'RECEPTIONIST' },
     { label: 'Doctor', value: 'DOCTOR' },
     { label: 'Super Admin', value: 'SUPER_ADMIN' },
+  ];
+
+  statusOptions = [
+    { label: 'Active', value: 'ACTIVE' },
+    { label: 'Inactive', value: 'INACTIVE' },
+    { label: 'Pending verification', value: 'PENDING_VERIFICATION' },
   ];
 
   constructor(
@@ -73,12 +86,20 @@ export class UserManagement implements OnInit {
     this.api.get<{ data: Clinic[] }>('/clinics').subscribe({ next: (res) => (this.clinics = res.data) });
   }
 
+  onLazyLoad(event: TableLazyLoadEvent): void {
+    this.first = event.first ?? 0;
+    this.limit = event.rows ?? 10;
+    this.page = this.limit > 0 ? Math.floor(this.first / this.limit) + 1 : 1;
+    this.load();
+  }
+
   load(): void {
     this.loading = true;
     this.api.get<{ data: User[]; total: number }>('/users', { page: this.page, limit: this.limit }).subscribe({
       next: (res) => {
         this.users = res.data;
         this.total = res.total;
+        this.last = this.total === 0 ? 0 : Math.min(this.first + this.users.length, this.total);
       },
       error: () => {},
       complete: () => (this.loading = false),
@@ -89,6 +110,46 @@ export class UserManagement implements OnInit {
     this.showForm = true;
     this.form = { name: '', email: '', password: '', role: 'RECEPTIONIST', specialization: '', clinicId: '' };
     this.error = '';
+  }
+
+  openEditForm(u: User): void {
+    this.editingUser = u;
+    const clinicId = typeof u.clinicId === 'object' ? (u.clinicId as Clinic)?._id : (u.clinicId as string) ?? '';
+    this.editForm = {
+      name: u.name,
+      status: u.status,
+      specialization: u.specialization ?? '',
+      clinicId: clinicId || null,
+    };
+    this.editError = '';
+    this.showEditForm = true;
+  }
+
+  updateUser(): void {
+    if (!this.editingUser) return;
+    this.editError = '';
+    this.editSubmitting = true;
+    const payload: Record<string, unknown> = {
+      name: this.editForm.name,
+      status: this.editForm.status,
+      specialization: this.editForm.specialization || undefined,
+    };
+    if (this.editingUser.role === 'DOCTOR' || this.editingUser.role === 'RECEPTIONIST') {
+      payload['clinicId'] = this.editForm.clinicId || null;
+    }
+    this.api.patch<User>(`/users/${this.editingUser._id}`, payload).subscribe({
+      next: () => {
+        this.editSubmitting = false;
+        this.showEditForm = false;
+        this.editingUser = null;
+        this.load();
+        this.messageService.add({ severity: 'success', summary: 'User updated', detail: this.editForm.name });
+      },
+      error: (err) => {
+        this.editSubmitting = false;
+        this.editError = (err?.error?.message as string) || 'Failed to update user.';
+      },
+    });
   }
 
   getClinicName(u: User): string {

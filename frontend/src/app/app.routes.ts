@@ -16,6 +16,7 @@ export const routes: Routes = [
         data: { roles: ['RECEPTIONIST', 'SUPER_ADMIN'] },
         children: [
           { path: 'patients', loadComponent: () => import('./features/patient-list/patient-list').then((m) => m.PatientList) },
+          { path: 'doctors', canActivate: [roleGuard], data: { roles: ['RECEPTIONIST'] }, loadComponent: () => import('./features/reception-doctors/reception-doctors').then((m) => m.ReceptionDoctors) },
           { path: 'patients/new', loadComponent: () => import('./features/patient-form/patient-form').then((m) => m.PatientForm) },
           { path: 'patients/:id/edit', loadComponent: () => import('./features/patient-form/patient-form').then((m) => m.PatientForm) },
           { path: 'patients/:id', loadComponent: () => import('./features/patient-profile/patient-profile').then((m) => m.PatientProfile) },

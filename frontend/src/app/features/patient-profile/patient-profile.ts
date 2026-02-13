@@ -8,7 +8,7 @@ import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
-import { TableModule } from 'primeng/table';
+import { TableModule, type TableLazyLoadEvent } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
@@ -60,6 +60,8 @@ export class PatientProfile implements OnInit {
   total = 0;
   page = 1;
   limit = 20;
+  first = 0;
+  recordsLast = 0;
   loadingPatient = true;
   loadingRecords = false;
   error = '';
@@ -123,13 +125,22 @@ export class PatientProfile implements OnInit {
       next: (res) => {
         this.records.set(res.data);
         this.total = res.total;
+        this.recordsLast = this.total === 0 ? 0 : Math.min(this.first + res.data.length, this.total);
       },
       error: () => this.records.set([]),
       complete: () => (this.loadingRecords = false),
     });
   }
 
+  onRecordsLazyLoad(event: TableLazyLoadEvent): void {
+    this.first = event.first ?? 0;
+    this.limit = event.rows ?? 20;
+    this.page = this.limit > 0 ? Math.floor(this.first / this.limit) + 1 : 1;
+    this.loadRecords();
+  }
+
   onFilterChange(): void {
+    this.first = 0;
     this.page = 1;
     this.loadRecords();
   }

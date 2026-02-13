@@ -63,6 +63,7 @@
         >
           <ng-template pTemplate="header">
             <tr>
+              <th style="width: 4rem;">S.No</th>
               <th>Name</th>
               <th>DOB</th>
               <th>Email</th>
@@ -73,8 +74,9 @@
               <th style="width: 6rem;">Actions</th>
             </tr>
           </ng-template>
-          <ng-template pTemplate="body" let-row>
+          <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
             <tr>
+              <td>{{ first + rowIndex + 1 }}</td>
               <td>{{ row.firstName }} {{ row.lastName }}</td>
               <td>{{ row.dob | date : 'shortDate' }}</td>
               <td>{{ row.contactEmail || '—' }}</td>
@@ -96,7 +98,7 @@
           </ng-template>
           <ng-template pTemplate="emptymessage">
             <tr>
-              <td colspan="8" class="text-center py-4 text-600">No patients found.</td>
+              <td colspan="9" class="text-center py-4 text-600">No patients found.</td>
             </tr>
           </ng-template>
         </p-table>

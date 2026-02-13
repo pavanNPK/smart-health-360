@@ -3,25 +3,63 @@
     <i class="pi pi-history mr-2 page-heading-icon"></i>Audit Logs
   </h1>
   <p-card styleClass="shadow-2 border-round-lg">
+    <div class="flex flex-wrap align-items-center gap-2 mb-3">
+      <label class="text-700 font-medium">Action:</label>
+      <p-select
+        [ngModel]="actionFilter"
+        (ngModelChange)="actionFilter = $event; first = 0; page = 1; load()"
+        [options]="actionOptions"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-12rem"
+        placeholder="All actions"
+      ></p-select>
+      <p-button icon="pi pi-refresh" styleClass="p-button-outlined" (onClick)="load()" pTooltip="Refresh"></p-button>
+    </div>
     @if (loading) {
       <div class="flex align-items-center justify-content-center py-8">
         <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
       </div>
     } @else {
-      <p-table [value]="logs" styleClass="p-datatable-sm p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }" showGridlines>
+      <p-table
+        [value]="logs"
+        [lazy]="true"
+        (onLazyLoad)="onLazyLoad($event)"
+        [paginator]="true"
+        [rows]="limit"
+        [first]="first"
+        [totalRecords]="total"
+        [rowsPerPageOptions]="[10, 20, 50, 100]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {{ first + 1 }} to {{ last }} of {{ total }} logs"
+        styleClass="p-datatable-sm p-datatable-striped"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        showGridlines
+      >
         <ng-template pTemplate="header">
           <tr>
+            <th style="width: 4rem;">S.No</th>
             <th>Time</th>
             <th>Action</th>
+            <th>Request</th>
             <th>User</th>
             <th>Details</th>
             <th style="width: 6rem;">Actions</th>
           </tr>
         </ng-template>
-        <ng-template pTemplate="body" let-log>
+        <ng-template pTemplate="body" let-log let-rowIndex="rowIndex">
           <tr>
+            <td>{{ first + rowIndex + 1 }}</td>
             <td>{{ log.createdAt | date : 'short' }}</td>
             <td>{{ log.action }}</td>
+            <td>
+              @if (log.action === 'API_ACCESS' && log.details && log.details['method'] && log.details['path']) {
+                <code class="text-sm surface-200 px-2 py-1 border-round">{{ log.details['method'] }} {{ log.details['path'] }}</code>
+                <span class="text-500 ml-1">({{ log.details['statusCode'] }})</span>
+              } @else {
+                <span class="text-500">—</span>
+              }
+            </td>
             <td>{{ log.userId.name }} ({{ log.userId.email }})</td>
             <td><code class="text-sm surface-200 px-2 py-1 border-round">{{ log.details | json }}</code></td>
             <td>
@@ -31,11 +69,10 @@
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="5" class="text-center py-4 text-600">No audit logs.</td>
+            <td colspan="7" class="text-center py-4 text-600">No audit logs.</td>
           </tr>
         </ng-template>
       </p-table>
-      <p class="text-600 text-sm mt-2">Page {{ page }} · {{ total }} total</p>
     }
   </p-card>
 </div>
