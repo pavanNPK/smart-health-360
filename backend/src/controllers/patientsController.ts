@@ -6,6 +6,7 @@ import { User } from '../models/User';
 import { AuthUser } from '../middleware/auth';
 import { canViewPatient } from '../services/permissions';
 import { sendPatientRegistrationEmail } from '../services/mail';
+import * as whatsappService from '../services/whatsapp';
 
 const createPatientSchema = z.object({
   firstName: z.string().min(1),
@@ -37,6 +38,46 @@ const assignDoctorSchema = z.object({
   doctorId: z.string().min(1),
 });
 
+/** Normalize phone to digits only for uniqueness (e.g. +91 98765 43210 → 919876543210). */
+function normalizePhone(phone: string | undefined): string {
+  if (!phone || typeof phone !== 'string') return '';
+  return phone.replace(/\D/g, '');
+}
+
+/** Check email unique across User and Patient; return error message or null. */
+async function checkEmailUnique(email: string, excludePatientId?: string): Promise<string | null> {
+  const lower = email.toLowerCase().trim();
+  const existingUser = await User.findOne({ email: lower });
+  if (existingUser) return 'This email is already registered as a user.';
+  const patientFilter: Record<string, unknown> = { contactEmail: lower };
+  if (excludePatientId) patientFilter._id = { $ne: excludePatientId };
+  const existingPatient = await Patient.findOne(patientFilter);
+  if (existingPatient) return 'This email is already registered for another patient.';
+  return null;
+}
+
+/** Check phone unique across Patients; return error message or null. */
+async function checkPhoneUnique(phone: string, excludePatientId?: string): Promise<string | null> {
+  const norm = normalizePhone(phone);
+  if (!norm) return null;
+  const filter: Record<string, unknown> = { contactPhoneNormalized: norm };
+  if (excludePatientId) filter._id = { $ne: excludePatientId };
+  const existing = await Patient.findOne(filter);
+  if (existing) return 'This phone number is already registered for another patient.';
+  // Also check patients that have contactPhone but not yet contactPhoneNormalized (pre-migration)
+  const withPhone = await Patient.find({
+    contactPhone: { $exists: true, $nin: [null, ''] },
+    $or: [{ contactPhoneNormalized: { $exists: false } }, { contactPhoneNormalized: '' }],
+  }).select('contactPhone _id').lean();
+  for (const p of withPhone) {
+    if (p._id.toString() === excludePatientId) continue;
+    if (normalizePhone((p as { contactPhone?: string }).contactPhone) === norm) {
+      return 'This phone number is already registered for another patient.';
+    }
+  }
+  return null;
+}
+
 export async function createPatient(req: Request, res: Response): Promise<void> {
   const parsed = createPatientSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -44,15 +85,52 @@ export async function createPatient(req: Request, res: Response): Promise<void> 
     return;
   }
   const user = req.user!;
-  const data = { ...parsed.data, contactEmail: parsed.data.contactEmail || undefined };
+  const contactEmail = parsed.data.contactEmail?.trim() || undefined;
+  const contactPhone = parsed.data.contactPhone?.trim() || undefined;
+
+  if (contactEmail) {
+    const emailError = await checkEmailUnique(contactEmail);
+    if (emailError) {
+      res.status(409).json({ message: emailError });
+      return;
+    }
+  }
+  if (contactPhone) {
+    const phoneError = await checkPhoneUnique(contactPhone);
+    if (phoneError) {
+      res.status(409).json({ message: phoneError });
+      return;
+    }
+  }
+
+  const phoneNorm = contactPhone ? normalizePhone(contactPhone) : undefined;
+  const data = {
+    ...parsed.data,
+    contactEmail,
+    contactPhone: contactPhone || undefined,
+    contactPhoneNormalized: phoneNorm || undefined,
+  };
   const patient = await Patient.create({
     ...data,
     dob: new Date(data.dob),
     primaryDoctorId: parsed.data.primaryDoctorId,
     createdBy: user.id,
   });
+  const doctor = await User.findById(parsed.data.primaryDoctorId).select('name').lean();
+  const doctorName = doctor?.name;
+  const patientName = `${patient.firstName} ${patient.lastName}`;
   if (patient.contactEmail) {
-    sendPatientRegistrationEmail(patient.contactEmail, `${patient.firstName} ${patient.lastName}`).catch(() => {});
+    const now = new Date();
+    const appointmentDate = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    const appointmentTime = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    sendPatientRegistrationEmail(patient.contactEmail, patientName, doctorName, {
+      appointmentDate,
+      appointmentTime,
+    }).catch(() => {});
+  }
+  if (patient.contactPhone) {
+    const msg = whatsappService.getAppointmentOnboardMessage(patientName, doctorName);
+    whatsappService.sendWhatsAppMessage(patient.contactPhone, msg).catch(() => {});
   }
   res.status(201).json(patient);
 }
@@ -67,9 +145,9 @@ export async function listPatients(req: Request, res: Response): Promise<void> {
   const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
   const skip = (page - 1) * limit;
   const filter: Record<string, unknown> = {};
-  if (user.role === 'DOCTOR' && assignedTo === 'me') {
+  if (user.role === 'DOCTOR') {
     filter.primaryDoctorId = user.id;
-    if (createdBy) filter.createdBy = createdBy;
+    if (assignedTo === 'me' && createdBy) filter.createdBy = createdBy;
   }
   if (user.role === 'RECEPTIONIST' && user.clinicId) {
     const clinicDoctorIds = await User.find({ role: 'DOCTOR', clinicId: user.clinicId }).distinct('_id');
@@ -148,7 +226,11 @@ export async function getPatient(req: Request, res: Response): Promise<void> {
   }
   const user = req.user! as AuthUser;
   if (!canViewPatient(patient, user)) {
-    res.status(403).json({ message: 'Forbidden' });
+    const message =
+      user.role === 'DOCTOR'
+        ? 'This patient is not assigned to you. You can only view patients where you are the primary doctor.'
+        : 'Forbidden';
+    res.status(403).json({ message });
     return;
   }
   res.json(patient);
@@ -179,11 +261,33 @@ export async function updatePatient(req: Request, res: Response): Promise<void> 
     res.status(403).json({ message: 'Forbidden' });
     return;
   }
+
   const updates: Record<string, unknown> = { ...parsed.data };
   if (updates.contactEmail === '') updates.contactEmail = undefined;
   if (updates.gender === '') updates.gender = undefined;
   if (updates.primaryDoctorId === '') updates.primaryDoctorId = null;
   if (updates.dob) updates.dob = new Date(updates.dob as string);
+
+  const newEmail = updates.contactEmail !== undefined ? (updates.contactEmail as string)?.trim() || undefined : undefined;
+  const newPhone = updates.contactPhone !== undefined ? (updates.contactPhone as string)?.trim() || undefined : undefined;
+  if (newEmail !== undefined) {
+    const emailError = await checkEmailUnique(newEmail, id);
+    if (emailError) {
+      res.status(409).json({ message: emailError });
+      return;
+    }
+  }
+  if (newPhone !== undefined) {
+    const phoneError = await checkPhoneUnique(newPhone, id);
+    if (phoneError) {
+      res.status(409).json({ message: phoneError });
+      return;
+    }
+    updates.contactPhoneNormalized = newPhone ? normalizePhone(newPhone) : undefined;
+  } else if ('contactPhone' in parsed.data) {
+    updates.contactPhoneNormalized = undefined;
+  }
+
   const updated = await Patient.findByIdAndUpdate(id, { $set: updates }, { new: true })
     .populate('primaryDoctorId', 'name email')
     .lean();

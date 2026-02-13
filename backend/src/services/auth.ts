@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
 import { AuthUser } from '../middleware/auth';
 import { logAudit } from './audit';
+import { sendWelcomeEmail } from './mail';
 
 const SALT_ROUNDS = 10;
 
@@ -81,6 +82,7 @@ export async function verifyOtpAndSetPassword(
   user.passwordHash = await hashPassword(newPassword);
   user.status = 'ACTIVE';
   await user.save();
+  sendWelcomeEmail(user.name, user.email).catch((err) => console.error('Welcome email failed:', err));
   const clinicId = user.clinicId?.toString();
   const payload: AuthUser & { email?: string; clinicId?: string } = { id: user._id.toString(), role: user.role, email: user.email, clinicId };
   const accessToken = signAccessToken(payload);

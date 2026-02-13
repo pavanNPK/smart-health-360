@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { Api } from '../../core/api';
@@ -93,22 +93,42 @@ export class PatientProfile implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private api: Api,
     private auth: Auth,
     private messageService: MessageService
   ) {}
 
+  /** Back-to-list URL based on current route so we don't send doctor/admin to /reception (which can redirect to login). */
+  get backToListUrl(): string {
+    const url = this.router.url;
+    if (url.startsWith('/doctor')) return '/doctor/patients';
+    if (url.startsWith('/admin')) return '/admin/dashboard';
+    return '/reception/patients';
+  }
+
+  /** Edit patient link (reception/edit route; SA and receptionist only). */
+  get editPatientLink(): string[] {
+    return ['/reception/patients', this.patientId, 'edit'];
+  }
+
   ngOnInit(): void {
     this.patientId = this.route.snapshot.paramMap.get('id') || '';
     this.loadPatient();
-    this.loadRecords();
+    // Records load on first p-table onLazyLoad (table stays in DOM; [loading] shows overlay)
   }
 
   loadPatient(): void {
     this.loadingPatient = true;
     this.api.get<Patient>(`/patients/${this.patientId}`).subscribe({
-      next: (p) => (this.patient = p),
-      error: (err) => (this.error = err.error?.message || 'Failed to load patient'),
+      next: (p) => {
+        this.patient = p;
+        this.loadRecords(); // first load when patient is ready (table may not fire onLazyLoad yet)
+      },
+      error: (err) => {
+        this.loadingPatient = false;
+        this.error = err?.error?.message || 'Failed to load patient. Check backend and network.';
+      },
       complete: () => (this.loadingPatient = false),
     });
   }
@@ -127,7 +147,16 @@ export class PatientProfile implements OnInit {
         this.total = res.total;
         this.recordsLast = this.total === 0 ? 0 : Math.min(this.first + res.data.length, this.total);
       },
-      error: () => this.records.set([]),
+      error: (err) => {
+        this.loadingRecords = false;
+        this.records.set([]);
+        this.total = 0;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Records load failed',
+          detail: err?.error?.message || 'Failed to load records. Check backend and network.',
+        });
+      },
       complete: () => (this.loadingRecords = false),
     });
   }

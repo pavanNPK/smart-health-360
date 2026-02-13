@@ -7,6 +7,8 @@ export interface IPatient extends Document {
   gender?: 'M' | 'F' | 'O';
   contactEmail?: string;
   contactPhone?: string;
+  /** Digits-only version of contactPhone for uniqueness checks. */
+  contactPhoneNormalized?: string;
   address?: string;
   nationalId?: string;
   patientVisibility: 'VIS_A' | 'VIS_B';
@@ -24,6 +26,7 @@ const PatientSchema = new Schema<IPatient>(
     gender: { type: String, enum: ['M', 'F', 'O'] },
     contactEmail: { type: String },
     contactPhone: { type: String },
+    contactPhoneNormalized: { type: String, sparse: true, unique: true },
     address: { type: String },
     nationalId: { type: String },
     patientVisibility: { type: String, enum: ['VIS_A', 'VIS_B'], default: 'VIS_A' },
@@ -36,5 +39,6 @@ const PatientSchema = new Schema<IPatient>(
 PatientSchema.index({ lastName: 1, firstName: 1 });
 PatientSchema.index({ primaryDoctorId: 1 });
 PatientSchema.index({ createdBy: 1 });
+PatientSchema.index({ contactEmail: 1 }, { sparse: true });
 
 export const Patient: Model<IPatient> = mongoose.model<IPatient>('Patient', PatientSchema);

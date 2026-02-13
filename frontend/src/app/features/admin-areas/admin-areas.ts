@@ -58,7 +58,10 @@ export class AdminAreas implements OnInit {
     this.loading = true;
     this.api.get<{ data: Area[] }>('/areas').subscribe({
       next: (res) => (this.areas = res.data),
-      error: () => {},
+      error: () => {
+        this.loading = false;
+        this.messageService.add({ severity: 'error', summary: 'Load failed', detail: 'Failed to load areas. Check backend and network.' });
+      },
       complete: () => (this.loading = false),
     });
   }

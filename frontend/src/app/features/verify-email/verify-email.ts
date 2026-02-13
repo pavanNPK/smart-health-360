@@ -74,15 +74,25 @@ export class VerifyEmail implements OnInit {
       .subscribe({
         next: (res) => {
           this.auth.setSession(res.accessToken, res.refreshToken, res.user);
-          this.messageService.add({ severity: 'success', summary: 'Password set', detail: 'Redirecting…' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Welcome!',
+            detail: 'Your account is active. A welcome email has been sent. Redirecting…',
+            life: 5000,
+          });
           const user = res.user;
           if (user.role === 'SUPER_ADMIN') this.router.navigate(['/admin/dashboard']);
           else if (user.role === 'DOCTOR') this.router.navigate(['/doctor/dashboard']);
           else this.router.navigate(['/reception/patients']);
         },
         error: (err) => {
-          this.error = err.error?.message || 'Verification failed. Check OTP and try again.';
-          this.messageService.add({ severity: 'error', summary: 'Verification failed', detail: this.error });
+          this.error = err.error?.message || 'Invalid or expired OTP. Request a new code or check the 6-digit code.';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Verification failed',
+            detail: this.error,
+            life: 6000,
+          });
           this.loading = false;
         },
         complete: () => (this.loading = false),
@@ -100,12 +110,17 @@ export class VerifyEmail implements OnInit {
     this.resendLoading = true;
     this.http.post<{ message: string }>(`${environment.apiUrl}/auth/send-otp`, { email: this.email.trim().toLowerCase() }).subscribe({
       next: () => {
-        this.success = 'OTP sent. Check your email.';
-        this.messageService.add({ severity: 'success', summary: 'OTP sent', detail: this.success });
+        this.success = 'Set-password link and OTP sent to your email. Check your inbox (and spam).';
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Email sent',
+          detail: this.success,
+          life: 6000,
+        });
       },
       error: (err) => {
-        this.error = err.error?.message || 'Failed to send OTP';
-        this.messageService.add({ severity: 'error', summary: 'Resend failed', detail: this.error });
+        this.error = err.error?.message || 'Failed to send OTP. Check email and try again.';
+        this.messageService.add({ severity: 'error', summary: 'Resend failed', detail: this.error, life: 6000 });
       },
       complete: () => (this.resendLoading = false),
     });

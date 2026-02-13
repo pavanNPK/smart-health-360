@@ -184,12 +184,22 @@ export class PatientForm implements OnInit, OnDestroy {
         .post<{ _id: string }>('/patients', payload)
         .subscribe({
           next: (res) => {
-            this.messageService.add({ severity: 'success', summary: 'Patient registered', detail: 'Redirecting to profile…' });
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Patient registered',
+              detail: 'Confirmation email sent (and WhatsApp if phone was provided). Appointment/onboarding confirmed. Redirecting…',
+              life: 6000,
+            });
             this.router.navigate(['/reception/patients', res._id]);
           },
           error: (err) => {
-            this.error = err.error?.message || 'Failed to create patient';
-            this.messageService.add({ severity: 'error', summary: 'Registration failed', detail: this.error });
+            this.error = err.error?.message || 'Failed to create patient. Check required fields and try again.';
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Registration failed',
+              detail: this.error,
+              life: 6000,
+            });
             this.loading = false;
           },
           complete: () => {

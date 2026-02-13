@@ -50,6 +50,7 @@
           [value]="patients"
           [lazy]="true"
           (onLazyLoad)="onLazyLoad($event)"
+          [loading]="loading"
           [paginator]="true"
           [rows]="limit"
           [first]="first"

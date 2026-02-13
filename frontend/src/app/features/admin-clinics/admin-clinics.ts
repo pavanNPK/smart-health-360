@@ -69,7 +69,10 @@ export class AdminClinics implements OnInit {
     this.loading = true;
     this.api.get<{ data: Clinic[] }>('/clinics').subscribe({
       next: (res) => (this.clinics = res.data),
-      error: () => {},
+      error: () => {
+        this.loading = false;
+        this.messageService.add({ severity: 'error', summary: 'Load failed', detail: 'Failed to load clinics. Check backend and network.' });
+      },
       complete: () => (this.loading = false),
     });
   }

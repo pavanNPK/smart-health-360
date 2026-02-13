@@ -95,13 +95,14 @@ export class DoctorPatientList implements OnInit {
         this.hasLoadedOnce = true;
       },
       error: (err) => {
+        this.loading = false;
         this.patients = [];
         this.total = 0;
         this.hasLoadedOnce = true;
         this.messageService.add({
           severity: 'error',
           summary: 'Load failed',
-          detail: err.error?.message || 'Failed to load patients.',
+          detail: err?.error?.message || 'Failed to load patients. Check backend and network.',
         });
       },
       complete: () => {

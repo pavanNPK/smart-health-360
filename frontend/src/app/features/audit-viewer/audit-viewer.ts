@@ -79,10 +79,11 @@ export class AuditViewer implements OnInit {
         this.last = this.total === 0 ? 0 : Math.min(this.first + this.logs.length, this.total);
       },
       error: (err) => {
+        this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Load failed',
-          detail: err.error?.message || 'Failed to load audit logs.',
+          detail: err?.error?.message || 'Failed to load audit logs. Check backend and network.',
         });
       },
       complete: () => (this.loading = false),

@@ -16,26 +16,22 @@
       ></p-select>
       <p-button icon="pi pi-refresh" styleClass="p-button-outlined" (onClick)="load()" pTooltip="Refresh"></p-button>
     </div>
-    @if (loading) {
-      <div class="flex align-items-center justify-content-center py-8">
-        <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
-      </div>
-    } @else {
-      <p-table
-        [value]="logs"
-        [lazy]="true"
-        (onLazyLoad)="onLazyLoad($event)"
-        [paginator]="true"
-        [rows]="limit"
-        [first]="first"
-        [totalRecords]="total"
-        [rowsPerPageOptions]="[10, 20, 50, 100]"
-        [showCurrentPageReport]="true"
-        currentPageReportTemplate="Showing {{ first + 1 }} to {{ last }} of {{ total }} logs"
-        styleClass="p-datatable-sm p-datatable-striped"
-        [tableStyle]="{ 'min-width': '50rem' }"
-        showGridlines
-      >
+    <p-table
+      [value]="logs"
+      [lazy]="true"
+      (onLazyLoad)="onLazyLoad($event)"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="limit"
+      [first]="first"
+      [totalRecords]="total"
+      [rowsPerPageOptions]="[10, 20, 50, 100]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {{ first + 1 }} to {{ last }} of {{ total }} logs"
+      styleClass="p-datatable-sm p-datatable-striped"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      showGridlines
+    >
         <ng-template pTemplate="header">
           <tr>
             <th style="width: 4rem;">S.No</th>
@@ -72,8 +68,7 @@
             <td colspan="7" class="text-center py-4 text-600">No audit logs.</td>
           </tr>
         </ng-template>
-      </p-table>
-    }
+    </p-table>
   </p-card>
 </div>
 

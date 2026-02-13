@@ -49,12 +49,17 @@ export class Login {
       },
       error: (err: { error?: { message?: string; code?: string } }) => {
         if (err.error?.code === 'EMAIL_NOT_VERIFIED') {
-          this.error = 'Your account is pending. Check your email for the OTP and the link to set your password.';
+          this.error = 'Your account is pending. Check your email for the set-password link and 6-digit OTP.';
           this.showVerifyLink = true;
-          this.messageService.add({ severity: 'warn', summary: 'Verify email', detail: this.error });
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Verify email first',
+            detail: this.error,
+            life: 7000,
+          });
         } else {
           this.error = err.error?.message || 'Invalid email or password';
-          this.messageService.add({ severity: 'error', summary: 'Sign in failed', detail: this.error });
+          this.messageService.add({ severity: 'error', summary: 'Sign in failed', detail: this.error, life: 5000 });
         }
         this.loading = false;
       },

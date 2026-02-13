@@ -101,7 +101,14 @@ export class UserManagement implements OnInit {
         this.total = res.total;
         this.last = this.total === 0 ? 0 : Math.min(this.first + this.users.length, this.total);
       },
-      error: () => {},
+      error: (err) => {
+        this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Load failed',
+          detail: err?.error?.message || 'Failed to load users. Check backend and network.',
+        });
+      },
       complete: () => (this.loading = false),
     });
   }
@@ -181,8 +188,12 @@ export class UserManagement implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'User created',
-          detail: msg + (res.message?.includes('OTP') ? ' They must verify email to set password and log in.' : ''),
-          life: 6000,
+          detail:
+            msg +
+            (res.message?.includes('OTP')
+              ? ' Set-password email sent. They must verify email and set password to log in.'
+              : ' They can log in with the password you set.'),
+          life: 7000,
         });
         setTimeout(() => (this.successMessage = ''), 5000);
       },
