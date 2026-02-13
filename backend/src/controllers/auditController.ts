@@ -29,8 +29,14 @@ export async function listAuditLogs(req: Request, res: Response): Promise<void> 
     const receptionistIds = clinicObjectId
       ? await User.find({ role: 'RECEPTIONIST', clinicId: clinicObjectId }).distinct('_id')
       : [];
-    const allowedUserIds = [user.id, ...receptionistIds.map((id) => id.toString())];
-    filter.userId = { $in: allowedUserIds };
+    const allowedIds: mongoose.Types.ObjectId[] = [];
+    try {
+      allowedIds.push(new mongoose.Types.ObjectId(user.id));
+    } catch {
+      // skip invalid user id
+    }
+    receptionistIds.forEach((id) => allowedIds.push(id));
+    filter.userId = allowedIds.length > 0 ? { $in: allowedIds } : user.id;
   } else {
     filter.userId = user.id;
   }

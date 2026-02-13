@@ -17,7 +17,12 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   const token = authHeader.slice(7);
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as AuthUser & { exp: number };
-    req.user = { id: payload.id, role: payload.role, email: payload.email, clinicId: payload.clinicId };
+    const role = (payload.role && String(payload.role).toUpperCase()) as AuthUser['role'];
+    if (!['RECEPTIONIST', 'DOCTOR', 'SUPER_ADMIN'].includes(role)) {
+      res.status(403).json({ message: 'Forbidden' });
+      return;
+    }
+    req.user = { id: payload.id, role, email: payload.email, clinicId: payload.clinicId };
     next();
   } catch {
     res.status(401).json({ message: 'Invalid token' });
@@ -30,7 +35,8 @@ export function roleGuard(...allowedRoles: AuthUser['role'][]) {
       res.status(401).json({ message: 'Unauthorized' });
       return;
     }
-    if (allowedRoles.includes(req.user.role)) {
+    const role = req.user.role;
+    if (allowedRoles.includes(role)) {
       next();
       return;
     }
