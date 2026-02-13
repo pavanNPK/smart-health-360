@@ -84,7 +84,7 @@
           </ng-template>
           <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
             <tr>
-              <td>{{ (page - 1) * limit + rowIndex + 1 }}</td>
+              <td>{{ first + rowIndex + 1 }}</td>
               <td>{{ row.firstName }} {{ row.lastName }}</td>
               <td>{{ row.dob | date : 'shortDate' }}</td>
               <td>{{ row.contactEmail || '—' }}</td>

@@ -52,6 +52,7 @@ export class DoctorPatientList implements OnInit {
   visibilityFilter: 'all' | 'VIS_A' | 'VIS_B' = 'all';
   loading = false;
   hasLoadedOnce = false;
+  private loadId = 0;
 
   statusOptions = [
     { label: 'All', value: 'all' },
@@ -71,6 +72,7 @@ export class DoctorPatientList implements OnInit {
   }
 
   onLazyLoad(event: TableLazyLoadEvent): void {
+    if (this.loading) return;
     this.limit = event.rows ?? 10;
     const rawFirst = event.first ?? 0;
     this.page = this.limit > 0 ? Math.floor(rawFirst / this.limit) + 1 : 1;
@@ -80,29 +82,37 @@ export class DoctorPatientList implements OnInit {
 
   load(): void {
     this.loading = true;
+    this.loadId += 1;
+    const currentLoadId = this.loadId;
+    const requestPage = this.page;
+    const requestLimit = this.limit;
     const params: Record<string, string | number | boolean> = {
       assignedTo: 'me',
-      page: this.page,
-      limit: this.limit,
+      page: requestPage,
+      limit: requestLimit,
     };
     if (this.search.trim()) params['search'] = this.search.trim();
     if (this.visibilityFilter !== 'all') params['visibility'] = this.visibilityFilter;
     this.api.get<{ data: Patient[]; total: number }>('/patients', params).subscribe({
       next: (res) => {
+        if (currentLoadId !== this.loadId) return;
         const total = res.total;
-        if (total > 0 && this.first >= total) {
-          this.first = Math.max(0, (Math.ceil(total / this.limit) - 1) * this.limit);
-          this.page = Math.ceil(total / this.limit);
+        if (total > 0 && (requestPage - 1) * requestLimit >= total) {
+          this.page = Math.max(1, Math.ceil(total / requestLimit));
+          this.first = (this.page - 1) * requestLimit;
           this.load();
           return;
         }
         this.patients = res.data;
         this.total = total;
         this.totalRecords = total;
+        this.first = (requestPage - 1) * requestLimit;
+        this.page = requestPage;
         this.last = this.total === 0 ? 0 : Math.min(this.first + this.patients.length, this.total);
         this.hasLoadedOnce = true;
       },
       error: (err) => {
+        if (currentLoadId !== this.loadId) return;
         this.loading = false;
         this.patients = [];
         this.total = 0;
@@ -114,7 +124,7 @@ export class DoctorPatientList implements OnInit {
         });
       },
       complete: () => {
-        this.loading = false;
+        if (currentLoadId === this.loadId) this.loading = false;
       },
     });
   }

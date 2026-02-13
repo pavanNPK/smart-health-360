@@ -46,7 +46,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-log let-rowIndex="rowIndex">
           <tr>
-            <td>{{ (page - 1) * limit + rowIndex + 1 }}</td>
+            <td>{{ first + rowIndex + 1 }}</td>
             <td>{{ log.createdAt | date : 'short' }}</td>
             <td>{{ log.action }}</td>
             <td>

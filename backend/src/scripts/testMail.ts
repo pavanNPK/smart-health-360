@@ -1,9 +1,9 @@
 /**
- * Test mail config: loads .env and sends one email to MAIL_USER.
+ * Test mail config: loads .env and sends one branded email to MAIL_USER (brand color #051C3B).
  * Run: npm run test-mail  (or npx ts-node src/scripts/testMail.ts)
  */
 import 'dotenv/config';
-import { sendMail } from '../services/mail';
+import { sendTestEmail } from '../services/mail';
 
 const to = process.env.MAIL_USER;
 if (!to) {
@@ -11,12 +11,7 @@ if (!to) {
   process.exit(1);
 }
 
-sendMail({
-  to,
-  subject: 'Smart Health 360 – Mail test',
-  html: '<p>If you see this, your mail config in .env is working.</p>',
-  text: 'If you see this, your mail config in .env is working.',
-})
+sendTestEmail(to)
   .then(() => {
     console.log('Mail sent successfully to', to);
     process.exit(0);

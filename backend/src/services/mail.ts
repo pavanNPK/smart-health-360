@@ -49,10 +49,10 @@ export async function sendMail(options: SendMailOptions): Promise<void> {
 const BRAND = {
   name: 'Smart Health 360',
   tagline: 'Your care, connected.',
-  primary: '#0d9488',
-  primaryDark: '#0f766e',
-  headerGradient: 'linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%)',
-  bgLight: '#f0fdfa',
+  primary: '#051C3B',
+  primaryDark: '#051C3B',
+  headerGradient: 'linear-gradient(135deg, #051C3B 0%, #0a2d5c 50%, #0d3d7a 100%)',
+  bgLight: '#f0f4f9',
   text: '#111827',
   textMuted: '#6b7280',
   border: '#e5e7eb',
@@ -89,6 +89,19 @@ function emailLayout(content: string, options?: { hideFooter?: boolean }): strin
       </div>
       ${footer}
     </div>`;
+}
+
+/** Send a simple test email with branded layout (brand color #051C3B). Used by test-mail script. */
+export async function sendTestEmail(to: string): Promise<void> {
+  const content = `
+    <p style="font-size:13px;color:${BRAND.textMuted};margin:0 0 16px;padding:8px 12px;background:${BRAND.bgLight};border-radius:8px;border-left:4px solid ${BRAND.primary};"><strong>Test email</strong> – Mail config check.</p>
+    <p style="font-size:15px;color:${BRAND.text};line-height:1.6;margin:0;">If you see this, your mail config in .env is working. This email uses the Smart Health 360 brand color <span style="color:${BRAND.primary};font-weight:600;">#051C3B</span>.</p>`;
+  await sendMail({
+    to,
+    subject: `${BRAND.name} – Mail test`,
+    html: emailLayout(content),
+    text: 'If you see this, your mail config in .env is working. Smart Health 360.',
+  });
 }
 
 /** Escape HTML for safe insertion into templates. */

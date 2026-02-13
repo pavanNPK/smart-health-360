@@ -39,7 +39,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-u let-rowIndex="rowIndex">
           <tr>
-            <td>{{ (page - 1) * limit + rowIndex + 1 }}</td>
+            <td>{{ first + rowIndex + 1 }}</td>
             <td>{{ u.name }}</td>
             <td>{{ u.email }}</td>
             <td>{{ u.role }}</td>

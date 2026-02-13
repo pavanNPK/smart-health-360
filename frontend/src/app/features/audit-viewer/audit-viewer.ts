@@ -38,6 +38,7 @@ export class AuditViewer implements OnInit {
   selectedLog: AuditLog | null = null;
   showDetailsDialog = false;
   actionFilter: string | undefined = undefined;
+  private loadId = 0;
   actionOptions = [
     { label: 'All actions', value: undefined },
     { label: 'API access (every request)', value: 'API_ACCESS' },
@@ -72,6 +73,7 @@ export class AuditViewer implements OnInit {
   }
 
   onLazyLoad(event: TableLazyLoadEvent): void {
+    if (this.loading) return;
     this.limit = event.rows ?? 20;
     const rawFirst = event.first ?? 0;
     this.page = this.limit > 0 ? Math.floor(rawFirst / this.limit) + 1 : 1;
@@ -81,22 +83,30 @@ export class AuditViewer implements OnInit {
 
   load(): void {
     this.loading = true;
-    const params: Record<string, string | number> = { page: this.page, limit: this.limit };
+    this.loadId += 1;
+    const currentLoadId = this.loadId;
+    const requestPage = this.page;
+    const requestLimit = this.limit;
+    const params: Record<string, string | number> = { page: requestPage, limit: requestLimit };
     if (this.actionFilter) params['action'] = this.actionFilter;
     this.api.get<{ data: AuditLog[]; total: number }>('/audit', params).subscribe({
       next: (res) => {
+        if (currentLoadId !== this.loadId) return;
         const total = res.total;
-        if (total > 0 && this.first >= total) {
-          this.first = Math.max(0, (Math.ceil(total / this.limit) - 1) * this.limit);
-          this.page = Math.ceil(total / this.limit);
+        if (total > 0 && (requestPage - 1) * requestLimit >= total) {
+          this.page = Math.max(1, Math.ceil(total / requestLimit));
+          this.first = (this.page - 1) * requestLimit;
           this.load();
           return;
         }
         this.logs = res.data;
         this.total = total;
+        this.first = (requestPage - 1) * requestLimit;
+        this.page = requestPage;
         this.last = this.total === 0 ? 0 : Math.min(this.first + this.logs.length, this.total);
       },
       error: (err) => {
+        if (currentLoadId !== this.loadId) return;
         this.loading = false;
         this.messageService.add({
           severity: 'error',
@@ -104,7 +114,9 @@ export class AuditViewer implements OnInit {
           detail: err?.error?.message || 'Failed to load audit logs. Check backend and network.',
         });
       },
-      complete: () => (this.loading = false),
+      complete: () => {
+        if (currentLoadId === this.loadId) this.loading = false;
+      },
     });
   }
 

@@ -80,7 +80,7 @@
           </ng-template>
           <ng-template pTemplate="body" let-r let-rowIndex="rowIndex">
             <tr>
-              <td>{{ (page - 1) * limit + rowIndex + 1 }}</td>
+              <td>{{ first + rowIndex + 1 }}</td>
               <td>{{ r.type }}</td>
               <td><span [class]="r.visibility === 'VIS_B' ? 'text-orange-600' : 'text-600'">{{ r.visibility }}</span></td>
               <td>{{ r.createdAt | date : 'short' }}</td>

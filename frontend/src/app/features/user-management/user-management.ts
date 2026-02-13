@@ -62,6 +62,7 @@ export class UserManagement implements OnInit {
   loading = false;
   formSubmitting = false;
   successMessage = '';
+  private loadId = 0;
 
   tableStyle = { 'min-width': '50rem' };
 
@@ -89,6 +90,7 @@ export class UserManagement implements OnInit {
   }
 
   onLazyLoad(event: TableLazyLoadEvent): void {
+    if (this.loading) return;
     this.limit = event.rows ?? 10;
     const rawFirst = event.first ?? 0;
     this.page = this.limit > 0 ? Math.floor(rawFirst / this.limit) + 1 : 1;
@@ -98,20 +100,28 @@ export class UserManagement implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.api.get<{ data: User[]; total: number }>('/users', { page: this.page, limit: this.limit }).subscribe({
+    this.loadId += 1;
+    const currentLoadId = this.loadId;
+    const requestPage = this.page;
+    const requestLimit = this.limit;
+    this.api.get<{ data: User[]; total: number }>('/users', { page: requestPage, limit: requestLimit }).subscribe({
       next: (res) => {
+        if (currentLoadId !== this.loadId) return;
         const total = res.total;
-        if (total > 0 && this.first >= total) {
-          this.first = Math.max(0, (Math.ceil(total / this.limit) - 1) * this.limit);
-          this.page = Math.ceil(total / this.limit);
+        if (total > 0 && (requestPage - 1) * requestLimit >= total) {
+          this.page = Math.max(1, Math.ceil(total / requestLimit));
+          this.first = (this.page - 1) * requestLimit;
           this.load();
           return;
         }
         this.users = res.data;
         this.total = total;
+        this.first = (requestPage - 1) * requestLimit;
+        this.page = requestPage;
         this.last = this.total === 0 ? 0 : Math.min(this.first + this.users.length, this.total);
       },
       error: (err) => {
+        if (currentLoadId !== this.loadId) return;
         this.loading = false;
         this.messageService.add({
           severity: 'error',
@@ -119,7 +129,9 @@ export class UserManagement implements OnInit {
           detail: err?.error?.message || 'Failed to load users. Check backend and network.',
         });
       },
-      complete: () => (this.loading = false),
+      complete: () => {
+        if (currentLoadId === this.loadId) this.loading = false;
+      },
     });
   }
 

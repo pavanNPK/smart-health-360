@@ -74,6 +74,7 @@ export class PatientProfile implements OnInit {
   selectedRecord: PatientRecord | null = null;
   changeStatusNewVisibility: 'VIS_A' | 'VIS_B' = 'VIS_A';
   changeStatusReason = '';
+  private recordsLoadId = 0;
 
   statusOptions = [
     { label: 'All', value: 'all' },
@@ -137,7 +138,11 @@ export class PatientProfile implements OnInit {
 
   loadRecords(): void {
     this.loadingRecords = true;
-    const params: Record<string, string | number | boolean> = { page: this.page, limit: this.limit };
+    this.recordsLoadId += 1;
+    const currentLoadId = this.recordsLoadId;
+    const requestPage = this.page;
+    const requestLimit = this.limit;
+    const params: Record<string, string | number | boolean> = { page: requestPage, limit: requestLimit };
     if (this.statusFilter !== 'all') params['status'] = this.statusFilter;
     if (this.typeFilter) params['type'] = this.typeFilter;
     if (this.fromDate) params['fromDate'] = this.fromDate;
@@ -145,18 +150,22 @@ export class PatientProfile implements OnInit {
     if (this.createdByFilter) params['createdBy'] = this.createdByFilter;
     this.api.get<{ data: PatientRecord[]; total: number }>(`/patients/${this.patientId}/records`, params).subscribe({
       next: (res) => {
+        if (currentLoadId !== this.recordsLoadId) return;
         const total = res.total;
-        if (total > 0 && this.first >= total) {
-          this.first = Math.max(0, (Math.ceil(total / this.limit) - 1) * this.limit);
-          this.page = Math.ceil(total / this.limit);
+        if (total > 0 && (requestPage - 1) * requestLimit >= total) {
+          this.page = Math.max(1, Math.ceil(total / requestLimit));
+          this.first = (this.page - 1) * requestLimit;
           this.loadRecords();
           return;
         }
         this.records.set(res.data);
         this.total = total;
+        this.first = (requestPage - 1) * requestLimit;
+        this.page = requestPage;
         this.recordsLast = this.total === 0 ? 0 : Math.min(this.first + res.data.length, this.total);
       },
       error: (err) => {
+        if (currentLoadId !== this.recordsLoadId) return;
         this.loadingRecords = false;
         this.records.set([]);
         this.total = 0;
@@ -166,11 +175,14 @@ export class PatientProfile implements OnInit {
           detail: err?.error?.message || 'Failed to load records. Check backend and network.',
         });
       },
-      complete: () => (this.loadingRecords = false),
+      complete: () => {
+        if (currentLoadId === this.recordsLoadId) this.loadingRecords = false;
+      },
     });
   }
 
   onRecordsLazyLoad(event: TableLazyLoadEvent): void {
+    if (this.loadingRecords) return;
     this.limit = event.rows ?? 20;
     const rawFirst = event.first ?? 0;
     this.page = this.limit > 0 ? Math.floor(rawFirst / this.limit) + 1 : 1;
