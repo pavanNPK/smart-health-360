@@ -1,0 +1,171 @@
+<div class="flex flex-column gap-4">
+  <div class="flex flex-wrap align-items-center justify-content-between gap-3">
+    <h1 class="m-0 text-2xl font-semibold text-900">
+      <i class="pi pi-sliders-h mr-2 page-heading-icon"></i>Module Management
+    </h1>
+    <p-button label="Add Module" icon="pi pi-plus" (onClick)="openAdd()"></p-button>
+  </div>
+  <p-card styleClass="shadow-2 border-round-lg">
+    <p class="text-600 text-sm mb-3">Manage screens (modules) and assign users per permission: Add, Edit, Delete, View. Users list is static; no backend.</p>
+    <p-table
+      [value]="modules"
+      [paginator]="true"
+      [rows]="rows"
+      [first]="first"
+      (onLazyLoad)="onPage($event)"
+      [totalRecords]="modules.length"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {{ first + 1 }} to {{ displayEnd }} of {{ modules.length }} modules"
+      styleClass="p-datatable-sm p-datatable-striped"
+      [tableStyle]="{ 'min-width': '48rem' }"
+      showGridlines
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 4rem;">S.No</th>
+          <th>Module Name</th>
+          <th>Code / Route</th>
+          <th>Add</th>
+          <th>Edit</th>
+          <th>Delete</th>
+          <th>View</th>
+          <th style="width: 10rem;">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-m let-rowIndex="rowIndex">
+        <tr>
+          <td>{{ first + rowIndex + 1 }}</td>
+          <td>{{ m.name }}</td>
+          <td><code class="text-sm">{{ m.code || '—' }}</code></td>
+          <td>{{ getAssignedNames(m.addUserIds) }}</td>
+          <td>{{ getAssignedNames(m.editUserIds) }}</td>
+          <td>{{ getAssignedNames(m.deleteUserIds) }}</td>
+          <td>{{ getAssignedNames(m.viewUserIds) }}</td>
+          <td>
+            <div class="flex gap-1 align-items-center">
+              <p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm" (onClick)="openView(m)" pTooltip="View"></p-button>
+              <p-button icon="pi pi-pencil" styleClass="p-button-text p-button-sm" (onClick)="openEdit(m)" pTooltip="Edit"></p-button>
+              <p-button icon="pi pi-trash" styleClass="p-button-text p-button-sm p-button-danger" (onClick)="confirmDelete(m)" pTooltip="Delete"></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="text-center py-4 text-600">No modules.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>
+
+<!-- Add -->
+<p-dialog [(visible)]="showAddDialog" header="Add Module" [modal]="true" [style]="{ width: '28rem' }" [draggable]="false" [resizable]="false" (onHide)="showAddDialog = false">
+  <div class="flex flex-column gap-3">
+    <div class="flex flex-column gap-2">
+      <label for="add-name" class="font-medium text-900">Module Name *</label>
+      <input id="add-name" pInputText [(ngModel)]="name" class="w-full" placeholder="e.g. Admin Dashboard" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="add-code" class="font-medium text-900">Code / Route</label>
+      <input id="add-code" pInputText [(ngModel)]="code" class="w-full" placeholder="e.g. /admin/dashboard" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="add-add-users" class="font-medium text-900">Add – assign users</label>
+      <p-multiselect id="add-add-users" [(ngModel)]="addUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="add-edit-users" class="font-medium text-900">Edit – assign users</label>
+      <p-multiselect id="add-edit-users" [(ngModel)]="editUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="add-delete-users" class="font-medium text-900">Delete – assign users</label>
+      <p-multiselect id="add-delete-users" [(ngModel)]="deleteUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="add-view-users" class="font-medium text-900">View – assign users</label>
+      <p-multiselect id="add-view-users" [(ngModel)]="viewUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+    </div>
+    @if (error) {
+      <p-message severity="error" [text]="error" styleClass="w-full"></p-message>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showAddDialog = false" styleClass="p-button-outlined"></p-button>
+    <p-button label="Add" icon="pi pi-check" (onClick)="add()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Edit -->
+<p-dialog [(visible)]="showEditDialog" header="Edit Module" [modal]="true" [style]="{ width: '28rem' }" [draggable]="false" [resizable]="false" (onHide)="showEditDialog = false; editingModule = null">
+  <div class="flex flex-column gap-3">
+    <div class="flex flex-column gap-2">
+      <label for="edit-name" class="font-medium text-900">Module Name *</label>
+      <input id="edit-name" pInputText [(ngModel)]="name" class="w-full" placeholder="e.g. Admin Dashboard" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="edit-code" class="font-medium text-900">Code / Route</label>
+      <input id="edit-code" pInputText [(ngModel)]="code" class="w-full" placeholder="e.g. /admin/dashboard" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="edit-add-users" class="font-medium text-900">Add – assign users</label>
+      <p-multiselect id="edit-add-users" [(ngModel)]="addUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="edit-edit-users" class="font-medium text-900">Edit – assign users</label>
+      <p-multiselect id="edit-edit-users" [(ngModel)]="editUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="edit-delete-users" class="font-medium text-900">Delete – assign users</label>
+      <p-multiselect id="edit-delete-users" [(ngModel)]="deleteUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+    </div>
+    <div class="flex flex-column gap-2">
+      <label for="edit-view-users" class="font-medium text-900">View – assign users</label>
+      <p-multiselect id="edit-view-users" [(ngModel)]="viewUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+    </div>
+    @if (error) {
+      <p-message severity="error" [text]="error" styleClass="w-full"></p-message>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showEditDialog = false; editingModule = null" styleClass="p-button-outlined"></p-button>
+    <p-button label="Update" icon="pi pi-check" (onClick)="update()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- View -->
+<p-dialog [(visible)]="showViewDialog" header="View Module" [modal]="true" [style]="{ width: '28rem' }" [draggable]="false" [resizable]="false" [closable]="true" (onHide)="showViewDialog = false; viewingModule = null">
+  @if (viewingModule) {
+    <div class="flex flex-column gap-3">
+      <div class="flex flex-column gap-2">
+        <span class="text-500 text-sm">Name</span>
+        <span class="font-medium text-900">{{ viewingModule.name }}</span>
+      </div>
+      <div class="flex flex-column gap-2">
+        <span class="text-500 text-sm">Code / Route</span>
+        <code class="text-sm">{{ viewingModule.code || '—' }}</code>
+      </div>
+      <div class="flex flex-column gap-2">
+        <span class="text-500 text-sm">Add – assign users</span>
+        <p-multiselect [(ngModel)]="viewingModule.addUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+      </div>
+      <div class="flex flex-column gap-2">
+        <span class="text-500 text-sm">Edit – assign users</span>
+        <p-multiselect [(ngModel)]="viewingModule.editUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+      </div>
+      <div class="flex flex-column gap-2">
+        <span class="text-500 text-sm">Delete – assign users</span>
+        <p-multiselect [(ngModel)]="viewingModule.deleteUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+      </div>
+      <div class="flex flex-column gap-2">
+        <span class="text-500 text-sm">View – assign users</span>
+        <p-multiselect [(ngModel)]="viewingModule.viewUserIds" [options]="staticUsers" optionLabel="name" optionValue="id" [filter]="true" placeholder="Select users" styleClass="w-full" appendTo="body" />
+      </div>
+    </div>
+  }
+  <ng-template pTemplate="footer">
+    <p-button label="Close" (onClick)="showViewDialog = false; viewingModule = null" styleClass="p-button-outlined"></p-button>
+    <p-button label="Save Assignments" icon="pi pi-check" (onClick)="saveViewAssignments()"></p-button>
+  </ng-template>
+</p-dialog>

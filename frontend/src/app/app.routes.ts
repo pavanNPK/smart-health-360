@@ -46,6 +46,7 @@ export const routes: Routes = [
           { path: 'areas', loadComponent: () => import('./features/admin-areas/admin-areas').then((m) => m.AdminAreas) },
           { path: 'clinics', loadComponent: () => import('./features/admin-clinics/admin-clinics').then((m) => m.AdminClinics) },
           { path: 'hierarchy', loadComponent: () => import('./features/admin-hierarchy/admin-hierarchy').then((m) => m.AdminHierarchy) },
+          { path: 'modules', loadComponent: () => import('./features/admin-modules/admin-modules').then((m) => m.AdminModules) },
           { path: 'patients/new', loadComponent: () => import('./features/patient-form/patient-form').then((m) => m.PatientForm) },
           { path: 'patients/:id/import', loadComponent: () => import('./features/patient-import/patient-import').then((m) => m.PatientImport) },
           { path: 'patients/:id/edit', loadComponent: () => import('./features/patient-form/patient-form').then((m) => m.PatientForm) },
