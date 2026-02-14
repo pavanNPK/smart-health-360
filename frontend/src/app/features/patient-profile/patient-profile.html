@@ -45,8 +45,8 @@
         <span class="font-medium text-900">Filters:</span>
         <p-select [(ngModel)]="statusFilter" [options]="statusOptions" optionLabel="label" optionValue="value" placeholder="Status" styleClass="w-10rem" (onChange)="onFilterChange()" />
         <input pInputText type="text" [(ngModel)]="typeFilter" placeholder="Type" class="w-10rem" (keyup.enter)="onFilterChange()" />
-        <input pInputText type="date" [(ngModel)]="fromDate" placeholder="From date" class="w-10rem" (change)="onFilterChange()" />
-        <input pInputText type="date" [(ngModel)]="toDate" placeholder="To date" class="w-10rem" (change)="onFilterChange()" />
+        <p-datepicker [(ngModel)]="fromDateValue" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="From date" styleClass="w-10rem" inputStyleClass="w-10rem" (onSelect)="onFilterChange()" (onClearClick)="onFilterChange()" />
+        <p-datepicker [(ngModel)]="toDateValue" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="To date" styleClass="w-10rem" inputStyleClass="w-10rem" (onSelect)="onFilterChange()" (onClearClick)="onFilterChange()" />
         <input pInputText type="text" [(ngModel)]="createdByFilter" placeholder="Created by" class="w-10rem" (keyup.enter)="onFilterChange()" />
         <p-button label="Apply" icon="pi pi-filter" (onClick)="onFilterChange()"></p-button>
       </div>

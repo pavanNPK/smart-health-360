@@ -9,6 +9,23 @@
     <p-message severity="success" [text]="successMessage + ' They must go to Verify email to set password and log in.'" styleClass="w-full"></p-message>
   }
   <p-card styleClass="shadow-2 border-round-lg">
+    <div class="flex flex-wrap align-items-end gap-3 mb-3">
+      <div class="flex flex-column gap-2" style="min-width: 16rem; max-width: 22rem;">
+        <label for="user-search" class="font-medium text-900">Search</label>
+        <div class="p-input-icon-left w-full">
+          <i class="pi pi-search"></i>
+          <input
+            id="user-search"
+            pInputText
+            type="text"
+            placeholder="Search by name or email"
+            [(ngModel)]="search"
+            (input)="onSearchInput()"
+            class="w-full"
+          />
+        </div>
+      </div>
+    </div>
     <p-table
       [value]="users"
       [lazy]="true"

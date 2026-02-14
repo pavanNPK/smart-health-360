@@ -11,6 +11,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { MessageModule } from 'primeng/message';
+import { DatePickerModule } from 'primeng/datepicker';
 
 interface Doctor {
   _id: string;
@@ -28,6 +29,7 @@ interface Doctor {
     InputTextModule,
     SelectModule,
     MessageModule,
+    DatePickerModule,
   ],
   templateUrl: './patient-form.html',
   styleUrl: './patient-form.scss',
@@ -36,7 +38,7 @@ export class PatientForm implements OnInit, OnDestroy {
   patientId: string | null = null;
   firstName = '';
   lastName = '';
-  dob = '';
+  dobDate: Date | null = null;
   gender: 'M' | 'F' | 'O' | '' = '';
   contactEmail = '';
   contactPhone = '';
@@ -108,7 +110,7 @@ export class PatientForm implements OnInit, OnDestroy {
         next: (p) => {
           this.firstName = p.firstName;
           this.lastName = p.lastName;
-          this.dob = typeof p.dob === 'string' ? p.dob.slice(0, 10) : new Date(p.dob).toISOString().slice(0, 10);
+          this.dobDate = p.dob ? new Date(p.dob + (p.dob.length <= 10 ? 'T00:00:00' : '')) : null;
           this.gender = p.gender ?? '';
           this.contactEmail = p.contactEmail ?? '';
           this.contactPhone = p.contactPhone ?? '';
@@ -157,7 +159,7 @@ export class PatientForm implements OnInit, OnDestroy {
     const payload = {
       firstName: this.firstName,
       lastName: this.lastName,
-      dob: this.dob,
+      dob: this.dobDate ? this.dobDate.toISOString().slice(0, 10) : '',
       gender: this.gender || undefined,
       contactEmail: this.contactEmail || undefined,
       contactPhone: this.contactPhone || undefined,

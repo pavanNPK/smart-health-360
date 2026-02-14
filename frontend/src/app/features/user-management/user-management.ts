@@ -62,7 +62,9 @@ export class UserManagement implements OnInit {
   loading = false;
   formSubmitting = false;
   successMessage = '';
+  search = '';
   private loadId = 0;
+  private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   tableStyle = { 'min-width': '50rem' };
 
@@ -89,6 +91,16 @@ export class UserManagement implements OnInit {
     this.api.get<{ data: Clinic[] }>('/clinics').subscribe({ next: (res) => (this.clinics = res.data) });
   }
 
+  onSearchInput(): void {
+    if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    this.searchDebounceTimer = setTimeout(() => {
+      this.first = 0;
+      this.page = 1;
+      this.load();
+      this.searchDebounceTimer = null;
+    }, 300);
+  }
+
   onLazyLoad(event: TableLazyLoadEvent): void {
     if (this.loading) return;
     this.limit = event.rows ?? 10;
@@ -104,7 +116,9 @@ export class UserManagement implements OnInit {
     const currentLoadId = this.loadId;
     const requestPage = this.page;
     const requestLimit = this.limit;
-    this.api.get<{ data: User[]; total: number }>('/users', { page: requestPage, limit: requestLimit }).subscribe({
+    const params: Record<string, string | number> = { page: requestPage, limit: requestLimit };
+    if (this.search.trim()) params['search'] = this.search.trim();
+    this.api.get<{ data: User[]; total: number }>('/users', params).subscribe({
       next: (res) => {
         if (currentLoadId !== this.loadId) return;
         const total = res.total;

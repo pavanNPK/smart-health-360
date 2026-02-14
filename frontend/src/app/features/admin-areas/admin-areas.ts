@@ -34,6 +34,8 @@ export class AdminAreas implements OnInit {
   name = '';
   code = '';
   error = '';
+  search = '';
+  private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private api: Api,
@@ -56,7 +58,9 @@ export class AdminAreas implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.api.get<{ data: Area[] }>('/areas').subscribe({
+    const params: Record<string, string> = {};
+    if (this.search.trim()) params['search'] = this.search.trim();
+    this.api.get<{ data: Area[] }>('/areas', params).subscribe({
       next: (res) => (this.areas = res.data),
       error: () => {
         this.loading = false;
@@ -64,6 +68,15 @@ export class AdminAreas implements OnInit {
       },
       complete: () => (this.loading = false),
     });
+  }
+
+  onSearchInput(): void {
+    if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    this.searchDebounceTimer = setTimeout(() => {
+      this.first = 0;
+      this.load();
+      this.searchDebounceTimer = null;
+    }, 300);
   }
 
   openDialog(): void {

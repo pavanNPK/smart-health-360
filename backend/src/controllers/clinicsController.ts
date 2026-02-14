@@ -39,6 +39,7 @@ export async function updateClinic(req: Request, res: Response): Promise<void> {
 export async function listClinics(req: Request, res: Response): Promise<void> {
   const user = req.user! as AuthUser;
   const areaId = req.query.areaId as string | undefined;
+  const search = (req.query.search as string)?.trim();
   const filter: Record<string, unknown> = {};
   if (user.role === 'SUPER_ADMIN') {
     if (areaId) filter.areaId = areaId;
@@ -48,6 +49,12 @@ export async function listClinics(req: Request, res: Response): Promise<void> {
       res.json({ data: [] });
       return;
     }
+  }
+  if (search) {
+    filter.$or = [
+      { name: new RegExp(search, 'i') },
+      { code: new RegExp(search, 'i') },
+    ];
   }
   const clinics = await Clinic.find(filter).populate('areaId', 'name code').sort({ name: 1 }).lean();
   res.json({ data: clinics });

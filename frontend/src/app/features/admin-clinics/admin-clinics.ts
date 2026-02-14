@@ -44,6 +44,8 @@ export class AdminClinics implements OnInit {
   code = '';
   areaId = '';
   error = '';
+  search = '';
+  private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private api: Api,
@@ -67,7 +69,9 @@ export class AdminClinics implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.api.get<{ data: Clinic[] }>('/clinics').subscribe({
+    const params: Record<string, string> = {};
+    if (this.search.trim()) params['search'] = this.search.trim();
+    this.api.get<{ data: Clinic[] }>('/clinics', params).subscribe({
       next: (res) => (this.clinics = res.data),
       error: () => {
         this.loading = false;
@@ -75,6 +79,15 @@ export class AdminClinics implements OnInit {
       },
       complete: () => (this.loading = false),
     });
+  }
+
+  onSearchInput(): void {
+    if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    this.searchDebounceTimer = setTimeout(() => {
+      this.first = 0;
+      this.load();
+      this.searchDebounceTimer = null;
+    }, 300);
   }
 
   openDialog(): void {

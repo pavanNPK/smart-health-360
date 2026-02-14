@@ -84,6 +84,7 @@ export async function listUsers(req: Request, res: Response): Promise<void> {
   const role = req.query.role as string | undefined;
   const status = req.query.status as string | undefined;
   const clinicId = req.query.clinicId as string | undefined;
+  const search = (req.query.search as string)?.trim();
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
   const skip = (page - 1) * limit;
@@ -91,6 +92,12 @@ export async function listUsers(req: Request, res: Response): Promise<void> {
   if (role) filter.role = role;
   if (status) filter.status = status;
   if (clinicId) filter.clinicId = clinicId;
+  if (search) {
+    filter.$or = [
+      { name: new RegExp(search, 'i') },
+      { email: new RegExp(search, 'i') },
+    ];
+  }
   const [users, total] = await Promise.all([
     User.find(filter).select('-passwordHash').populate('clinicId', 'name').skip(skip).limit(limit).lean(),
     User.countDocuments(filter),

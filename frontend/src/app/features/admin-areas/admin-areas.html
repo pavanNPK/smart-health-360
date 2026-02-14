@@ -6,6 +6,23 @@
     <p-button label="Add Area" icon="pi pi-plus" (onClick)="openDialog()"></p-button>
   </div>
   <p-card styleClass="shadow-2 border-round-lg">
+    <div class="flex flex-wrap align-items-end gap-3 mb-3">
+      <div class="flex flex-column gap-2" style="min-width: 16rem; max-width: 22rem;">
+        <label for="area-search" class="font-medium text-900">Search</label>
+        <div class="p-input-icon-left w-full">
+          <i class="pi pi-search"></i>
+          <input
+            id="area-search"
+            pInputText
+            type="text"
+            placeholder="Search by name or code"
+            [(ngModel)]="search"
+            (input)="onSearchInput()"
+            class="w-full"
+          />
+        </div>
+      </div>
+    </div>
     @if (loading) {
       <div class="flex align-items-center justify-content-center py-8">
         <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>

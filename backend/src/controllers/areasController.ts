@@ -19,7 +19,15 @@ export async function createArea(req: Request, res: Response): Promise<void> {
 }
 
 export async function listAreas(req: Request, res: Response): Promise<void> {
-  const areas = await Area.find().sort({ name: 1 }).lean();
+  const search = (req.query.search as string)?.trim();
+  const filter: Record<string, unknown> = {};
+  if (search) {
+    filter.$or = [
+      { name: new RegExp(search, 'i') },
+      { code: new RegExp(search, 'i') },
+    ];
+  }
+  const areas = await Area.find(filter).sort({ name: 1 }).lean();
   res.json({ data: areas });
 }
 

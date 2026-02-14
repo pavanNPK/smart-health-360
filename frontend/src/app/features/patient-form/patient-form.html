@@ -38,7 +38,7 @@
       <div class="grid">
         <div class="col-12 md:col-6 flex flex-column gap-2">
           <label for="dob" class="font-medium text-900">Date of birth *</label>
-          <input id="dob" pInputText type="date" [(ngModel)]="dob" name="dob" required class="w-full" />
+          <p-datepicker id="dob" [(ngModel)]="dobDate" name="dob" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Select date" styleClass="w-full" inputStyleClass="w-full" />
         </div>
         <div class="col-12 md:col-6 flex flex-column gap-2">
           <label for="gender" class="font-medium text-900">Gender</label>

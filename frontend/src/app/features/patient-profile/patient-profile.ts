@@ -13,6 +13,7 @@ import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
+import { DatePickerModule } from 'primeng/datepicker';
 
 interface Patient {
   _id: string;
@@ -49,6 +50,7 @@ interface PatientRecord {
     InputTextModule,
     DialogModule,
     TooltipModule,
+    DatePickerModule,
   ],
   templateUrl: './patient-profile.html',
   styleUrl: './patient-profile.scss',
@@ -67,8 +69,8 @@ export class PatientProfile implements OnInit {
   error = '';
   statusFilter: 'all' | 'VIS_A' | 'VIS_B' = 'all';
   typeFilter = '';
-  fromDate = '';
-  toDate = '';
+  fromDateValue: Date | null = null;
+  toDateValue: Date | null = null;
   createdByFilter = '';
   showChangeStatusDialog = false;
   selectedRecord: PatientRecord | null = null;
@@ -145,8 +147,8 @@ export class PatientProfile implements OnInit {
     const params: Record<string, string | number | boolean> = { page: requestPage, limit: requestLimit };
     if (this.statusFilter !== 'all') params['status'] = this.statusFilter;
     if (this.typeFilter) params['type'] = this.typeFilter;
-    if (this.fromDate) params['fromDate'] = this.fromDate;
-    if (this.toDate) params['toDate'] = this.toDate;
+    if (this.fromDateValue) params['fromDate'] = this.fromDateValue.toISOString().slice(0, 10);
+    if (this.toDateValue) params['toDate'] = this.toDateValue.toISOString().slice(0, 10);
     if (this.createdByFilter) params['createdBy'] = this.createdByFilter;
     this.api.get<{ data: PatientRecord[]; total: number }>(`/patients/${this.patientId}/records`, params).subscribe({
       next: (res) => {
