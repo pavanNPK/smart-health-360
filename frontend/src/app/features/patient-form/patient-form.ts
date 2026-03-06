@@ -171,7 +171,7 @@ export class PatientForm implements OnInit, OnDestroy {
       this.api.patch<{ _id: string }>(`/patients/${this.patientId}`, payload).subscribe({
         next: () => {
           this.messageService.add({ severity: 'success', summary: 'Patient updated', detail: 'Details saved.' });
-          this.router.navigate([this.patientsBase, this.patientId]);
+          this.router.navigate([this.patientsBase, this.patientId, 'details']);
         },
         error: (err) => {
           const msg = err.error?.message || err.message || 'Failed to update patient';
@@ -197,7 +197,7 @@ export class PatientForm implements OnInit, OnDestroy {
               detail: 'Confirmation email sent (and WhatsApp if phone was provided). Appointment/onboarding confirmed. Redirecting…',
               life: 6000,
             });
-            this.router.navigate([this.patientsBase, res._id]);
+            this.router.navigate([this.patientsBase, res._id, 'details']);
           },
           error: (err) => {
             this.error = err.error?.message || 'Failed to create patient. Check required fields and try again.';

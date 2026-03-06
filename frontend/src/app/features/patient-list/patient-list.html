@@ -99,7 +99,7 @@
               <td>{{ row.visACount ?? 0 }} / {{ row.visBCount ?? 0 }}</td>
               <td>
                 <div class="flex gap-1 flex-wrap align-items-center">
-                  <a [routerLink]="[patientsBase(), row._id]" class="no-underline" pTooltip="View"><p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm"></p-button></a>
+                  <a [routerLink]="[patientsBase(), row._id, 'details']" class="no-underline" pTooltip="View patient details"><p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm"></p-button></a>
                   <a [routerLink]="[patientsBase(), row._id, 'edit']" class="no-underline" pTooltip="Edit"><p-button icon="pi pi-pencil" styleClass="p-button-text p-button-sm"></p-button></a>
                   <a [routerLink]="[patientsBase(), row._id, 'import']" class="no-underline" pTooltip="Import"><p-button icon="pi pi-upload" styleClass="p-button-text p-button-sm"></p-button></a>
                   <p-button icon="pi pi-trash" styleClass="p-button-text p-button-sm p-button-danger" pTooltip="Delete" (onClick)="confirmDelete(row)"></p-button>

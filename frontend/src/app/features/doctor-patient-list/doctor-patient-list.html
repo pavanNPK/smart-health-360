@@ -91,7 +91,7 @@
               <td>{{ row.createdBy?.name || '—' }}</td>
               <td>{{ row.visACount ?? 0 }} / {{ row.visBCount ?? 0 }}</td>
               <td>
-                <a [routerLink]="['/doctor/patients', row._id]" class="no-underline" pTooltip="View">
+                <a [routerLink]="['/doctor/patients', row._id, 'details']" class="no-underline" pTooltip="View patient details">
                   <p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm"></p-button>
                 </a>
               </td>

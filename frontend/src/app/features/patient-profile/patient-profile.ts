@@ -113,8 +113,13 @@ export class PatientProfile implements OnInit {
   /** Edit patient link (same base as current route: admin or reception). */
   get editPatientLink(): string[] {
     const url = this.router.url;
-    const base = url.startsWith('/admin') ? '/admin/patients' : '/reception/patients';
+    const base = url.startsWith('/admin') ? '/admin/patients' : url.startsWith('/doctor') ? '/doctor/patients' : '/reception/patients';
     return [base, this.patientId, 'edit'];
+  }
+
+  /** Patient details (tabbed module) link. */
+  get detailsLink(): string[] {
+    return [this.backToListUrl, this.patientId, 'details'];
   }
 
   ngOnInit(): void {

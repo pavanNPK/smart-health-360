@@ -47,6 +47,12 @@ export class Api {
     });
   }
 
+  put<T>(path: string, body: unknown): Observable<T> {
+    return this.http.put<T>(`${this.baseUrl}${path}`, body, {
+      headers: this.getHeaders(),
+    });
+  }
+
   delete<T>(path: string): Observable<T> {
     return this.http.delete<T>(`${this.baseUrl}${path}`, {
       headers: this.getHeaders(),

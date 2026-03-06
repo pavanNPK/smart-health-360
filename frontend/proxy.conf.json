@@ -2,6 +2,7 @@
   "/auth": { "target": "http://localhost:3000", "secure": false },
   "/users": { "target": "http://localhost:3000", "secure": false },
   "/patients": { "target": "http://localhost:3000", "secure": false },
+  "/prescriptions": { "target": "http://localhost:3000", "secure": false },
   "/records": { "target": "http://localhost:3000", "secure": false },
   "/reports": { "target": "http://localhost:3000", "secure": false },
   "/import": { "target": "http://localhost:3000", "secure": false },

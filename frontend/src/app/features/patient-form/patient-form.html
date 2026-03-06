@@ -72,7 +72,7 @@
       }
       <div class="flex gap-2">
         <p-button type="submit" [label]="loading ? 'Saving…' : (isEditMode ? 'Save changes' : 'Register Patient')" icon="pi pi-check" [loading]="loading" [disabled]="loading" />
-        <a [routerLink]="isEditMode ? [patientsBase, patientId] : [patientsBase]" class="no-underline"><p-button type="button" label="Cancel" icon="pi pi-times" severity="secondary" styleClass="p-button-outlined"></p-button></a>
+        <a [routerLink]="isEditMode ? [patientsBase, patientId, 'details'] : [patientsBase]" class="no-underline"><p-button type="button" label="Cancel" icon="pi pi-times" severity="secondary" styleClass="p-button-outlined"></p-button></a>
       </div>
     </form>
   </p-card>

@@ -18,6 +18,9 @@
         <i class="pi pi-arrow-left"></i> Back to list
       </a>
       <div class="flex gap-2 align-items-center">
+        <a [routerLink]="detailsLink" class="no-underline">
+          <p-button label="Patient details" icon="pi pi-folder-open" styleClass="p-button-outlined"></p-button>
+        </a>
         @if (canEditPatient()) {
           <a [routerLink]="editPatientLink" class="no-underline">
             <p-button label="Edit patient" icon="pi pi-pencil" styleClass="p-button-outlined"></p-button>

@@ -10,6 +10,8 @@
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "seed": "npx ts-node src/scripts/seedAdmin.ts",
+    "seed:patient-details": "npx ts-node src/scripts/seedPatientDetailsDemo.ts",
+    "seed:patient-details:all": "npx ts-node src/scripts/seedPatientDetailsAllPatients.ts",
     "seed:realtime": "npx ts-node src/scripts/seedRealtimeData.ts",
     "test-mail": "npx ts-node src/scripts/testMail.ts",
     "migrate:patient-visibility": "npx ts-node src/scripts/migratePatientVisibility.ts",
