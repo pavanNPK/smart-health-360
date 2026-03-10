@@ -7,6 +7,8 @@ import { CardModule } from 'primeng/card';
 import { TableModule, type TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
 import { DialogModule } from 'primeng/dialog';
 import { MessageModule } from 'primeng/message';
@@ -35,6 +37,8 @@ interface User {
     TableModule,
     ButtonModule,
     InputTextModule,
+    IconFieldModule,
+    InputIconModule,
     SelectModule,
     DialogModule,
     MessageModule,

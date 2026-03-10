@@ -5,7 +5,7 @@ import { Record } from '../models/Record';
 import { User } from '../models/User';
 import { AuthUser } from '../middleware/auth';
 import { canViewPatient, canViewPatientAsync } from '../services/permissions';
-import { sendPatientRegistrationEmail } from '../services/mail';
+import { sendPatientRegistrationEmail, sendDoctorAssignmentEmail } from '../services/mail';
 import * as whatsappService from '../services/whatsapp';
 
 const createPatientSchema = z.object({
@@ -116,16 +116,22 @@ export async function createPatient(req: Request, res: Response): Promise<void> 
     primaryDoctorId: parsed.data.primaryDoctorId,
     createdBy: user.id,
   });
-  const doctor = await User.findById(parsed.data.primaryDoctorId).select('name').lean();
+  const doctor = await User.findById(parsed.data.primaryDoctorId).select('name email').lean();
   const doctorName = doctor?.name;
   const patientName = `${patient.firstName} ${patient.lastName}`;
+  const now = new Date();
+  const appointmentDate = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  const appointmentTime = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
   if (patient.contactEmail) {
-    const now = new Date();
-    const appointmentDate = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-    const appointmentTime = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
     sendPatientRegistrationEmail(patient.contactEmail, patientName, doctorName, {
       appointmentDate,
       appointmentTime,
+    }).catch(() => {});
+  }
+  if (doctor?.email) {
+    sendDoctorAssignmentEmail(doctor.email, doctorName ?? 'Doctor', patientName, {
+      assignmentDate: appointmentDate,
+      assignmentTime: appointmentTime,
     }).catch(() => {});
   }
   if (patient.contactPhone) {

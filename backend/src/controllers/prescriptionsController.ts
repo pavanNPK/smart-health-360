@@ -5,6 +5,7 @@ import { Prescription } from '../models/Prescription';
 import { AuthUser } from '../middleware/auth';
 import { canViewPatientAsync } from '../services/permissions';
 import { finalizePrescriptionAndNotify } from '../services/prescriptionService';
+import { sendPrescriptionFinalizedEmail } from '../services/mail';
 
 const medicineItemSchema = z.object({
   name: z.string().min(1),
@@ -48,6 +49,35 @@ const updatePrescriptionSchema = z.object({
     .optional(),
 });
 
+/** Normalize doctorApproval: receptionist-created/updated = pending (—). Only show Approved/Rejected when doctor set approvedAt. */
+function normalizeDoctorApproval<
+  T extends {
+    doctorApproval?: { approved?: boolean; approvedAt?: Date; remarks?: string };
+    updatedByRole?: string;
+    createdByRole?: string;
+  }
+>(doc: T): T {
+  // Receptionist last touched (create or edit) → always show as pending until doctor acts.
+  if (doc.updatedByRole === 'RECEPTIONIST') {
+    const out = { ...doc };
+    delete (out as any).doctorApproval;
+    return out;
+  }
+  // New prescription from receptionist (no update yet): createdByRole is set but updatedByRole may be missing in old data.
+  if (doc.createdByRole === 'RECEPTIONIST' && doc.updatedByRole == null) {
+    const out = { ...doc };
+    delete (out as any).doctorApproval;
+    return out;
+  }
+  // Only show Approved/Rejected when doctor actually took action (approvedAt present).
+  if (!doc.doctorApproval || doc.doctorApproval.approvedAt == null) {
+    const out = { ...doc };
+    delete (out as any).doctorApproval;
+    return out;
+  }
+  return doc;
+}
+
 export async function listPrescriptions(req: Request, res: Response): Promise<void> {
   const patient = await Patient.findById(req.params.id);
   if (!patient) {
@@ -66,7 +96,7 @@ export async function listPrescriptions(req: Request, res: Response): Promise<vo
   const skip = (page - 1) * limit;
   const filter: Record<string, unknown> = { patientId: patient._id };
   if (status && ['DRAFT', 'FINAL'].includes(status)) filter.status = status;
-  const [data, total] = await Promise.all([
+  const [raw, total] = await Promise.all([
     Prescription.find(filter)
       .populate('writtenByDoctorId', 'name')
       .populate('enteredByReceptionistId', 'name')
@@ -76,7 +106,28 @@ export async function listPrescriptions(req: Request, res: Response): Promise<vo
       .lean(),
     Prescription.countDocuments(filter),
   ]);
+  const data = raw.map((d) => normalizeDoctorApproval(d as any));
   res.json({ data, total, page, limit });
+}
+
+/** List prescriptions pending doctor approval (FINAL, not yet approved). Doctor only; returns prescriptions for patients assigned to this doctor. */
+export async function listPendingApproval(req: Request, res: Response): Promise<void> {
+  const user = req.user! as AuthUser;
+  if (user.role !== 'DOCTOR') {
+    res.status(403).json({ message: 'Only doctors can list pending approvals' });
+    return;
+  }
+  const myPatientIds = await Patient.find({ primaryDoctorId: user.id }).distinct('_id');
+  const data = await Prescription.find({
+    patientId: { $in: myPatientIds },
+    status: 'FINAL',
+    $or: [{ 'doctorApproval.approved': { $ne: true } }, { doctorApproval: { $exists: false } }],
+  })
+    .populate('patientId', 'firstName lastName')
+    .populate('writtenByDoctorId', 'name')
+    .sort({ prescriptionDate: -1, createdAt: -1 })
+    .lean();
+  res.json({ data });
 }
 
 export async function createPrescription(req: Request, res: Response): Promise<void> {
@@ -123,6 +174,7 @@ export async function createPrescription(req: Request, res: Response): Promise<v
     followUpDate: followUpDate && !isNaN(followUpDate.getTime()) ? followUpDate : undefined,
     status: parsed.data.status,
     createdByRole: user.role,
+    updatedByRole: 'RECEPTIONIST', // so list normalizes to pending (—) until doctor acts
   });
   if (doc.status === 'FINAL') {
     finalizePrescriptionAndNotify(doc._id.toString()).catch((err) =>
@@ -133,7 +185,7 @@ export async function createPrescription(req: Request, res: Response): Promise<v
     .populate('writtenByDoctorId', 'name')
     .populate('enteredByReceptionistId', 'name')
     .lean();
-  res.status(201).json(populated);
+  res.status(201).json(normalizeDoctorApproval(populated as any));
 }
 
 export async function updatePrescription(req: Request, res: Response): Promise<void> {
@@ -182,6 +234,8 @@ export async function updatePrescription(req: Request, res: Response): Promise<v
       prescription.followUpDate = parsed.data.followUpDate ? new Date(parsed.data.followUpDate) : undefined;
     if (parsed.data.status !== undefined) prescription.status = parsed.data.status;
     prescription.updatedByRole = 'RECEPTIONIST';
+    // Clear doctor approval so status shows blank until doctor re-verifies (approve/reject)
+    prescription.doctorApproval = undefined;
   }
   if (isDoctor) {
     if (parsed.data.doctorApproval !== undefined) {
@@ -197,14 +251,36 @@ export async function updatePrescription(req: Request, res: Response): Promise<v
   }
   const previousStatus = prescription.status;
   await prescription.save();
+  if (isReceptionist) {
+    await Prescription.updateOne({ _id: prescription._id }, { $unset: { doctorApproval: 1 } });
+  }
   if (previousStatus !== 'FINAL' && prescription.status === 'FINAL') {
     finalizePrescriptionAndNotify(prescription._id.toString()).catch((err) =>
       console.error('Prescription notify failed:', err)
     );
   }
+  if (isDoctor && parsed.data.doctorApproval?.approved === true && patient?.contactEmail) {
+    const patientName = [patient.firstName, patient.lastName].filter(Boolean).join(' ') || 'Patient';
+    const prescriptionDate =
+      prescription.prescriptionDate instanceof Date
+        ? prescription.prescriptionDate.toISOString().slice(0, 10)
+        : String(prescription.prescriptionDate).slice(0, 10);
+    const followUpStr = prescription.followUpDate
+      ? prescription.followUpDate instanceof Date
+        ? prescription.followUpDate.toISOString().slice(0, 10)
+        : String(prescription.followUpDate).slice(0, 10)
+      : undefined;
+    sendPrescriptionFinalizedEmail(patient.contactEmail, patientName, prescriptionDate, {
+      complaintSymptoms: prescription.complaintSymptoms,
+      diagnosis: prescription.diagnosis,
+      medicines: prescription.medicines,
+      testsOrXray: prescription.testsOrXray?.map((t: { type: string; name: string }) => ({ type: t.type, name: t.name })),
+      followUpDate: followUpStr,
+    }).catch((err) => console.error('Prescription approved email failed:', err));
+  }
   const updated = await Prescription.findById(prescription._id)
     .populate('writtenByDoctorId', 'name')
     .populate('enteredByReceptionistId', 'name')
     .lean();
-  res.json(updated);
+  res.json(normalizeDoctorApproval(updated as any));
 }

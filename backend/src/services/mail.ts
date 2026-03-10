@@ -220,6 +220,78 @@ export async function sendOTPEmail(to: string, userName: string, otp: string): P
   });
 }
 
+/** Sent to patient when a prescription is finalized – full prescription details in email. */
+export async function sendPrescriptionFinalizedEmail(
+  patientEmail: string,
+  patientName: string,
+  prescriptionDate: string,
+  prescription: {
+    complaintSymptoms?: string;
+    diagnosis?: string;
+    medicines?: Array<{ name: string; dosageText: string; days?: number; beforeFood?: boolean }>;
+    testsOrXray?: Array<{ type: string; name: string }>;
+    followUpDate?: string;
+  }
+): Promise<void> {
+  const dateRow =
+    prescriptionDate &&
+    `<tr><td style="padding:10px 12px;font-weight:600;color:${BRAND.primaryDark};width:160px;">Date</td><td style="padding:10px 12px;">${escapeHtml(prescriptionDate)}</td></tr>`;
+  const complaintRow =
+    prescription.complaintSymptoms &&
+    `<tr><td style="padding:10px 12px;font-weight:600;color:${BRAND.primaryDark};">Complaint / symptoms</td><td style="padding:10px 12px;">${escapeHtml(prescription.complaintSymptoms)}</td></tr>`;
+  const diagnosisRow =
+    prescription.diagnosis &&
+    `<tr><td style="padding:10px 12px;font-weight:600;color:${BRAND.primaryDark};">Diagnosis</td><td style="padding:10px 12px;">${escapeHtml(prescription.diagnosis)}</td></tr>`;
+  let medicinesHtml = '';
+  if (prescription.medicines?.length) {
+    medicinesHtml = `
+    <p style="font-size:14px;font-weight:600;color:${BRAND.primaryDark};margin:16px 0 8px;">Medicines</p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;background:${BRAND.bgLight};border-radius:8px;">
+      <tr style="border-bottom:1px solid ${BRAND.border};">
+        <th style="padding:10px 12px;text-align:left;">Name</th>
+        <th style="padding:10px 12px;text-align:left;">Dosage</th>
+        <th style="padding:10px 12px;text-align:left;">Days</th>
+        <th style="padding:10px 12px;text-align:left;">Before food</th>
+      </tr>
+      ${prescription.medicines
+        .map(
+          (m) =>
+            `<tr><td style="padding:10px 12px;">${escapeHtml(m.name)}</td><td style="padding:10px 12px;">${escapeHtml(m.dosageText)}</td><td style="padding:10px 12px;">${m.days ?? '—'}</td><td style="padding:10px 12px;">${m.beforeFood ? 'Yes' : 'No'}</td></tr>`
+        )
+        .join('')}
+    </table>`;
+  }
+  let testsHtml = '';
+  if (prescription.testsOrXray?.length) {
+    testsHtml = `
+    <p style="font-size:14px;font-weight:600;color:${BRAND.primaryDark};margin:16px 0 8px;">Tests / X-Ray</p>
+    <ul style="margin:0;padding-left:20px;">${prescription.testsOrXray.map((t) => `<li>${escapeHtml(t.type)}: ${escapeHtml(t.name)}</li>`).join('')}</ul>`;
+  }
+  const followUpRow =
+    prescription.followUpDate &&
+    `<p style="font-size:14px;margin:12px 0 0;"><strong>Follow-up date:</strong> ${escapeHtml(prescription.followUpDate)}</p>`;
+  const content = `
+    <p style="font-size:13px;color:${BRAND.textMuted};margin:0 0 16px;padding:8px 12px;background:${BRAND.bgLight};border-radius:8px;border-left:4px solid ${BRAND.primary};"><strong>This email is for: Patient.</strong> Your prescription has been finalized. Details are below.</p>
+    <p style="font-size:18px;font-weight:600;color:${BRAND.primaryDark};margin:0 0 8px;">Prescription</p>
+    <p style="font-size:15px;color:${BRAND.text};line-height:1.6;margin:0 0 16px;">Dear ${escapeHtml(patientName)},</p>
+    <p style="font-size:15px;color:${BRAND.text};line-height:1.6;margin:0 0 16px;">Your prescription is ready. Please find the details below.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:15px;background:${BRAND.bgLight};border-radius:10px;">
+      ${dateRow}
+      ${complaintRow}
+      ${diagnosisRow}
+    </table>
+    ${medicinesHtml}
+    ${testsHtml}
+    ${followUpRow}
+    <p style="font-size:14px;color:${BRAND.textMuted};margin:24px 0 0;">You can collect a copy from the clinic or contact us for any questions.</p>`;
+  await sendMail({
+    to: patientEmail,
+    subject: `Your prescription – ${BRAND.name}`,
+    html: emailLayout(content),
+    text: `Dear ${patientName}, your prescription dated ${prescriptionDate} is ready. ${BRAND.name}.`,
+  });
+}
+
 /** Sent to Super Admin when someone exports patient records (audit notification). */
 export async function sendExportAuditEmail(
   adminEmail: string,

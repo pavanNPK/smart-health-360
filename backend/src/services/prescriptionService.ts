@@ -1,6 +1,6 @@
 import { Prescription } from '../models/Prescription';
-import { Patient } from '../models/Patient';
-import { notifyPrescriptionFinalized } from './notification';
+import { sendPrescriptionFinalizedEmail } from './mail';
+import { notifyPrescriptionWhatsApp } from './notification';
 
 export async function finalizePrescriptionAndNotify(prescriptionId: string): Promise<void> {
   const prescription = await Prescription.findById(prescriptionId)
@@ -18,15 +18,23 @@ export async function finalizePrescriptionAndNotify(prescriptionId: string): Pro
     prescription.prescriptionDate instanceof Date
       ? prescription.prescriptionDate.toISOString().slice(0, 10)
       : String(prescription.prescriptionDate).slice(0, 10);
-  const summary =
-    prescription.medicines?.length > 0
-      ? `Medicines: ${prescription.medicines.map((m) => m.name).join(', ')}`
-      : undefined;
-  await notifyPrescriptionFinalized({
-    patientEmail: patient.contactEmail,
-    patientPhone: patient.contactPhone,
-    patientName,
-    prescriptionDate,
-    prescriptionSummary: summary,
-  });
+  const followUpStr = prescription.followUpDate
+    ? prescription.followUpDate instanceof Date
+      ? prescription.followUpDate.toISOString().slice(0, 10)
+      : String(prescription.followUpDate).slice(0, 10)
+    : undefined;
+  if (patient.contactEmail) {
+    sendPrescriptionFinalizedEmail(patient.contactEmail, patientName, prescriptionDate, {
+      complaintSymptoms: prescription.complaintSymptoms,
+      diagnosis: prescription.diagnosis,
+      medicines: prescription.medicines,
+      testsOrXray: prescription.testsOrXray?.map((t) => ({ type: t.type, name: t.name })),
+      followUpDate: followUpStr,
+    }).catch((err) => console.error('Prescription email failed:', err));
+  }
+  if (patient.contactPhone) {
+    notifyPrescriptionWhatsApp({ patientPhone: patient.contactPhone, patientName, prescriptionDate }).catch((err) =>
+      console.error('Prescription WhatsApp failed:', err)
+    );
+  }
 }

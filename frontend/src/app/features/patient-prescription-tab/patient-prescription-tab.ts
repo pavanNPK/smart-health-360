@@ -13,6 +13,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { CheckboxModule } from 'primeng/checkbox';
 import { SelectModule } from 'primeng/select';
+import { TooltipModule } from 'primeng/tooltip';
 
 export interface PatientDetailsSummary {
   _id: string;
@@ -64,6 +65,7 @@ export interface Prescription {
     TextareaModule,
     CheckboxModule,
     SelectModule,
+    TooltipModule,
   ],
   template: `
     <p-card header="Prescriptions" styleClass="shadow-2 border-round-lg card-header-plain">
@@ -92,14 +94,20 @@ export interface Prescription {
           <tr>
             <td>{{ p.prescriptionDate | date : 'shortDate' }}</td>
             <td><span [class]="p.status === 'FINAL' ? 'text-green-600' : 'text-orange-600'">{{ p.status }}</span></td>
-            <td>{{ p.doctorApproval?.approved ? 'Approved' : '—' }}</td>
             <td>
-              <p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm" (onClick)="viewPrescription(p)"></p-button>
+              @if (p.doctorApproval?.approved === true) {
+                <span class="text-green-600">Approved</span>
+              } @else if (p.doctorApproval?.approved === false) {
+                <span class="text-red-600">Rejected</span>
+                <i class="pi pi-info-circle ml-1 text-600 cursor-help" [pTooltip]="p.doctorApproval?.remarks || 'No message provided.'" style="font-size: 0.9rem;"></i>
+              } @else {
+                —
+              }
+            </td>
+            <td>
+              <p-button icon="pi pi-eye" styleClass="p-button-text p-button-sm" (onClick)="viewPrescription(p)" pTooltip="View"></p-button>
               @if (canEdit(p)) {
                 <p-button icon="pi pi-pencil" styleClass="p-button-text p-button-sm" (onClick)="openEditDialog(p)"></p-button>
-              }
-              @if (canApprove(p)) {
-                <p-button icon="pi pi-check" styleClass="p-button-text p-button-sm" (onClick)="openApprovalDialog(p)"></p-button>
               }
             </td>
           </tr>
@@ -146,16 +154,48 @@ export interface Prescription {
           <label class="font-medium block mb-1">Medicines</label>
           <div class="flex flex-column gap-2">
             @for (m of form.medicines; track $index) {
-              <div class="flex gap-2 align-items-end flex-wrap">
-                <input pInputText [(ngModel)]="m.name" placeholder="Name" class="flex-grow-1" style="min-width: 8rem;" />
-                <input pInputText [(ngModel)]="m.dosageText" placeholder="Dosage (e.g. 1-0-1)" class="w-6rem" />
-                <input pInputText type="number" [(ngModel)]="m.days" placeholder="Days" class="w-5rem" />
-                <p-checkbox [(ngModel)]="m.beforeFood" [binary]="true" inputId="bf-{{ $index }}"></p-checkbox>
-                <label [for]="'bf-' + $index" class="text-sm">Before food</label>
-                <p-button icon="pi pi-trash" styleClass="p-button-text p-button-sm p-button-danger" (onClick)="removeMedicine($index)"></p-button>
+              <div class="flex flex-column gap-1 w-full">
+                <div class="flex gap-2 flex-wrap">
+                  <input
+                    pInputText
+                    [(ngModel)]="m.name"
+                    placeholder="Name"
+                    class="flex-grow-1"
+                    style="min-width: 8rem;"
+                  />
+                  <input
+                    pInputText
+                    [(ngModel)]="m.dosageText"
+                    placeholder="Dosage (e.g. 1-0-1)"
+                    class="w-8rem"
+                  />
+                </div>
+                <div class="flex gap-2 align-items-center flex-wrap">
+                  <input
+                    pInputText
+                    type="number"
+                    [(ngModel)]="m.days"
+                    placeholder="Days"
+                    class="w-5rem"
+                  />
+                  <div class="flex align-items-center gap-2">
+                    <p-checkbox [(ngModel)]="m.beforeFood" [binary]="true" inputId="bf-{{ $index }}"></p-checkbox>
+                    <label [for]="'bf-' + $index" class="text-sm">Before food</label>
+                  </div>
+                  <p-button
+                    icon="pi pi-trash"
+                    styleClass="p-button-text p-button-sm p-button-danger ml-auto"
+                    (onClick)="removeMedicine($index)"
+                  ></p-button>
+                </div>
               </div>
             }
-            <p-button label="Add medicine" icon="pi pi-plus" styleClass="p-button-outlined p-button-sm" (onClick)="addMedicine()"></p-button>
+            <p-button
+              label="Add medicine"
+              icon="pi pi-plus"
+              styleClass="p-button-outlined p-button-sm"
+              (onClick)="addMedicine()"
+            ></p-button>
           </div>
         </div>
         <div>
@@ -178,19 +218,19 @@ export interface Prescription {
       </div>
       <ng-template pTemplate="footer">
         <p-button label="Cancel" severity="secondary" styleClass="p-button-outlined" (onClick)="closeFormDialog()"></p-button>
-        <p-button label="Save draft" icon="pi pi-save" (onClick)="savePrescription('DRAFT')" [disabled]="saving()"></p-button>
+        <p-button label="Save draft" icon="pi pi-save" (onClick)="savePrescription('DRAFT')" [disabled]="saving()" pTooltip="Save without finalizing; doctor will not see it until you click Finalize."></p-button>
         <p-button label="Finalize" icon="pi pi-check" (onClick)="savePrescription('FINAL')" [disabled]="saving() || form.medicines.length === 0"></p-button>
       </ng-template>
     </p-dialog>
 
-    <!-- View / Print dialog -->
+    <!-- View / Print dialog (with Approve/Reject for doctor when FINAL and not yet approved) -->
     <p-dialog
       [(visible)]="showViewDialog"
       header="Prescription"
       [modal]="true"
       [style]="{ width: '32rem' }"
       [draggable]="false"
-      (onHide)="selectedPrescription.set(null)"
+      (onHide)="selectedPrescription.set(null); approvalPrescription.set(null); showRejectTextarea = false"
     >
       @if (selectedPrescription()) {
         <div class="prescription-print-view" id="prescription-print-area">
@@ -223,32 +263,52 @@ export interface Prescription {
           @if (selectedPrescription()!.followUpDate) {
             <p class="mt-2"><strong>Follow-up:</strong> {{ selectedPrescription()!.followUpDate | date : 'mediumDate' }}</p>
           }
+          @if (selectedPrescription()!.status === 'FINAL' && selectedPrescription()!.doctorApproval?.approved === false) {
+            <div class="mt-3 pt-3 border-top-1 surface-border">
+              <p class="font-semibold text-900 mb-1">Doctor rejection</p>
+              <p class="text-600 m-0">{{ selectedPrescription()!.doctorApproval?.remarks || 'No message provided.' }}</p>
+            </div>
+          }
         </div>
+        @if (isDoctor() && selectedPrescription()!.status === 'FINAL') {
+          <div class="mt-3 pt-3 border-top-1 surface-border">
+            <p class="font-semibold text-900 mb-2">Doctor approval</p>
+            @if (canApprove(selectedPrescription()!)) {
+              <div class="flex flex-column gap-2">
+                <div class="flex gap-2 flex-wrap">
+                  <p-button label="Approve" icon="pi pi-check" (onClick)="submitApprovalFromView(true)"></p-button>
+                  <p-button label="Reject" icon="pi pi-times" severity="danger" (onClick)="showRejectTextarea = true"></p-button>
+                </div>
+                @if (showRejectTextarea) {
+                  <div class="flex flex-column gap-1">
+                    <label class="font-medium">Rejection message (required)</label>
+                    <textarea pInputTextarea [(ngModel)]="approvalRemarks" rows="2" placeholder="Enter reason for rejection..." class="w-full"></textarea>
+                    <div class="flex gap-2">
+                      <p-button label="Confirm reject" icon="pi pi-times" severity="danger" (onClick)="submitApprovalFromView(false)"></p-button>
+                      <p-button label="Cancel" severity="secondary" (onClick)="showRejectTextarea = false"></p-button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-600 m-0">
+                @if (selectedPrescription()!.doctorApproval?.approved === true) {
+                  <span class="text-green-600">Approved</span>
+                } @else if (selectedPrescription()!.doctorApproval?.approved === false) {
+                  <span class="text-red-600">Rejected</span>
+                  @if (selectedPrescription()!.doctorApproval?.remarks) {
+                    — {{ selectedPrescription()!.doctorApproval?.remarks }}
+                  }
+                }
+              </p>
+            }
+          </div>
+        }
         <ng-template pTemplate="footer">
-          <p-button label="Close" (onClick)="showViewDialog = false"></p-button>
-          <p-button label="Print" icon="pi pi-print" (onClick)="printPrescription()"></p-button>
-        </ng-template>
-      }
-    </p-dialog>
-
-    <!-- Doctor approval dialog -->
-    <p-dialog
-      [(visible)]="showApprovalDialog"
-      header="Doctor approval"
-      [modal]="true"
-      [style]="{ width: '24rem' }"
-      [draggable]="false"
-      (onHide)="approvalPrescription.set(null); approvalRemarks = ''"
-    >
-      @if (approvalPrescription()) {
-        <div class="flex flex-column gap-2">
-          <label class="font-medium">Remarks (optional)</label>
-          <textarea pInputTextarea [(ngModel)]="approvalRemarks" rows="3" class="w-full"></textarea>
-        </div>
-        <ng-template pTemplate="footer">
-          <p-button label="Cancel" severity="secondary" (onClick)="showApprovalDialog = false"></p-button>
-          <p-button label="Approve" icon="pi pi-check" (onClick)="submitApproval(true)"></p-button>
-          <p-button label="Reject" icon="pi pi-times" severity="secondary" (onClick)="submitApproval(false)"></p-button>
+          <p-button label="Close" (onClick)="closeViewDialog()"></p-button>
+          @if (!isDoctor() || selectedPrescription()!.status !== 'FINAL' || !canApprove(selectedPrescription()!)) {
+            <p-button label="Print" icon="pi pi-print" (onClick)="printPrescription()"></p-button>
+          }
         </ng-template>
       }
     </p-dialog>
@@ -275,11 +335,11 @@ export class PatientPrescriptionTab implements OnInit {
   saving = signal(false);
   showFormDialog = false;
   showViewDialog = false;
-  showApprovalDialog = false;
   editingId: string | null = null;
   selectedPrescription = signal<Prescription | null>(null);
   approvalPrescription = signal<Prescription | null>(null);
   approvalRemarks = '';
+  showRejectTextarea = false;
 
   statusOptions = [
     { label: 'Draft', value: 'DRAFT' },
@@ -310,8 +370,13 @@ export class PatientPrescriptionTab implements OnInit {
   };
 
   canCreate = computed(() => this.auth.currentUserValue?.role === 'RECEPTIONIST');
-  canEdit = (p: Prescription) => this.auth.currentUserValue?.role === 'RECEPTIONIST' && p.status === 'DRAFT';
-  canApprove = (p: Prescription) => this.auth.currentUserValue?.role === 'DOCTOR';
+  canEdit = (p: Prescription) =>
+    this.auth.currentUserValue?.role === 'RECEPTIONIST' &&
+    (p.status === 'DRAFT' || (p.status === 'FINAL' && p.doctorApproval?.approved === false));
+  isDoctor = computed(() => this.auth.currentUserValue?.role === 'DOCTOR');
+  /** Show Approve/Reject only when pending (no decision yet). Hide when already approved or rejected until receptionist modifies. */
+  canApprove = (p: Prescription) =>
+    this.auth.currentUserValue?.role === 'DOCTOR' && p.status === 'FINAL' && !p.doctorApproval;
 
   constructor(
     private api: Api,
@@ -352,7 +417,7 @@ export class PatientPrescriptionTab implements OnInit {
   }
 
   openEditDialog(p: Prescription): void {
-    if (p.status !== 'DRAFT') return;
+    if (!this.canEdit(p)) return;
     this.editingId = p._id;
     this.form = {
       prescriptionDate: new Date(p.prescriptionDate),
@@ -441,31 +506,41 @@ export class PatientPrescriptionTab implements OnInit {
 
   viewPrescription(p: Prescription): void {
     this.selectedPrescription.set(p);
+    if (this.isDoctor() && this.canApprove(p)) {
+      this.approvalPrescription.set(p);
+      this.approvalRemarks = p.doctorApproval?.remarks || '';
+    }
     this.showViewDialog = true;
   }
 
-  printPrescription(): void {
-    window.print();
+  closeViewDialog(): void {
+    this.showViewDialog = false;
+    this.selectedPrescription.set(null);
+    this.approvalPrescription.set(null);
+    this.showRejectTextarea = false;
   }
 
-  openApprovalDialog(p: Prescription): void {
-    this.approvalPrescription.set(p);
-    this.approvalRemarks = p.doctorApproval?.remarks || '';
-    this.showApprovalDialog = true;
-  }
-
-  submitApproval(approved: boolean): void {
-    const p = this.approvalPrescription();
+  submitApprovalFromView(approved: boolean): void {
+    const p = this.selectedPrescription();
     if (!p) return;
+    if (!approved && !this.approvalRemarks.trim()) {
+      this.messageService.add({ severity: 'warn', summary: 'Required', detail: 'Please enter a rejection message.' });
+      return;
+    }
+    this.approvalPrescription.set(p);
     this.api
       .put<Prescription>(`/prescriptions/${p._id}`, {
         doctorApproval: { approved, remarks: this.approvalRemarks.trim() || undefined },
       })
       .subscribe({
         next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Done', detail: approved ? 'Prescription approved.' : 'Approval updated.' });
-          this.showApprovalDialog = false;
-          this.approvalPrescription.set(null);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Done',
+            detail: approved ? 'Prescription approved.' : 'Prescription rejected.',
+          });
+          this.showRejectTextarea = false;
+          this.closeViewDialog();
           this.loadPrescriptions();
         },
         error: (err: { error?: { message?: string } }) => {
@@ -473,4 +548,9 @@ export class PatientPrescriptionTab implements OnInit {
         },
       });
   }
+
+  printPrescription(): void {
+    window.print();
+  }
+
 }

@@ -100,6 +100,20 @@ export async function notifyPrescriptionFinalized(params: {
   await Promise.all(promises);
 }
 
+/** WhatsApp only: notify patient that prescription is ready (used when email is sent separately with full prescription). */
+export async function notifyPrescriptionWhatsApp(params: {
+  patientPhone?: string;
+  patientName: string;
+  prescriptionDate: string;
+}): Promise<void> {
+  const { patientPhone, patientName, prescriptionDate } = params;
+  if (!patientPhone) return;
+  const body = `Your prescription (${prescriptionDate}) is ready, ${patientName}. Please collect from clinic or contact us. – Smart Health 360`;
+  await whatsAppProvider.send({ toPhone: patientPhone, body }).catch((err) => {
+    console.error('[Notification] Prescription WhatsApp failed:', err);
+  });
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')

@@ -9,8 +9,8 @@
     <div class="flex flex-wrap align-items-end gap-3 mb-3">
       <div class="flex flex-column gap-2" style="min-width: 16rem; max-width: 22rem;">
         <label for="area-search" class="font-medium text-900">Search</label>
-        <div class="p-input-icon-left w-full">
-          <i class="pi pi-search"></i>
+        <p-iconfield iconPosition="left" class="w-full">
+          <p-inputicon styleClass="pi pi-search" />
           <input
             id="area-search"
             pInputText
@@ -20,7 +20,7 @@
             (input)="onSearchInput()"
             class="w-full"
           />
-        </div>
+        </p-iconfield>
       </div>
     </div>
     @if (loading) {

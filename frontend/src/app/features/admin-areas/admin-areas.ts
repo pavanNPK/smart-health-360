@@ -5,6 +5,8 @@ import { CardModule } from 'primeng/card';
 import { TableModule, type TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { MessageModule } from 'primeng/message';
@@ -19,7 +21,7 @@ interface Area {
 @Component({
   selector: 'app-admin-areas',
   standalone: true,
-  imports: [CardModule, TableModule, ButtonModule, InputTextModule, FormsModule, DialogModule, MessageModule, TooltipModule],
+  imports: [CardModule, TableModule, ButtonModule, InputTextModule, IconFieldModule, InputIconModule, FormsModule, DialogModule, MessageModule, TooltipModule],
   templateUrl: './admin-areas.html',
   styleUrl: './admin-areas.scss',
 })

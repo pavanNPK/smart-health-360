@@ -36,7 +36,7 @@ export interface IPrescription extends Document {
   testsOrXray: ITestOrXrayItem[];
   followUpDate?: Date;
   status: PrescriptionStatus;
-  doctorApproval: IDoctorApproval;
+  doctorApproval?: IDoctorApproval; // undefined = pending (blank until doctor approves/rejects)
   createdAt: Date;
   updatedAt: Date;
   createdByRole: 'RECEPTIONIST' | 'DOCTOR' | 'SUPER_ADMIN';
@@ -66,7 +66,7 @@ const TestOrXrayItemSchema = new Schema<ITestOrXrayItem>(
 
 const DoctorApprovalSchema = new Schema<IDoctorApproval>(
   {
-    approved: { type: Boolean, default: false },
+    approved: { type: Boolean, required: true }, // true = approved, false = rejected
     approvedAt: { type: Date },
     approvedByDoctorId: { type: Schema.Types.ObjectId, ref: 'User' },
     remarks: { type: String },
@@ -87,7 +87,7 @@ const PrescriptionSchema = new Schema<IPrescription>(
     testsOrXray: { type: [TestOrXrayItemSchema], default: [] },
     followUpDate: { type: Date },
     status: { type: String, enum: ['DRAFT', 'FINAL'], default: 'DRAFT' },
-    doctorApproval: { type: DoctorApprovalSchema, default: () => ({ approved: false }) },
+    doctorApproval: { type: DoctorApprovalSchema }, // undefined = pending (blank until doctor approves/rejects)
     createdByRole: { type: String, enum: ['RECEPTIONIST', 'DOCTOR', 'SUPER_ADMIN'], required: true },
     updatedByRole: { type: String, enum: ['RECEPTIONIST', 'DOCTOR', 'SUPER_ADMIN'] },
   },
