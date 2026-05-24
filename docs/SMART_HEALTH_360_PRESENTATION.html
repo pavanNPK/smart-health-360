@@ -1,0 +1,1718 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Health 360 - Project Flow Presentation</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #5d6d7e;
+      --line: #d9e2ec;
+      --paper: #ffffff;
+      --soft: #f6f8fb;
+      --brand: #0f766e;
+      --brand-2: #1d4ed8;
+      --accent: #b45309;
+      --danger: #9f1239;
+      --ok: #15803d;
+      --shadow: 0 20px 50px rgba(23, 32, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: #e9eef5;
+      line-height: 1.45;
+    }
+
+    .deck {
+      width: min(1180px, calc(100% - 32px));
+      margin: 28px auto;
+    }
+
+    .slide {
+      min-height: 660px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      margin: 0 0 28px;
+      padding: 46px;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 8px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2), var(--accent));
+    }
+
+    .kicker {
+      color: var(--brand);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      line-height: 1.08;
+    }
+
+    h1 {
+      font-size: 58px;
+      max-width: 860px;
+    }
+
+    h2 {
+      font-size: 38px;
+      max-width: 940px;
+      margin-bottom: 24px;
+    }
+
+    h3 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .lead {
+      font-size: 24px;
+      max-width: 960px;
+      color: #2c3e50;
+      margin-top: 22px;
+    }
+
+    .tagline {
+      margin-top: 34px;
+      padding: 18px 22px;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 18px;
+      color: #064e3b;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--soft);
+      padding: 22px;
+      min-height: 110px;
+    }
+
+    .card.white {
+      background: #ffffff;
+    }
+
+    .card strong {
+      color: var(--ink);
+    }
+
+    .role {
+      border-top: 5px solid var(--brand);
+    }
+
+    .role.doctor {
+      border-color: var(--brand-2);
+    }
+
+    .role.admin {
+      border-color: var(--accent);
+    }
+
+    ul, ol {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    li {
+      margin: 7px 0;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 9px 14px;
+      background: #eef6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .step {
+      min-height: 120px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      position: relative;
+    }
+
+    .step::after {
+      content: "->";
+      position: absolute;
+      right: -16px;
+      top: 45%;
+      color: var(--brand);
+      font-weight: 900;
+    }
+
+    .step:last-child::after {
+      display: none;
+    }
+
+    .step-no {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--brand);
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .step h3 {
+      font-size: 17px;
+      margin-bottom: 6px;
+    }
+
+    .step p {
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 18px;
+    }
+
+    .vis {
+      padding: 26px;
+      border-radius: 22px;
+      border: 2px solid;
+      background: #ffffff;
+    }
+
+    .vis.a {
+      border-color: #86efac;
+      background: #f0fdf4;
+    }
+
+    .vis.b {
+      border-color: #fbbf24;
+      background: #fffbeb;
+    }
+
+    .vis .label {
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eef2f7;
+      color: #273444;
+      font-weight: 800;
+    }
+
+    td {
+      color: var(--muted);
+      background: #ffffff;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .dot {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--brand-2);
+      color: #ffffff;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 18px 20px;
+    }
+
+    .panel p {
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .tree {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .tree .branch {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 22px;
+      background: #ffffff;
+    }
+
+    .section-chip {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: #fef3c7;
+      color: #92400e;
+      font-weight: 800;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .callout {
+      border-left: 6px solid var(--brand);
+      background: #f8fafc;
+      padding: 18px 20px;
+      border-radius: 14px;
+      margin-top: 20px;
+    }
+
+    .callout p {
+      margin: 0;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    .footer {
+      position: absolute;
+      left: 46px;
+      right: 46px;
+      bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      color: #94a3b8;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
+
+    .mini-flow {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .mini-flow div {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 150px;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .metric .big {
+      font-size: 40px;
+      font-weight: 900;
+      color: var(--brand);
+    }
+
+    .metric .small {
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .full-reference {
+      min-height: auto;
+    }
+
+    .full-reference pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 22px 0 36px;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #f8fafc;
+      color: #17202a;
+      font: 15px/1.55 Arial, Helvetica, sans-serif;
+    }
+
+    @media (max-width: 900px) {
+      .slide {
+        padding: 28px;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      h2 {
+        font-size: 30px;
+      }
+
+      .cols-2, .cols-3, .cols-4, .flow, .compare, .tree {
+        grid-template-columns: 1fr;
+      }
+
+      .step::after {
+        display: none;
+      }
+
+      .footer {
+        position: static;
+        margin-top: 24px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+
+      .deck {
+        width: 100%;
+        margin: 0;
+      }
+
+      .slide {
+        min-height: 100vh;
+        box-shadow: none;
+        border-radius: 0;
+        border: 0;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide">
+      <div class="kicker">Smart Health 360</div>
+      <h1>Project Flow Presentation</h1>
+      <p class="lead">A visual explanation of the project flow from patient entry to consultation, record storage, visibility control, audit handling, waiting-room optimization, offline payment, and future trusted-person operations.</p>
+      <div class="tagline">Digital hospital workflow with controlled VIS_A / VIS_B record visibility.</div>
+      <div class="pill-row">
+        <span class="pill">Reception</span>
+        <span class="pill">Doctor workflow</span>
+        <span class="pill">Patient history</span>
+        <span class="pill">Incognito records</span>
+        <span class="pill">Audit safety</span>
+      </div>
+      <div class="footer"><span>Project Flow</span><span>01</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Overview</div>
+      <h2>What The Application Does</h2>
+      <div class="grid cols-3">
+        <div class="card metric">
+          <div class="big">1</div>
+          <div class="small">Reception registers and assigns patients</div>
+        </div>
+        <div class="card metric">
+          <div class="big">2</div>
+          <div class="small">Doctor sees assigned patients and medical history</div>
+        </div>
+        <div class="card metric">
+          <div class="big">3</div>
+          <div class="small">Records are saved as VIS_A or VIS_B</div>
+        </div>
+      </div>
+      <div class="callout">
+        <p>Smart Health 360 is a hospital workflow system where patient registration, doctor consultation, prescription history, medical records, audit handling, and controlled visibility work together in one flow.</p>
+      </div>
+      <div class="footer"><span>One-Line Project Summary</span><span>02</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Users</div>
+      <h2>Main Users And Responsibilities</h2>
+      <div class="grid cols-3">
+        <div class="card role admin">
+          <h3>Super Admin</h3>
+          <ul>
+            <li>Controls users, clinics, audit, and high-level permissions.</li>
+            <li>Creates doctors and receptionists.</li>
+            <li>Controls emergency hide and restore.</li>
+            <li>Monitors trusted administrative operations.</li>
+          </ul>
+        </div>
+        <div class="card role doctor">
+          <h3>Doctor</h3>
+          <ul>
+            <li>Sees assigned patients.</li>
+            <li>Opens patient details and medical history.</li>
+            <li>Adds diagnosis, advice, prescription, and follow-up notes.</li>
+            <li>Uses VIS_A / VIS_B visibility where authorized.</li>
+          </ul>
+        </div>
+        <div class="card role">
+          <h3>Receptionist</h3>
+          <ul>
+            <li>Registers and searches patients.</li>
+            <li>Assigns each patient to a doctor.</li>
+            <li>Maintains basic patient information.</li>
+            <li>Supports waiting-room and visit data flow.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><span>Main Actors</span><span>03</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Real-World Flow</div>
+      <h2>Example: Ramesh Kumar Walks Into The Hospital</h2>
+      <div class="timeline">
+        <div class="timeline-item"><div class="dot">1</div><div class="panel"><p>Ramesh reaches reception. Receptionist registers him or searches his existing profile.</p></div></div>
+        <div class="timeline-item"><div class="dot">2</div><div class="panel"><p>Receptionist assigns Ramesh to Dr. Arjun. He appears in the doctor's patient list or waiting-room screen.</p></div></div>
+        <div class="timeline-item"><div class="dot">3</div><div class="panel"><p>Doctor opens the profile and sees basic details, previous visits, diagnosis history, prescriptions, medicine history, X-ray or lab attachments, and current visit notes.</p></div></div>
+        <div class="timeline-item"><div class="dot">4</div><div class="panel"><p>Doctor completes consultation and saves the record or prescription as VIS_A or VIS_B.</p></div></div>
+        <div class="timeline-item"><div class="dot">5</div><div class="panel"><p>If required later, an authorized user can change VIS_A to VIS_B or VIS_B to VIS_A. During inspection mode, VIS_B can be hidden from normal views and exports.</p></div></div>
+      </div>
+      <div class="footer"><span>Simple Story</span><span>04</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Record Visibility</div>
+      <h2>VIS_A And VIS_B</h2>
+      <div class="compare">
+        <div class="vis a">
+          <div class="label">VIS_A</div>
+          <h3>Normal Visible Record</h3>
+          <p>Regular patient record visible in normal hospital workflow and normal exports based on role.</p>
+          <ul>
+            <li>Used for regular outpatient treatment history.</li>
+            <li>Can appear in standard patient history.</li>
+            <li>Can be included in normal reports or exports based on permission.</li>
+          </ul>
+        </div>
+        <div class="vis b">
+          <div class="label">VIS_B</div>
+          <h3>Incognito / Sensitive Record</h3>
+          <p>Controlled record that can be hidden during inspection/audit mode and protected from normal export.</p>
+          <ul>
+            <li>Stored in the system but treated as sensitive.</li>
+            <li>Available only according to permission.</li>
+            <li>Can be hidden from normal screens and exports during audit mode.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout">
+        <p>In discussions, these may be described as normal/incognito records. In the application and project documentation, the terms are VIS_A and VIS_B.</p>
+      </div>
+      <div class="footer"><span>Visibility Model</span><span>05</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">VIS_A Example</div>
+      <h2>Normal Record Example</h2>
+      <div class="grid cols-2">
+        <div class="card white">
+          <h3>Patient Details</h3>
+          <table>
+            <tr><th>Patient</th><td>Ramesh Kumar</td></tr>
+            <tr><th>Visit Reason</th><td>Fever and cough</td></tr>
+            <tr><th>Doctor</th><td>Dr. Arjun</td></tr>
+            <tr><th>Status</th><td><strong>VIS_A</strong></td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>What This Means</h3>
+          <ul>
+            <li>It is a normal hospital record.</li>
+            <li>Doctor can see it.</li>
+            <li>Reception/front desk can see it based on permission.</li>
+            <li>It can appear in standard patient history.</li>
+            <li>It can be included in normal reports/exports based on role.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><span>VIS_A Real Example</span><span>06</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">VIS_B Example</div>
+      <h2>Incognito Record Example</h2>
+      <div class="grid cols-2">
+        <div class="card white">
+          <h3>Patient Details</h3>
+          <table>
+            <tr><th>Patient</th><td>Suresh Reddy</td></tr>
+            <tr><th>Visit Reason</th><td>Sensitive internal consultation</td></tr>
+            <tr><th>Doctor</th><td>Dr. Arjun</td></tr>
+            <tr><th>Status</th><td><strong>VIS_B</strong></td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>What This Means</h3>
+          <ul>
+            <li>It is stored but treated as incognito/sensitive.</li>
+            <li>Authorized doctors/admins can see it in normal mode.</li>
+            <li>During audit/inspection mode, it can be hidden from normal screens and exports.</li>
+            <li>It gives the hospital controlled visibility over sensitive patient entries.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><span>VIS_B Real Example</span><span>07</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Visibility Change</div>
+      <h2>Changing VIS_A To VIS_B And VIS_B To VIS_A</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <span class="section-chip">Normal To Incognito</span>
+          <ol>
+            <li>Ramesh is registered as a normal patient.</li>
+            <li>His first visit is saved as VIS_A.</li>
+            <li>Later, hospital decides this record should be incognito.</li>
+            <li>Authorized user changes VIS_A to VIS_B.</li>
+            <li>The record follows incognito visibility rules.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <span class="section-chip">Incognito To Normal</span>
+          <ol>
+            <li>Suresh has a record saved as VIS_B.</li>
+            <li>Later, hospital decides it can be normal history.</li>
+            <li>Authorized user changes VIS_B to VIS_A.</li>
+            <li>The record returns to normal visible workflow.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="callout">
+        <p>Hospitals do not always know the final visibility requirement at registration time. The system supports controlled movement between VIS_A and VIS_B with audit tracking.</p>
+      </div>
+      <div class="footer"><span>Visibility Lifecycle</span><span>08</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">End-To-End Flow</div>
+      <h2>Complete Start-To-End Project Flow</h2>
+      <div class="flow">
+        <div class="step"><div class="step-no">1</div><h3>Patient Arrives</h3><p>Patient reaches reception.</p></div>
+        <div class="step"><div class="step-no">2</div><h3>Reception Entry</h3><p>Search existing patient or create new patient.</p></div>
+        <div class="step"><div class="step-no">3</div><h3>Assign Doctor</h3><p>Receptionist assigns the patient to a doctor.</p></div>
+        <div class="step"><div class="step-no">4</div><h3>Doctor Queue</h3><p>Patient appears in doctor workflow or waiting room.</p></div>
+        <div class="step"><div class="step-no">5</div><h3>Patient Details</h3><p>Doctor checks records, medicines, prescriptions, and reports.</p></div>
+      </div>
+      <div class="flow">
+        <div class="step"><div class="step-no">6</div><h3>Consultation</h3><p>Doctor consults patient.</p></div>
+        <div class="step"><div class="step-no">7</div><h3>Save Data</h3><p>Record, prescription, or attachment is saved.</p></div>
+        <div class="step"><div class="step-no">8</div><h3>Visibility</h3><p>Record is marked VIS_A or VIS_B.</p></div>
+        <div class="step"><div class="step-no">9</div><h3>History</h3><p>Hospital continues normal treatment history.</p></div>
+        <div class="step"><div class="step-no">10</div><h3>Audit Mode</h3><p>VIS_B can be hidden and later restored.</p></div>
+      </div>
+      <div class="footer"><span>Complete Flow</span><span>09</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Role Tree</div>
+      <h2>Role-Based Flow Tree</h2>
+      <div class="tree">
+        <div class="branch">
+          <h3>Super Admin</h3>
+          <ul>
+            <li>Creates doctors and receptionists.</li>
+            <li>Manages clinics, areas, and hierarchy.</li>
+            <li>Views audit logs.</li>
+            <li>Controls emergency hide and restore.</li>
+            <li>Can view/manage broader patient data.</li>
+          </ul>
+        </div>
+        <div class="branch">
+          <h3>Receptionist</h3>
+          <ul>
+            <li>Registers patient.</li>
+            <li>Assigns doctor.</li>
+            <li>Updates patient demographic details.</li>
+            <li>Adds visit support details where allowed.</li>
+            <li>Adds medicine/X-ray attachment data where allowed.</li>
+            <li>Helps operate waiting-room flow.</li>
+          </ul>
+        </div>
+        <div class="branch">
+          <h3>Doctor</h3>
+          <ul>
+            <li>Sees assigned patients.</li>
+            <li>Opens patient profile.</li>
+            <li>Reads visit history.</li>
+            <li>Reads medicine and prescription history.</li>
+            <li>Adds diagnosis and prescription.</li>
+            <li>Approves/reviews medical entries.</li>
+            <li>Uses VIS_A / VIS_B where authorized.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><span>Role-Based Flow</span><span>10</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Consultation</div>
+      <h2>Doctor Consultation Flow In Detail</h2>
+      <div class="grid cols-3">
+        <div class="card"><h3>1. Login</h3><p>Doctor opens the portal and logs in. The doctor sees their own dashboard, not receptionist or admin screens.</p></div>
+        <div class="card"><h3>2. Queue/List</h3><p>Doctor sees assigned patients and can identify who is waiting, who is next, and the visit reason.</p></div>
+        <div class="card"><h3>3. Patient Details</h3><p>Doctor opens the patient profile and checks previous records, diagnosis, prescriptions, medicine history, reports, and follow-up information.</p></div>
+        <div class="card"><h3>4. Current Visit</h3><p>Doctor enters current complaint, diagnosis, medicines, tests or X-ray advice, follow-up date, and notes.</p></div>
+        <div class="card"><h3>5. Save Record</h3><p>The record is saved as VIS_A for normal record or VIS_B for incognito/sensitive record.</p></div>
+        <div class="card"><h3>6. Maintain History</h3><p>Next time the patient visits, treatment continues with full context instead of starting from zero.</p></div>
+      </div>
+      <div class="footer"><span>Doctor Consultation</span><span>11</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Queue Example</div>
+      <h2>Patient Queue / Waiting List Example</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Queue No</th>
+            <th>Patient</th>
+            <th>Reason</th>
+            <th>Assigned Doctor</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Ramesh Kumar</td><td>Fever</td><td>Dr. Arjun</td><td>Waiting</td></tr>
+          <tr><td>2</td><td>Priya Sharma</td><td>Follow-up</td><td>Dr. Arjun</td><td>Waiting</td></tr>
+          <tr><td>3</td><td>Suresh Reddy</td><td>Consultation</td><td>Dr. Arjun</td><td>Waiting</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <p>This can become a complete digital waiting-room screen so the doctor can see who is next and open the patient profile before consultation starts.</p>
+      </div>
+      <div class="footer"><span>Waiting List</span><span>12</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Patient Details</div>
+      <h2>Patient Details Module</h2>
+      <div class="grid cols-4">
+        <div class="card">
+          <h3>Settings</h3>
+          <ul>
+            <li>Name</li>
+            <li>Age/date of birth</li>
+            <li>Gender</li>
+            <li>Contact details</li>
+            <li>Assigned doctor</li>
+            <li>Status/visibility where applicable</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Records</h3>
+          <ul>
+            <li>New visit</li>
+            <li>Follow-up</li>
+            <li>Continuation</li>
+            <li>Disease summary</li>
+            <li>Diagnosis</li>
+            <li>Doctor notes</li>
+            <li>Visibility status</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Prescription</h3>
+          <ul>
+            <li>Symptoms</li>
+            <li>Diagnosis</li>
+            <li>Medicines</li>
+            <li>Dosage</li>
+            <li>Food instructions</li>
+            <li>Tests/X-rays</li>
+            <li>Doctor approval</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Medicine / X-Ray</h3>
+          <ul>
+            <li>Medicine files</li>
+            <li>X-ray reports</li>
+            <li>Lab attachments</li>
+            <li>Prescription documents</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><span>Patient Details Module</span><span>13</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Audit Handling</div>
+      <h2>Incognito / Audit Handling Flow</h2>
+      <div class="grid cols-3">
+        <div class="card">
+          <h3>Normal Mode</h3>
+          <ul>
+            <li>Doctors access assigned patient data.</li>
+            <li>Reception performs front-desk operations.</li>
+            <li>Admin monitors system data.</li>
+            <li>VIS_A records are normal.</li>
+            <li>VIS_B records are available only by permission.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Inspection / Emergency Hide</h3>
+          <ol>
+            <li>Trusted Super Admin enables emergency hide.</li>
+            <li>VIS_B records are hidden from normal views.</li>
+            <li>Normal screens show only VIS_A.</li>
+            <li>Normal exports include only VIS_A.</li>
+            <li>Audit log stores who, when, and why.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Restore Mode</h3>
+          <ol>
+            <li>Trusted Super Admin restores hidden records.</li>
+            <li>VIS_B records return to controlled availability.</li>
+            <li>Audit log stores restore activity.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="callout">
+        <p>This allows daily digital workflow while keeping sensitive records controlled during audit or inspection situations.</p>
+      </div>
+      <div class="footer"><span>Audit Handling</span><span>14</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Payments</div>
+      <h2>Offline Payment Plan</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Planned Payment Approach</h3>
+          <ul>
+            <li>Allow offline payment mode.</li>
+            <li>Receptionist records payment status manually.</li>
+            <li>Payment can be cash, UPI outside the app, card machine, or another offline method.</li>
+            <li>System can maintain payment reference or notes.</li>
+            <li>Medical workflow does not depend on payment gateway success or failure.</li>
+          </ul>
+        </div>
+        <div class="card white">
+          <h3>Example</h3>
+          <p>Ramesh pays consultation fee by cash at reception. Receptionist marks payment as received in the system. Doctor can continue consultation flow without waiting for online payment confirmation.</p>
+          <div class="callout">
+            <p>This keeps the hospital workflow simple and practical.</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Offline Payment</span><span>15</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Trusted Control</div>
+      <h2>Future Trusted-Person Operating Model</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Trusted User Can</h3>
+          <ul>
+            <li>Control which records are VIS_A and VIS_B.</li>
+            <li>Manage inspection mode.</li>
+            <li>Manage doctors and receptionists.</li>
+            <li>Monitor audit logs.</li>
+            <li>Decide when to restore hidden records.</li>
+            <li>Ensure sensitive records are handled correctly.</li>
+          </ul>
+        </div>
+        <div class="card white">
+          <h3>Why It Matters</h3>
+          <p>The incognito feature should not be available to every staff member. It should be controlled only by trusted hospital users.</p>
+        </div>
+      </div>
+      <div class="footer"><span>Trusted-Person Model</span><span>16</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Waiting Room</div>
+      <h2>Waiting-Room Optimization Plan</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Doctor Screen Can Show</h3>
+          <ul>
+            <li>Who is waiting.</li>
+            <li>Who is next.</li>
+            <li>Which patient is in consultation.</li>
+            <li>Visit type.</li>
+            <li>Assigned doctor.</li>
+            <li>Patient basic details.</li>
+            <li>Previous visit summary.</li>
+            <li>Pending reports.</li>
+            <li>Follow-up status.</li>
+          </ul>
+        </div>
+        <div class="card white">
+          <h3>Example Waiting-Room Flow</h3>
+          <div class="mini-flow">
+            <div>Reception registers patient</div>
+            <div>Patient enters waiting list</div>
+            <div>Doctor screen shows next patient</div>
+            <div>Doctor opens patient details before calling patient</div>
+            <div>Consultation starts</div>
+            <div>Prescription and record saved</div>
+            <div>Patient checkout / follow-up / medicine process</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Waiting-Room Digitalization</span><span>17</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Medicine History</div>
+      <h2>Medicine History Maintenance</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>System Maintains</h3>
+          <ul>
+            <li>Previous medicine names.</li>
+            <li>Dosage.</li>
+            <li>Number of days.</li>
+            <li>Instructions.</li>
+            <li>Diagnosis connected to medicine.</li>
+            <li>Follow-up advice.</li>
+            <li>Whether medicine was part of current or older visit.</li>
+          </ul>
+        </div>
+        <div class="card white">
+          <h3>Example</h3>
+          <p>Priya comes again for gastric pain. Doctor checks that she was already given one medicine last month. Doctor can avoid repeating the same medicine unnecessarily and can change treatment based on history.</p>
+        </div>
+      </div>
+      <div class="footer"><span>Medicine And Prescription History</span><span>18</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Permissions</div>
+      <h2>Who Can See What</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Super Admin</th>
+            <th>Doctor</th>
+            <th>Receptionist</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Create users</td><td>Yes</td><td>No</td><td>No</td></tr>
+          <tr><td>Create patient</td><td>Usually no / admin controlled</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Assign doctor</td><td>Yes</td><td>No</td><td>Yes during registration</td></tr>
+          <tr><td>See assigned patients</td><td>Yes</td><td>Yes</td><td>Yes based on clinic/front desk</td></tr>
+          <tr><td>See patient profile</td><td>Yes</td><td>Yes, based on assignment/clinic rules</td><td>Yes, based on clinic/front desk</td></tr>
+          <tr><td>Add consultation record</td><td>Yes if allowed</td><td>Yes</td><td>Limited/support entry based on module</td></tr>
+          <tr><td>Add prescription</td><td>Controlled</td><td>Yes / doctor approval</td><td>Entry support where allowed</td></tr>
+          <tr><td>Change VIS_A / VIS_B</td><td>Yes</td><td>Yes if authorized</td><td>Limited/controlled</td></tr>
+          <tr><td>Emergency hide/restore</td><td>Yes</td><td>No</td><td>No</td></tr>
+          <tr><td>View audit logs</td><td>Full</td><td>Scoped</td><td>Own/scoped</td></tr>
+        </tbody>
+      </table>
+      <div class="footer"><span>Permission Matrix</span><span>19</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Exports And Audit</div>
+      <h2>Export And Audit Safety</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Export Rules</h3>
+          <ul>
+            <li>Receptionist export should be restricted.</li>
+            <li>Doctor export should be related to assigned patients.</li>
+            <li>Super Admin export can be broader but should be audited.</li>
+            <li>During emergency hide/inspection mode, exports should show only VIS_A.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Audit Logged Actions</h3>
+          <ul>
+            <li>Login.</li>
+            <li>Patient creation.</li>
+            <li>Record creation.</li>
+            <li>Visibility change.</li>
+            <li>Export.</li>
+            <li>Emergency hide.</li>
+            <li>Emergency restore.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout">
+        <p>Audit log means the system remembers who did what and when.</p>
+      </div>
+      <div class="footer"><span>Audit Safety</span><span>20</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">End-To-End Examples</div>
+      <h2>Two Patient Scenarios</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Ramesh Kumar - VIS_A</h3>
+          <ol>
+            <li>Ramesh enters the hospital.</li>
+            <li>Receptionist searches by phone number.</li>
+            <li>Receptionist creates profile and assigns Dr. Arjun.</li>
+            <li>Ramesh appears in Dr. Arjun's waiting list.</li>
+            <li>Doctor opens profile and sees no previous history.</li>
+            <li>Doctor diagnoses fever and cough.</li>
+            <li>Doctor adds Paracetamol, cough syrup, and follow-up advice.</li>
+            <li>Record is saved as VIS_A.</li>
+            <li>Later visits continue with previous history.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Suresh Reddy - VIS_B</h3>
+          <ol>
+            <li>Suresh enters the hospital.</li>
+            <li>Receptionist registers him and assigns Dr. Arjun.</li>
+            <li>Doctor completes consultation.</li>
+            <li>Hospital decides this record should be incognito.</li>
+            <li>Record is saved as VIS_B.</li>
+            <li>Authorized users can access it in normal mode.</li>
+            <li>During inspection mode, VIS_B is hidden from normal views/exports.</li>
+            <li>After audit, Super Admin restores hidden data.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="footer"><span>Patient Examples</span><span>21</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Vision</div>
+      <h2>Final Project Vision</h2>
+      <div class="grid cols-3">
+        <div class="card"><h3>Digital Operations</h3><ul><li>Digital reception.</li><li>Digital doctor workflow.</li><li>Digital waiting room.</li></ul></div>
+        <div class="card"><h3>Medical Continuity</h3><ul><li>Patient medical history in one place.</li><li>Prescription and medicine history.</li><li>Attachment/report storage.</li></ul></div>
+        <div class="card"><h3>Controlled Safety</h3><ul><li>Offline payment handling.</li><li>Controlled incognito patient records.</li><li>Audit-safe visibility management.</li><li>Trusted-person control.</li></ul></div>
+      </div>
+      <div class="tagline">The doctor should know who is next, open the full patient history on screen, treat faster with better context, maintain medicine and prescription history, and the hospital should control which records remain normal and which records are handled as incognito.</div>
+      <div class="footer"><span>Final Project Vision</span><span>22</span></div>
+    </section>
+    <!-- FULL_README_REFERENCE_START -->
+    <section class="slide full-reference">
+      <div class="kicker">Complete Reference</div>
+      <h2>Full Project Flow Content</h2>
+      <p>This section contains the complete README content exactly, so the visual document includes the full project explanation without removing any topic, example, table, or flow.</p>
+      <pre># Smart Health 360 - Project Flow
+
+This document explains the Smart Health 360 project flow from patient entry to doctor consultation, record storage, visibility control, audit handling, and future workflow plans.
+
+The application is currently built for three main users:
+
+- **Super Admin (SA)**: hospital owner/admin/trusted head person who controls users, clinics, audit, and high-level permissions.
+- **Doctor**: sees assigned patients, patient history, records, prescriptions, medicines, reports, and waiting-room flow.
+- **Receptionist**: registers patients, assigns doctor, manages queue-related patient entry, enters prescription/supporting data where allowed, and helps operate the hospital front desk.
+
+The main business idea is that the hospital can run normal digital patient management while also controlling which patient records are visible as normal records and which records are treated as incognito records using `VIS_A` and `VIS_B`.
+
+---
+
+## 1. One-Line Project Summary
+
+Smart Health 360 is a hospital workflow system where the receptionist registers the patient, the doctor sees the patient digitally, records and prescriptions are maintained in one place, and the hospital can mark selected patient data as normal (`VIS_A`) or incognito (`VIS_B`) based on internal trust and audit requirements.
+
+---
+
+## 2. Simple Real-World Story
+
+Imagine a patient named **Ramesh Kumar** walks into the hospital.
+
+1. Ramesh reaches the reception.
+2. Receptionist registers Ramesh in the system.
+3. Receptionist assigns Ramesh to **Dr. Arjun**.
+4. Ramesh appears in the doctor&#x27;s patient list or waiting-room screen.
+5. Doctor opens Ramesh&#x27;s profile and sees:
+   - basic details,
+   - previous visits,
+   - diagnosis history,
+   - prescription history,
+   - medicine history,
+   - X-ray or lab attachments,
+   - current visit notes.
+6. Doctor completes consultation and adds the medical record or prescription.
+7. The record is saved as either:
+   - `VIS_A`: normal visible hospital record,
+   - `VIS_B`: incognito/sensitive record.
+8. If required later, an authorized person can change the record from `VIS_A` to `VIS_B`, or from `VIS_B` back to `VIS_A`.
+9. During audit/inspection mode, `VIS_B` data can be hidden from normal views and exports, while `VIS_A` data remains visible.
+
+So the hospital gets a digital system for daily work plus controlled visibility for sensitive records.
+
+---
+
+## 3. Main Actors And Their Work
+
+### 3.1 Receptionist
+
+The receptionist is the front-desk operator.
+
+Main responsibilities:
+
+- Register new patients.
+- Search existing patients.
+- Assign each patient to a doctor.
+- Maintain basic patient information.
+- Add visit support data where allowed.
+- Add medicine/X-ray attachment links or reports where allowed.
+- Help create a digital waiting-room flow.
+- View patient records based on system permission.
+
+Example:
+
+Ramesh comes to the hospital for fever. The receptionist creates his patient profile, enters mobile number, age/date of birth, gender, and assigns him to Dr. Arjun. Ramesh now appears in the system instead of being managed only on paper.
+
+### 3.2 Doctor
+
+The doctor is the consultation user.
+
+Main responsibilities:
+
+- See assigned patients.
+- Open patient details before or during consultation.
+- Check previous visit history.
+- Check medicine and prescription history.
+- Add diagnosis, advice, prescription, and follow-up notes.
+- Approve or review prescription entries when needed.
+- Change record visibility when authorized.
+- Use the system as a digital patient screen and workflow tool.
+
+Example:
+
+Dr. Arjun opens the waiting-room list and sees Ramesh is next. Before calling him inside, the doctor can open Ramesh&#x27;s profile and see that he came two months ago for cough and was prescribed a medicine. This reduces repeated questions and helps treatment continuity.
+
+### 3.3 Super Admin
+
+The Super Admin is the highest-control role.
+
+Main responsibilities:
+
+- Create doctors and receptionists.
+- Manage hospital/clinic setup.
+- View broader patient and audit data.
+- Assign or change doctor mapping where allowed.
+- Monitor system activity.
+- Control emergency hide/restore features.
+- Handle trusted administrative operations.
+
+Example:
+
+The hospital owner or trusted senior person creates a new doctor account, assigns staff to clinics, checks audit logs, and controls emergency incognito visibility when needed.
+
+---
+
+## 4. VIS_A And VIS_B Explanation
+
+The system uses two visibility levels:
+
+| Term | Simple Meaning | Practical Meaning |
+|------|----------------|-------------------|
+| `VIS_A` | Normal visible record | Regular patient record visible in normal hospital workflow and normal exports |
+| `VIS_B` | Incognito/sensitive record | Controlled record that can be hidden during inspection/audit mode and protected from normal export |
+
+In discussions, these may be described as &quot;normal/incognito&quot; records. In the application and project documentation, the terms are `VIS_A` and `VIS_B`.
+
+### 4.1 VIS_A Real Example
+
+Patient: **Ramesh Kumar**  
+Visit reason: fever and cough  
+Doctor: Dr. Arjun  
+Record status: `VIS_A`
+
+This means:
+
+- It is a normal hospital record.
+- Doctor can see it.
+- Reception/front desk can see it based on permission.
+- It can appear in standard patient history.
+- It can be included in normal reports/exports based on role.
+
+This is suitable for regular outpatient treatment history.
+
+### 4.2 VIS_B Real Example
+
+Patient: **Suresh Reddy**  
+Visit reason: sensitive internal consultation  
+Doctor: Dr. Arjun  
+Record status: `VIS_B`
+
+This means:
+
+- It is stored in the system but treated as incognito/sensitive.
+- Authorized doctors/admins can see it when the system is in normal mode.
+- During audit/inspection mode, the system can hide this record from normal screens and exports.
+- It gives the hospital controlled visibility over sensitive patient entries.
+
+This is suitable for records that the hospital wants to handle with extra discretion.
+
+---
+
+## 5. Changing VIS_A To VIS_B And VIS_B To VIS_A
+
+The system supports changing visibility during the patient lifecycle.
+
+### 5.1 Normal To Incognito
+
+Example:
+
+1. Ramesh is registered as a normal patient.
+2. His first visit is saved as `VIS_A`.
+3. Later, hospital decides this record should be treated as incognito.
+4. Authorized user changes the status from `VIS_A` to `VIS_B`.
+5. From that point, the record follows incognito visibility rules.
+
+Result:
+
+The patient exists in the system, but that specific record becomes controlled/sensitive.
+
+### 5.2 Incognito To Normal
+
+Example:
+
+1. Suresh has a record saved as `VIS_B`.
+2. Later, hospital decides it can be part of normal history.
+3. Authorized user changes the status from `VIS_B` to `VIS_A`.
+4. The record returns to normal visible workflow.
+
+Result:
+
+The record becomes part of normal patient history and normal visibility rules again.
+
+### 5.3 Why This Matters
+
+Hospitals do not always know the final visibility requirement at the time of registration. Sometimes the decision happens later. The application supports this by allowing controlled movement between `VIS_A` and `VIS_B`, with audit tracking.
+
+---
+
+## 6. Complete Start-To-End Flow
+
+```
+Patient arrives
+    |
+    v
+Receptionist searches existing patient or creates new patient
+    |
+    v
+Receptionist assigns doctor
+    |
+    v
+Patient appears in doctor&#x27;s workflow / waiting-room list
+    |
+    v
+Doctor opens patient details
+    |
+    v
+Doctor checks previous records, medicines, prescriptions, reports
+    |
+    v
+Doctor consults patient
+    |
+    v
+Record / prescription / attachment is saved
+    |
+    v
+Record is marked VIS_A or VIS_B
+    |
+    v
+Hospital continues normal treatment history
+    |
+    v
+If audit/inspection mode is needed, VIS_B data can be hidden
+    |
+    v
+After audit/inspection, VIS_B data can be restored
+```
+
+---
+
+## 7. Role-Based Flow Tree
+
+```
+Smart Health 360
+|
++-- Super Admin
+|   |
+|   +-- Creates doctors and receptionists
+|   +-- Manages clinics / areas / hierarchy
+|   +-- Views audit logs
+|   +-- Controls emergency hide / restore
+|   +-- Can view/manage broader patient data
+|
++-- Receptionist
+|   |
+|   +-- Registers patient
+|   +-- Assigns doctor
+|   +-- Updates patient demographic details
+|   +-- Adds visit support details where allowed
+|   +-- Adds medicine/X-ray attachment data where allowed
+|   +-- Helps operate waiting-room flow
+|
++-- Doctor
+    |
+    +-- Sees assigned patients
+    +-- Opens patient profile
+    +-- Reads visit history
+    +-- Reads medicine and prescription history
+    +-- Adds diagnosis and prescription
+    +-- Approves/reviews medical entries
+    +-- Uses VIS_A / VIS_B visibility where authorized
+```
+
+---
+
+## 8. Doctor Consultation Flow In Detail
+
+### Step 1: Doctor Logs In
+
+Doctor opens the portal and logs in with their email and password.
+
+After login, the doctor sees their own dashboard, not the receptionist or admin dashboard.
+
+### Step 2: Doctor Sees Patient Queue / Patient List
+
+The doctor sees patients assigned to them.
+
+Example:
+
+| Queue No | Patient | Reason | Assigned Doctor | Status |
+|----------|---------|--------|-----------------|--------|
+| 1 | Ramesh Kumar | Fever | Dr. Arjun | Waiting |
+| 2 | Priya Sharma | Follow-up | Dr. Arjun | Waiting |
+| 3 | Suresh Reddy | Consultation | Dr. Arjun | Waiting |
+
+This can become a complete digital waiting-room screen in future.
+
+### Step 3: Doctor Opens Patient Details
+
+Doctor clicks Ramesh Kumar.
+
+The doctor can see:
+
+- patient name, age, gender, phone,
+- assigned doctor,
+- previous visit records,
+- disease summary,
+- diagnosis history,
+- prescription history,
+- medicine history,
+- test/X-ray attachments,
+- follow-up information.
+
+### Step 4: Doctor Adds Current Consultation
+
+Doctor enters:
+
+- current complaint,
+- diagnosis,
+- medicines,
+- tests or X-ray advice,
+- follow-up date,
+- notes.
+
+### Step 5: Record Is Saved
+
+The record is saved with a visibility status:
+
+- `VIS_A` for normal record,
+- `VIS_B` for incognito/sensitive record.
+
+### Step 6: Patient History Is Maintained
+
+Next time Ramesh visits, the doctor does not start from zero. The doctor can open previous history and continue treatment properly.
+
+---
+
+## 9. Patient Details Module
+
+The project includes a patient details area with multiple sections.
+
+### 9.1 Settings
+
+Shows basic patient information:
+
+- name,
+- age/date of birth,
+- gender,
+- contact details,
+- assigned doctor,
+- patient status/visibility information where applicable.
+
+### 9.2 Records
+
+Shows visit history:
+
+- new visit,
+- follow-up,
+- continuation,
+- disease summary,
+- diagnosis,
+- doctor notes,
+- created date,
+- visibility status.
+
+### 9.3 Prescription
+
+Shows prescription details:
+
+- symptoms,
+- diagnosis,
+- medicines,
+- dosage,
+- food instructions,
+- number of days,
+- tests or X-rays,
+- follow-up date,
+- doctor approval.
+
+### 9.4 Medicine / X-Ray Data
+
+Stores supporting files or links:
+
+- medicine-related files,
+- X-ray reports,
+- lab attachments,
+- prescription-related documents.
+
+This keeps medical history in one place instead of spreading it across multiple papers or registers.
+
+---
+
+## 10. Incognito / Audit Handling Flow
+
+The main agenda of this project is controlled patient visibility.
+
+When the hospital wants to keep some records hidden during audit/inspection, those records are marked as `VIS_B`.
+
+### Normal Mode
+
+In normal hospital operation:
+
+- doctors can access assigned patient data,
+- receptionist can do front-desk operations,
+- admin can monitor system data,
+- `VIS_A` records are normal,
+- `VIS_B` records are available only according to permission.
+
+### Inspection / Emergency Hide Mode
+
+When audit or inspection happens:
+
+1. Trusted Super Admin enables emergency hide.
+2. `VIS_B` records are moved or hidden from normal record collections/views.
+3. Normal screens show only `VIS_A` data.
+4. Normal exports include only `VIS_A` data.
+5. Audit log stores who enabled the mode, when, and why.
+
+### Restore Mode
+
+After audit/inspection:
+
+1. Trusted Super Admin restores hidden records.
+2. `VIS_B` records return to normal controlled availability.
+3. Audit log stores restore activity.
+
+This allows the hospital to continue daily digital workflow while keeping sensitive data controlled.
+
+---
+
+## 11. Offline Payment Plan
+
+The current main focus is not online payment gateway integration.
+
+The planned payment approach is:
+
+- allow offline payment mode,
+- receptionist records payment status manually,
+- payment can be cash, UPI outside the app, card machine, or other offline method,
+- system can maintain payment reference or notes,
+- the medical workflow does not depend on payment gateway success/failure.
+
+Example:
+
+Ramesh pays consultation fee by cash at reception. Receptionist marks payment as received in the system. Doctor can continue consultation flow without waiting for online payment confirmation.
+
+This keeps the hospital workflow simple and practical.
+
+---
+
+## 12. Future Trusted-Person Operating Model
+
+In future, the whole application can be operated by one trusted person or a trusted small group inside the hospital.
+
+That trusted person can:
+
+- control which records are `VIS_A` and `VIS_B`,
+- manage inspection mode,
+- manage doctors and receptionists,
+- monitor audit logs,
+- decide when to restore hidden records,
+- ensure sensitive records are handled correctly.
+
+This is important because the incognito feature should not be available to every staff member. It should be controlled only by trusted hospital users.
+
+---
+
+## 13. Waiting-Room Optimization Plan
+
+The application can fully digitalize the waiting room.
+
+Current/future doctor screen can show:
+
+- who is waiting,
+- who is next,
+- which patient is in consultation,
+- visit type,
+- assigned doctor,
+- patient basic details,
+- previous visit summary,
+- pending reports,
+- follow-up status.
+
+Example waiting-room flow:
+
+```
+Reception registers patient
+    |
+    v
+Patient enters waiting list
+    |
+    v
+Doctor screen shows next patient
+    |
+    v
+Doctor opens patient details before calling patient
+    |
+    v
+Consultation starts
+    |
+    v
+Prescription and record saved
+    |
+    v
+Patient checkout / follow-up / medicine process
+```
+
+This reduces paper dependency and makes doctor consultation faster.
+
+---
+
+## 14. Medicine History Maintenance
+
+The system maintains medicine and prescription history so doctors can understand previous treatment.
+
+Doctor can check:
+
+- previous medicine names,
+- dosage,
+- number of days,
+- instructions,
+- diagnosis connected to medicine,
+- follow-up advice,
+- whether medicine was part of current or older visit.
+
+Example:
+
+Priya comes again for gastric pain. Doctor checks that she was already given one medicine last month. Doctor can avoid repeating the same medicine unnecessarily and can change treatment based on history.
+
+---
+
+## 15. Who Can See What
+
+| Action | Super Admin | Doctor | Receptionist |
+|--------|-------------|--------|--------------|
+| Create users | Yes | No | No |
+| Create patient | Usually no / admin controlled | No | Yes |
+| Assign doctor | Yes | No | Yes during registration |
+| See assigned patients | Yes | Yes | Yes based on clinic/front desk |
+| See patient profile | Yes | Yes, based on assignment/clinic rules | Yes, based on clinic/front desk |
+| Add consultation record | Yes if allowed | Yes | Limited/support entry based on module |
+| Add prescription | Controlled | Yes / doctor approval | Entry support where allowed |
+| Change `VIS_A` / `VIS_B` | Yes | Yes if authorized | Limited/controlled |
+| Emergency hide/restore | Yes | No | No |
+| View audit logs | Full | Scoped | Own/scoped |
+
+---
+
+## 16. Export And Audit Safety
+
+Exports must follow role and visibility rules.
+
+General rule:
+
+- Receptionist export should be restricted.
+- Doctor export should be related to assigned patients.
+- Super Admin export can be broader but should be audited.
+- During emergency hide/inspection mode, exports should show only `VIS_A`.
+
+Every important action should be audit logged:
+
+- login,
+- patient creation,
+- record creation,
+- visibility change,
+- export,
+- emergency hide,
+- emergency restore.
+
+Audit log means the system remembers who did what and when.
+
+---
+
+## 17. End-To-End Example
+
+### Patient: Ramesh Kumar
+
+1. Ramesh enters the hospital.
+2. Receptionist searches by phone number.
+3. Ramesh is new, so receptionist creates patient profile.
+4. Receptionist assigns Dr. Arjun.
+5. Ramesh appears in Dr. Arjun&#x27;s waiting list.
+6. Doctor opens Ramesh&#x27;s profile.
+7. Doctor sees no previous history because he is new.
+8. Doctor diagnoses fever and cough.
+9. Doctor adds prescription:
+   - Paracetamol,
+   - cough syrup,
+   - follow-up after 3 days if fever continues.
+10. Record is saved as `VIS_A`.
+11. Later, Ramesh visits again.
+12. Doctor sees previous fever/cough record and continues treatment properly.
+
+### Patient: Suresh Reddy
+
+1. Suresh enters hospital.
+2. Receptionist registers him and assigns Dr. Arjun.
+3. Doctor completes consultation.
+4. Hospital decides this record should be incognito.
+5. Record is saved as `VIS_B`.
+6. During normal operations, authorized users can access it.
+7. During audit/inspection mode, `VIS_B` records are hidden from normal views/exports.
+8. After audit, trusted Super Admin restores the hidden data.
+
+---
+
+## 18. Final Project Vision
+
+Smart Health 360 is not only a patient registration system. The final vision is:
+
+- digital reception,
+- digital doctor workflow,
+- digital waiting room,
+- patient medical history in one place,
+- prescription and medicine history,
+- attachment/report storage,
+- offline payment handling,
+- controlled incognito patient records,
+- audit-safe visibility management,
+- trusted-person control for sensitive hospital operations.
+
+In simple words:
+
+The doctor should know who is next, open the full patient history on screen, treat faster with better context, maintain medicine and prescription history, and the hospital should control which records remain normal and which records are handled as incognito.
+</pre>
+      <div class="footer"><span>Full README Reference</span><span>23</span></div>
+    </section>
+        <!-- FULL_README_REFERENCE_END -->
+  </main>
+</body>
+</html>

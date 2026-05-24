@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Health 360 - Pharmacy Payment Application</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #566573;
+      --line: #d8dee9;
+      --paper: #ffffff;
+      --soft: #f5f7fb;
+      --green: #047857;
+      --blue: #1d4ed8;
+      --amber: #b45309;
+      --red: #b91c1c;
+      --shadow: 0 22px 60px rgba(23, 32, 42, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: #e9eef5;
+      line-height: 1.42;
+    }
+
+    .deck {
+      width: min(1180px, calc(100% - 32px));
+      margin: 28px auto;
+    }
+
+    .slide {
+      min-height: 660px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      margin: 0 0 28px;
+      padding: 44px;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 8px;
+      background: linear-gradient(90deg, var(--green), var(--blue), var(--amber));
+    }
+
+    .kicker {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1, h2, h3 { margin: 0; line-height: 1.08; }
+    h1 { font-size: 56px; max-width: 900px; }
+    h2 { font-size: 38px; margin-bottom: 24px; max-width: 920px; }
+    h3 { font-size: 21px; margin-bottom: 10px; }
+
+    p {
+      color: var(--muted);
+      font-size: 18px;
+      margin: 0 0 14px;
+    }
+
+    .lead {
+      font-size: 23px;
+      color: #2c3e50;
+      max-width: 970px;
+      margin-top: 22px;
+    }
+
+    .tagline {
+      margin-top: 32px;
+      padding: 18px 22px;
+      border: 1px solid #a7f3d0;
+      background: #ecfdf5;
+      border-radius: 16px;
+      color: #064e3b;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+      padding: 20px;
+      min-height: 108px;
+    }
+
+    .card.white { background: #fff; }
+    .card.green { border-top: 5px solid var(--green); }
+    .card.blue { border-top: 5px solid var(--blue); }
+    .card.amber { border-top: 5px solid var(--amber); }
+    .card.red { border-top: 5px solid var(--red); }
+
+    ul, ol {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    li { margin: 7px 0; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      align-items: stretch;
+      margin-top: 8px;
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 96px;
+      position: relative;
+    }
+
+    .step::after {
+      content: "→";
+      color: var(--blue);
+      font-size: 28px;
+      font-weight: 800;
+      position: absolute;
+      right: -16px;
+      top: 34px;
+    }
+
+    .step:nth-child(4n)::after,
+    .step:last-child::after { display: none; }
+
+    .number {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .step strong { display: block; font-size: 17px; margin-bottom: 6px; }
+    .step span { color: var(--muted); font-size: 14px; }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      max-width: 780px;
+      margin-top: 12px;
+    }
+
+    .pipe {
+      border: 1px solid var(--line);
+      border-left: 7px solid var(--blue);
+      background: #fff;
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .pipe strong { font-size: 18px; }
+    .pipe span { color: var(--muted); font-size: 15px; }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      font-size: 16px;
+    }
+
+    .table th {
+      background: #eef6ff;
+      color: #1f2937;
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      vertical-align: top;
+    }
+
+    .stack {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .badge {
+      border-radius: 999px;
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      color: #1e3a8a;
+      padding: 9px 13px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .split-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 22px;
+      align-items: flex-start;
+    }
+
+    .slide-no {
+      color: #94a3b8;
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    @media print {
+      body { background: #fff; }
+      .deck { width: 100%; margin: 0; }
+      .slide {
+        box-shadow: none;
+        border-radius: 0;
+        border: 0;
+        margin: 0;
+        min-height: 100vh;
+      }
+    }
+
+    @media (max-width: 900px) {
+      h1 { font-size: 40px; }
+      h2 { font-size: 30px; }
+      .slide { padding: 30px; }
+      .cols-2, .cols-3, .cols-4, .stack, .flow { grid-template-columns: 1fr; }
+      .step::after { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide">
+      <div class="kicker">Smart Health 360 Future Extension</div>
+      <h1>Pharmacy Payment & Medicine Sales Application</h1>
+      <p class="lead">A branch-ready pharmacy billing, payment, inventory, invoice, and reporting platform for physical stores first, with a future path to online medicine selling and mobile apps.</p>
+      <div class="tagline">Current goal: maintain pharmacy billing and stock across many branches with one central system.</div>
+      <div class="badge-row">
+        <span class="badge">Physical store POS</span>
+        <span class="badge">Payments</span>
+        <span class="badge">Inventory</span>
+        <span class="badge">Invoices</span>
+        <span class="badge">Reports</span>
+        <span class="badge">Future online sales</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">Business Problem</div>
+          <h2>Why This Platform Is Needed</h2>
+        </div>
+        <div class="slide-no">02</div>
+      </div>
+      <div class="grid cols-3">
+        <div class="card green"><h3>Billing Accuracy</h3><p>Reduce billing mistakes, wrong discounts, manual tax errors, and missing invoice records.</p></div>
+        <div class="card blue"><h3>Branch Stock Control</h3><p>Track every medicine by branch, batch, expiry date, rack, and available quantity.</p></div>
+        <div class="card amber"><h3>Payment Visibility</h3><p>Connect cash, UPI, card, wallet, refunds, and daily closing reports.</p></div>
+        <div class="card green"><h3>Central Reporting</h3><p>Owners and managers can see branch sales, stock, payments, and exceptions centrally.</p></div>
+        <div class="card blue"><h3>Audit Trail</h3><p>Know who changed stock, price, invoice, discount, refund, or branch settings.</p></div>
+        <div class="card amber"><h3>Future Ready</h3><p>The same platform can later support online ordering, mobile app, prescription upload, and delivery.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">Store Workflow</div>
+          <h2>Physical Pharmacy Billing Flow</h2>
+        </div>
+        <div class="slide-no">03</div>
+      </div>
+      <div class="flow">
+        <div class="step"><div class="number">1</div><strong>Customer Arrives</strong><span>Cashier searches or adds customer.</span></div>
+        <div class="step"><div class="number">2</div><strong>Scan Medicine</strong><span>Barcode scan or medicine search.</span></div>
+        <div class="step"><div class="number">3</div><strong>Check Stock</strong><span>Branch stock, batch, expiry, and prescription rule.</span></div>
+        <div class="step"><div class="number">4</div><strong>Add To Cart</strong><span>Quantity, price, GST, and discount rules.</span></div>
+        <div class="step"><div class="number">5</div><strong>Generate Bill</strong><span>Subtotal, GST, discount, final amount.</span></div>
+        <div class="step"><div class="number">6</div><strong>Take Payment</strong><span>Cash, UPI, card, wallet, or credit.</span></div>
+        <div class="step"><div class="number">7</div><strong>Create Invoice</strong><span>Print, download, SMS, or WhatsApp.</span></div>
+        <div class="step"><div class="number">8</div><strong>Update System</strong><span>Stock, audit, branch report, central report.</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">Real Example</div>
+          <h2>What Happens In Real Time</h2>
+        </div>
+        <div class="slide-no">04</div>
+      </div>
+      <div class="stack">
+        <div class="card white">
+          <h3>Customer Purchase</h3>
+          <p>Branch: Hyderabad Gachibowli</p>
+          <p>Items: Dolo 650 - 2 strips, Vitamin D - 1 strip</p>
+          <p>Payment: UPI</p>
+          <p>Cashier scans medicines, system checks branch stock and expiry, calculates GST, accepts UPI payment, generates invoice, and reduces stock.</p>
+        </div>
+        <div class="pipeline">
+          <div class="pipe"><strong>Scan barcode</strong><span>Find product master</span></div>
+          <div class="pipe"><strong>Validate sale</strong><span>Stock, batch, expiry, prescription</span></div>
+          <div class="pipe"><strong>Calculate bill</strong><span>MRP, selling price, GST, discount</span></div>
+          <div class="pipe"><strong>Confirm payment</strong><span>UPI success response</span></div>
+          <div class="pipe"><strong>Commit transaction</strong><span>Invoice, payment, stock, audit</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">Data Collection</div>
+          <h2>Information We Must Gather</h2>
+        </div>
+        <div class="slide-no">05</div>
+      </div>
+      <table class="table">
+        <thead><tr><th>Area</th><th>Required Data</th></tr></thead>
+        <tbody>
+          <tr><td>Branch</td><td>Name, address, GST, phone, manager, hours, status</td></tr>
+          <tr><td>Staff</td><td>Name, phone, email, role, branch, login access, status</td></tr>
+          <tr><td>Customer</td><td>Name, mobile, address, purchase history, prescription records</td></tr>
+          <tr><td>Medicine</td><td>Name, generic, brand, barcode, batch, expiry, MRP, selling price, GST, prescription required</td></tr>
+          <tr><td>Inventory</td><td>Branch, medicine, batch, quantity, reserved quantity, expiry, rack, minimum stock</td></tr>
+          <tr><td>Payment</td><td>Mode, amount, transaction reference, gateway response, status, refund status</td></tr>
+          <tr><td>Audit</td><td>User, action, old value, new value, branch, IP/device, timestamp</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">People And Collaboration</div>
+          <h2>Who Must Be Involved</h2>
+        </div>
+        <div class="slide-no">06</div>
+      </div>
+      <div class="grid cols-3">
+        <div class="card green"><h3>Doctors / Owners</h3><p>Business rules, prescription rules, approvals, branch workflow.</p></div>
+        <div class="card blue"><h3>Pharmacists</h3><p>Medicine validation, batch handling, expiry rules, substitute medicine guidance.</p></div>
+        <div class="card amber"><h3>Accountants</h3><p>GST invoice, closing reports, refunds, reconciliation, tax reports.</p></div>
+        <div class="card green"><h3>Inventory Team</h3><p>Purchase entry, stock transfer, low stock, expiry handling, supplier flow.</p></div>
+        <div class="card blue"><h3>Branch Staff</h3><p>Scanner, printer, rush-hour billing, real operational feedback.</p></div>
+        <div class="card amber"><h3>Technical Team</h3><p>Application, APIs, database, security, hosting, payment integration.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">Technical Stack</div>
+          <h2>Recommended Technology</h2>
+        </div>
+        <div class="slide-no">07</div>
+      </div>
+      <div class="grid cols-3">
+        <div class="card green"><h3>Angular</h3><p>POS billing, admin dashboard, inventory screens, reports, role-based UI.</p></div>
+        <div class="card blue"><h3>Spring Boot</h3><p>Secure APIs, business rules, transactions, audit, payments, large scale backend.</p></div>
+        <div class="card amber"><h3>PostgreSQL</h3><p>Invoices, payments, inventory, branch data, GST reports, transaction consistency.</p></div>
+        <div class="card green"><h3>AWS S3</h3><p>Prescription uploads, invoice PDFs, medicine images, report exports.</p></div>
+        <div class="card blue"><h3>Redis</h3><p>Fast product lookup, branch stock cache, sessions, counters, rate limiting.</p></div>
+        <div class="card amber"><h3>Payment Gateway</h3><p>Razorpay, PhonePe PG, PayU, or Cashfree for UPI, card, wallet, online payments.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">Architecture</div>
+          <h2>Best Starting Strategy</h2>
+        </div>
+        <div class="slide-no">08</div>
+      </div>
+      <div class="stack">
+        <div>
+          <h3>Start With Modular Monolith</h3>
+          <p>Build one clean Spring Boot application with separated modules. This is faster, cheaper, easier to test, and better for early business changes.</p>
+          <div class="pipeline">
+            <div class="pipe"><strong>Angular Web App</strong><span>POS + admin + reports</span></div>
+            <div class="pipe"><strong>Spring Boot API</strong><span>Auth, products, inventory, billing, payments</span></div>
+            <div class="pipe"><strong>PostgreSQL</strong><span>Main transactional database</span></div>
+            <div class="pipe"><strong>Redis + S3</strong><span>Cache and file storage</span></div>
+            <div class="pipe"><strong>Payment Gateway</strong><span>UPI, card, wallet, online payment</span></div>
+          </div>
+        </div>
+        <div class="card white">
+          <h3>Split Later Only When Needed</h3>
+          <ul>
+            <li>Auth Service</li>
+            <li>Product Service</li>
+            <li>Inventory Service</li>
+            <li>Billing Service</li>
+            <li>Payment Service</li>
+            <li>Report Service</li>
+            <li>Notification Service</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">Backend Transaction</div>
+          <h2>Billing Must Be Consistent</h2>
+        </div>
+        <div class="slide-no">09</div>
+      </div>
+      <div class="flow">
+        <div class="step"><div class="number">1</div><strong>Validate Access</strong><span>User, role, branch, permissions.</span></div>
+        <div class="step"><div class="number">2</div><strong>Validate Cart</strong><span>Stock, batch, expiry, price, prescription.</span></div>
+        <div class="step"><div class="number">3</div><strong>Create Invoice</strong><span>Invoice and invoice items.</span></div>
+        <div class="step"><div class="number">4</div><strong>Record Payment</strong><span>Cash, UPI, card, wallet.</span></div>
+        <div class="step"><div class="number">5</div><strong>Reduce Stock</strong><span>Branch inventory and stock movement.</span></div>
+        <div class="step"><div class="number">6</div><strong>Audit Log</strong><span>Who did what and when.</span></div>
+        <div class="step"><div class="number">7</div><strong>Commit</strong><span>All records saved together.</span></div>
+        <div class="step"><div class="number">8</div><strong>Events</strong><span>Reports and notifications updated.</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">Development Roadmap</div>
+          <h2>Build In Phases</h2>
+        </div>
+        <div class="slide-no">10</div>
+      </div>
+      <div class="grid cols-2">
+        <div class="card green"><h3>Phase 1: Physical Store MVP</h3><p>Login, roles, branches, medicine master, inventory, barcode billing, payments, invoice print, basic reports.</p></div>
+        <div class="card blue"><h3>Phase 2: Store Operations</h3><p>Returns, refunds, supplier purchase, stock transfer, low stock alerts, expiry alerts, audit logs, prescription upload.</p></div>
+        <div class="card amber"><h3>Phase 3: Multi-Branch Scale</h3><p>Central dashboard, regional reports, reconciliation, GST reports, advanced inventory, Redis, queue-based reports.</p></div>
+        <div class="card green"><h3>Phase 4: Online Medicine Selling</h3><p>Customer web app, mobile app, medicine search, prescription upload, online payment, delivery, pickup, order tracking.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">AI Future</div>
+          <h2>How AI Can Help Later</h2>
+        </div>
+        <div class="slide-no">11</div>
+      </div>
+      <div class="grid cols-3">
+        <div class="card green"><h3>Medicine Search</h3><p>Search by brand, generic name, symptom, or spelling mistake.</p></div>
+        <div class="card blue"><h3>Prescription Reading</h3><p>Read prescription image and suggest medicines for pharmacist review.</p></div>
+        <div class="card amber"><h3>Stock Prediction</h3><p>Predict fast-moving stock and possible stock-out situations.</p></div>
+        <div class="card green"><h3>Expiry Alerts</h3><p>Identify near-expiry and slow-moving stock before loss happens.</p></div>
+        <div class="card blue"><h3>Sales Insights</h3><p>Show branch trends, seasonal demand, and product movement.</p></div>
+        <div class="card amber"><h3>Anomaly Detection</h3><p>Flag unusual refunds, discounts, stock edits, and billing patterns.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="split-title">
+        <div>
+          <div class="kicker">Final Recommendation</div>
+          <h2>Start Simple, Build Strong, Scale Later</h2>
+        </div>
+        <div class="slide-no">12</div>
+      </div>
+      <div class="card white">
+        <h3>Recommended Starting Stack</h3>
+        <p>Angular + Spring Boot + PostgreSQL + Redis + AWS S3 + Razorpay / PhonePe PG / PayU / Cashfree.</p>
+      </div>
+      <div class="grid cols-3" style="margin-top: 18px;">
+        <div class="card green"><h3>Now</h3><p>Physical branch POS, payments, inventory, invoices, reports.</p></div>
+        <div class="card blue"><h3>Next</h3><p>Returns, refunds, stock transfer, supplier purchase, central dashboards.</p></div>
+        <div class="card amber"><h3>Future</h3><p>Online medicine sales, mobile app, delivery, Smart Health 360 connection, AI support.</p></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
